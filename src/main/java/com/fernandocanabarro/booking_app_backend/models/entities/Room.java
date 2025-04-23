@@ -57,7 +57,7 @@ public class Room {
     public List<LocalDate> getUnavailableDates() {
         return this.bookings.stream()
             .filter(booking -> !booking.isFinished())
-            .flatMap(booking -> booking.getCheckIn().datesUntil(booking.getCheckOut()))
+            .flatMap(booking -> booking.getCheckIn().datesUntil(booking.getCheckOut().plusDays(1L)))
             .toList();
     }
 

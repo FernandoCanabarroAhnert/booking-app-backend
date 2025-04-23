@@ -41,8 +41,11 @@ public class Booking {
     private LocalDate checkIn;
     private LocalDate checkOut;
 
-    private LocalDateTime reservationDate;
-    private BigDecimal totalPrice;
+    private LocalDateTime createdAt;
     private boolean isFinished;
+
+    public BigDecimal getTotalPrice() {
+        return this.room.getPricePerNight().multiply(BigDecimal.valueOf(this.checkIn.datesUntil(this.checkOut).count()));
+    }
 
 }

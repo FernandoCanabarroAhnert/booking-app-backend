@@ -55,7 +55,7 @@ public class RoomServiceImpl implements RoomService {
         RoomMapper.updateRoom(room, request);
         if (!request.getHotelId().equals(room.getHotel().getId())) {
             Hotel hotel = this.hotelRepository.findById(request.getHotelId())
-            .orElseThrow(() -> new ResourceNotFoundException("Hotel", request.getHotelId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel", request.getHotelId()));
             room.setHotel(hotel);
         }
         this.roomRepository.save(room);
