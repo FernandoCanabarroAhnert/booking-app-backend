@@ -16,6 +16,7 @@ import com.fernandocanabarro.booking_app_backend.repositories.GuestRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.RoomIsUnavailableForBookingException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -46,6 +47,9 @@ public class BookingServiceImpl implements BookingService {
     public void create(BookingRequestDTO request) {
         Room room = this.roomRepository.findById(request.getRoomId())
             .orElseThrow(() -> new ResourceNotFoundException("Room", request.getRoomId()));
+        if (!room.isAvalableToBook(request.getCheckIn(), request.getCheckOut())) {
+            throw new RoomIsUnavailableForBookingException(room.getId(), request.getCheckIn(), request.getCheckOut());
+        }
         Guest guest = this.guestRepository.findById(request.getGuestId())
             .orElseThrow(() -> new ResourceNotFoundException("Guest", request.getGuestId()));
         Booking entity = BookingMapper.convertRequestToEntity(request, room, guest);
@@ -57,10 +61,13 @@ public class BookingServiceImpl implements BookingService {
     public void update(Long id, BookingRequestDTO request) {
         Booking entity = this.bookingRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Booking", id));
+        Room room = this.roomRepository.findById(request.getRoomId())
+            .orElseThrow(() -> new ResourceNotFoundException("Room", request.getRoomId()));
+        if (!room.isAvalableToBook(request.getCheckIn(), request.getCheckOut())) {
+            throw new RoomIsUnavailableForBookingException(room.getId(), request.getCheckIn(), request.getCheckOut());
+        }
         BookingMapper.updateEntity(entity, request);
         if (!request.getRoomId().equals(entity.getRoom().getId())) {
-            Room room = this.roomRepository.findById(request.getRoomId())
-                .orElseThrow(() -> new ResourceNotFoundException("Room", request.getRoomId()));
             entity.setRoom(room);
         }
         if (!request.getGuestId().equals(entity.getGuest().getId())) {
