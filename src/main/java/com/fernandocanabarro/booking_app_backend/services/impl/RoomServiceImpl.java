@@ -3,6 +3,7 @@ package com.fernandocanabarro.booking_app_backend.services.impl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fernandocanabarro.booking_app_backend.mappers.RoomMapper;
 import com.fernandocanabarro.booking_app_backend.models.dtos.RoomRequestDTO;
@@ -24,11 +25,13 @@ public class RoomServiceImpl implements RoomService {
     private final HotelRepository hotelRepository;
     
     @Override
+    @Transactional(readOnly = true)
     public Page<RoomResponseDTO> findAll(Pageable pageable) {
         return this.roomRepository.findAll(pageable).map(RoomMapper::convertEntityToResponse);
     }
 
     @Override
+    @Transactional
     public RoomResponseDTO findById(Long id) {
         return this.roomRepository.findById(id)
             .map(RoomMapper::convertEntityToResponse)
@@ -36,6 +39,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Transactional
     public void create(RoomRequestDTO request) {
         Hotel hotel = this.hotelRepository.findById(request.getHotelId())
             .orElseThrow(() -> new ResourceNotFoundException("Hotel", request.getHotelId()));
@@ -44,6 +48,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Transactional
     public void update(Long id, RoomRequestDTO request) {
         Room room = this.roomRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Room", id));
@@ -57,6 +62,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         if (!this.roomRepository.existsById(id)) {
             throw new ResourceNotFoundException("Room", id);

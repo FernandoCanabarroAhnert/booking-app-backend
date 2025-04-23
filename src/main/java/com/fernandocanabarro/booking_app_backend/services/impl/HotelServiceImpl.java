@@ -6,10 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fernandocanabarro.booking_app_backend.mappers.HotelMapper;
+import com.fernandocanabarro.booking_app_backend.mappers.RoomMapper;
 import com.fernandocanabarro.booking_app_backend.models.dtos.HotelRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.HotelResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
 import com.fernandocanabarro.booking_app_backend.repositories.HotelRepository;
+import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
 import com.fernandocanabarro.booking_app_backend.services.HotelService;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 
@@ -20,11 +23,18 @@ import lombok.RequiredArgsConstructor;
 public class HotelServiceImpl implements HotelService {
 
     private final HotelRepository hotelRepository;
+    private final RoomRepository roomRepository;
     
     @Override
     @Transactional(readOnly = true)
     public Page<HotelResponseDTO> findAll(Pageable pageable) {
         return this.hotelRepository.findAll(pageable).map(HotelMapper::convertEntityToResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<RoomResponseDTO> findRoomsByHotelId(Long hotelId, Pageable pageable) {
+        return this.roomRepository.findByHotelId(hotelId, pageable).map(RoomMapper::convertEntityToResponse);
     }
 
     @Override

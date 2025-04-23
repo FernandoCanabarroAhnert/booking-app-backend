@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fernandocanabarro.booking_app_backend.models.dtos.HotelRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.HotelResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.HotelService;
 
 import jakarta.validation.Valid;
@@ -29,6 +30,11 @@ public class HotelController {
     @GetMapping
     public ResponseEntity<Page<HotelResponseDTO>> findAll(Pageable pageable) {
         return ResponseEntity.ok(this.hotelService.findAll(pageable));
+    }
+
+    @GetMapping("/{id}/rooms")
+    public ResponseEntity<Page<RoomResponseDTO>> findRoomsByHotelId(@PathVariable Long id, Pageable pageable) {
+        return ResponseEntity.ok(this.hotelService.findRoomsByHotelId(id, pageable));
     }
 
     @GetMapping("/{id}")

@@ -3,6 +3,7 @@ package com.fernandocanabarro.booking_app_backend.services.impl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fernandocanabarro.booking_app_backend.mappers.GuestMapper;
 import com.fernandocanabarro.booking_app_backend.models.dtos.GuestRequestDTO;
@@ -21,11 +22,13 @@ public class GuestServiceImpl implements GuestService {
     private final GuestRepository guestRepository;
     
     @Override
+    @Transactional(readOnly = true)
     public Page<GuestResponseDTO> findAll(Pageable pageable) {
         return this.guestRepository.findAll(pageable).map(GuestMapper::convertEntityToResponse);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public GuestResponseDTO findById(Long id) {
         return this.guestRepository.findById(id)
             .map(GuestMapper::convertEntityToResponse)
@@ -33,12 +36,14 @@ public class GuestServiceImpl implements GuestService {
     }
 
     @Override
+    @Transactional
     public void create(GuestRequestDTO request) {
         Guest entity = GuestMapper.convertRequestToEntity(request);
         this.guestRepository.save(entity);
     }
 
     @Override
+    @Transactional
     public void update(Long id, GuestRequestDTO request) {
         Guest entity = this.guestRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Guest", id));
@@ -47,6 +52,7 @@ public class GuestServiceImpl implements GuestService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         if (!this.guestRepository.existsById(id)) {
             throw new ResourceNotFoundException("Guest", id);
