@@ -1,5 +1,8 @@
 package com.fernandocanabarro.booking_app_backend.services.impl;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,11 +34,19 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public RoomResponseDTO findById(Long id) {
         return this.roomRepository.findById(id)
             .map(RoomMapper::convertEntityToResponse)
             .orElseThrow(() -> new ResourceNotFoundException("Room", id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<LocalDate> getUnavailableDatesFromRoomByRoomId(Long id) {
+        Room room = this.roomRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Room", id));
+        return room.getUnavailableDates();
     }
 
     @Override

@@ -50,10 +50,6 @@ public class Room {
     @JoinColumn(name = "hotel_id", foreignKey = @ForeignKey(name = "fk_room_hotel", value = ConstraintMode.CONSTRAINT))
     private Hotel hotel;
 
-    public boolean isAvailableToBook() {
-        return this.bookings.isEmpty() || this.bookings.stream().allMatch(booking -> booking.isFinished());
-    }
-
     public List<LocalDate> getUnavailableDates() {
         return this.bookings.stream()
             .filter(booking -> !booking.isFinished())

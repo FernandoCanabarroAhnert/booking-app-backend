@@ -1,5 +1,8 @@
 package com.fernandocanabarro.booking_app_backend.controllers;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +37,11 @@ public class RoomController {
     @GetMapping("/{id}")
     public ResponseEntity<RoomResponseDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(this.RoomService.findById(id));
+    }
+
+    @GetMapping("/{id}/unavailable-days")
+    public ResponseEntity<List<LocalDate>> getUnavailableDatesFromRoomByRoomId(@PathVariable Long id) {
+        return ResponseEntity.ok(this.RoomService.getUnavailableDatesFromRoomByRoomId(id));
     }
 
     @PostMapping
