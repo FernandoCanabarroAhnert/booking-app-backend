@@ -21,14 +21,13 @@ public class HotelMapper {
             .build();
     }
 
-    public static Hotel updateEntity(Hotel hotel, HotelRequestDTO request) {
+    public static void updateEntity(Hotel hotel, HotelRequestDTO request) {
         hotel.setName(request.getName());
         hotel.setAddress(request.getAddress());
         hotel.setCity(request.getCity());
         hotel.setZipCode(request.getZipCode());
         hotel.setState(request.getState());
         hotel.setPhone(request.getPhone());
-        return hotel;
     }
 
     public static HotelResponseDTO convertEntityToResponse(Hotel entity) {
