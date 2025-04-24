@@ -15,6 +15,7 @@ public class HotelResponseDTO {
 
     private Long id;
     private String name;
+    private Integer roomQuantity;
     private String address;
     private String city;
     private String zipCode;

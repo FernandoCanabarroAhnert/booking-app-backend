@@ -22,5 +22,9 @@ public class BookingRequestDTO {
     private LocalDate checkIn;
     @NotNull(message = "Required field")
     private LocalDate checkOut;
+    @NotNull(message = "Required field")
+    private Integer paymentType;
+
+    private Integer installmentQuantity; 
 
 }

@@ -11,9 +11,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,6 +28,7 @@ import jakarta.persistence.ForeignKey;
 @Builder
 @Entity
 @Table(name = "bookings")
+@EqualsAndHashCode(of = "id")
 public class Booking {
 
     @Id
@@ -43,6 +46,10 @@ public class Booking {
 
     private LocalDateTime createdAt;
     private boolean isFinished;
+
+    @OneToOne
+    @JoinColumn(name = "payment_id", foreignKey = @ForeignKey(name = "fk_booking_payment", value = ConstraintMode.CONSTRAINT))
+    private Payment payment;
 
     public BigDecimal getTotalPrice() {
         return this.room.getPricePerNight().multiply(BigDecimal.valueOf(this.checkIn.datesUntil(this.checkOut).count()));

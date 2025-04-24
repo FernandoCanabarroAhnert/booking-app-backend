@@ -11,6 +11,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,12 +23,14 @@ import lombok.Setter;
 @Entity
 @Table(name = "hotels")
 @Builder
+@EqualsAndHashCode(of = "id")
 public class Hotel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private Integer roomQuantity;
     private String address;
     private String city;
     private String zipCode;

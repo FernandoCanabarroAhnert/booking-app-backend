@@ -22,7 +22,7 @@ public class GuestRequestDTO {
     private String fullName;
     @Email(message = "Invalid email format")
     @NotBlank(message = "Required field")
-    private String email;
+    private String email; 
     @NotBlank(message = "Required field")
     private String phone;
     @NotBlank(message = "Required field")

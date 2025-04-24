@@ -12,7 +12,7 @@ public enum RoomTypeEnum {
         this.roomType = roomType;
     }
 
-    public int getDescription() {
+    public int getRoomType() {
         return roomType;
     }
 

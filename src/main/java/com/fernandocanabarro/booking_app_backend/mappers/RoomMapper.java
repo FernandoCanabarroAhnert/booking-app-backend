@@ -38,7 +38,7 @@ public class RoomMapper {
                 .id(entity.getId())
                 .number(entity.getNumber())
                 .floor(entity.getFloor())
-                .type(entity.getType().getDescription())
+                .type(entity.getType().getRoomType())
                 .pricePerNight(entity.getPricePerNight())
                 .description(entity.getDescription())
                 .capacity(entity.getCapacity())

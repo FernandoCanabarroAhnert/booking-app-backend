@@ -12,6 +12,7 @@ public class HotelMapper {
     public static Hotel convertRequestToEntity(HotelRequestDTO request) {
         return Hotel.builder()
             .name(request.getName())
+            .roomQuantity(request.getRoomQuantity())
             .address(request.getAddress())
             .city(request.getCity())
             .zipCode(request.getZipCode())
@@ -23,6 +24,7 @@ public class HotelMapper {
 
     public static void updateEntity(Hotel hotel, HotelRequestDTO request) {
         hotel.setName(request.getName());
+        hotel.setRoomQuantity(request.getRoomQuantity());
         hotel.setAddress(request.getAddress());
         hotel.setCity(request.getCity());
         hotel.setZipCode(request.getZipCode());
@@ -34,6 +36,7 @@ public class HotelMapper {
         return HotelResponseDTO.builder()
             .id(entity.getId())
             .name(entity.getName())
+            .roomQuantity(entity.getRoomQuantity())
             .address(entity.getAddress())
             .city(entity.getCity())
             .zipCode(entity.getZipCode())
