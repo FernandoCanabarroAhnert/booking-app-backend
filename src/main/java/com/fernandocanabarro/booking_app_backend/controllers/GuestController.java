@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fernandocanabarro.booking_app_backend.models.dtos.GuestRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.GuestResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.UserWithPropertyAlreadyExistsDTO;
 import com.fernandocanabarro.booking_app_backend.services.GuestService;
 
 import jakarta.validation.Valid;
@@ -52,6 +54,16 @@ public class GuestController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         this.guestService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<UserWithPropertyAlreadyExistsDTO> verifyEmail(@RequestParam(name = "email") String email) {
+        return ResponseEntity.ok(this.guestService.verifyIfGuestExistsByEmail(email));
+    }
+
+    @GetMapping("/verify-cpf")
+    public ResponseEntity<UserWithPropertyAlreadyExistsDTO> verifyCpf(@RequestParam(name = "cpf") String cpf) {
+        return ResponseEntity.ok(this.guestService.verifyIfGuestExistsByCpf(cpf));
     }
 
 }

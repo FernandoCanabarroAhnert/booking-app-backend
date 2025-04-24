@@ -2,6 +2,7 @@ package com.fernandocanabarro.booking_app_backend.models.dtos;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,9 +14,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class BookingRequestDTO {
 
+    @NotNull(message = "Required field")
     private Long guestId;
+    @NotNull(message = "Required field")
     private Long roomId;
+    @NotNull(message = "Required field")
     private LocalDate checkIn;
+    @NotNull(message = "Required field")
     private LocalDate checkOut;
 
 }
