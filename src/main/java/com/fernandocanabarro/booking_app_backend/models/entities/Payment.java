@@ -38,4 +38,9 @@ public abstract class Payment {
 
     private BigDecimal amount;
 
+    public Payment(PaymentTypeEnum paymentType, BigDecimal amount) {
+        this.paymentType = paymentType;
+        this.amount = amount;
+    }
+
 }
