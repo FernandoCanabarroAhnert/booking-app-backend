@@ -13,6 +13,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.LoginRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.LoginResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.RegistrationRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdateInfosRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdatePasswordRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserWithPropertyAlreadyExistsDTO;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
 
@@ -47,6 +48,12 @@ public class AuthController {
     @PutMapping("/update-infos")
     public ResponseEntity<Void> userSelfUpdateInfos(@Valid @RequestBody UserSelfUpdateInfosRequestDTO request) {
         authService.userSelfUpdateInfos(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/update-password")
+    public ResponseEntity<Void> userSelfUpdatePassword(@Valid @RequestBody UserSelfUpdatePasswordRequestDTO request) {
+        authService.userSelfUpdatePassword(request);
         return ResponseEntity.ok().build();
     }
 

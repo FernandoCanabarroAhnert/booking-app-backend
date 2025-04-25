@@ -13,6 +13,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.exceptions.Standard
 import com.fernandocanabarro.booking_app_backend.models.dtos.exceptions.ValidationError;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.AlreadyExistingPropertyException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidCurrentPasswordException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredWorkingHotelIdException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RoomIsUnavailableForBookingException;
@@ -60,6 +61,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AlreadyExistingPropertyException.class)
     public ResponseEntity<StandardError> alreadyExistingProperty(AlreadyExistingPropertyException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        StandardError error = new StandardError(Instant.now(), status.value(), "Conflict", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(InvalidCurrentPasswordException.class)
+    public ResponseEntity<StandardError> invalidCurrentPassword(InvalidCurrentPasswordException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.CONFLICT;
         StandardError error = new StandardError(Instant.now(), status.value(), "Conflict", ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(error);

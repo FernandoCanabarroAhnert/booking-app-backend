@@ -21,6 +21,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.LoginRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.LoginResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.RegistrationRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdateInfosRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdatePasswordRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserWithPropertyAlreadyExistsDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Role;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
@@ -29,6 +30,7 @@ import com.fernandocanabarro.booking_app_backend.repositories.UserRepository;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.AlreadyExistingPropertyException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidCurrentPasswordException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.UnauthorizedException;
 import com.fernandocanabarro.booking_app_backend.utils.UserUtils;
 
@@ -118,6 +120,16 @@ public class AuthServiceImpl implements AuthService {
             }
         }
         UserMapper.updateUser(user, request);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void userSelfUpdatePassword(UserSelfUpdatePasswordRequestDTO request) {
+        User user = this.getConnectedUser();
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new InvalidCurrentPasswordException();
+        }
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
     }
 
