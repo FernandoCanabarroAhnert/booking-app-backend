@@ -19,6 +19,7 @@ public class HotelMapper {
             .state(request.getState())
             .phone(request.getPhone())
             .rooms(new ArrayList<>(Arrays.asList()))
+            .workers(new ArrayList<>(Arrays.asList()))
             .build();
     }
 

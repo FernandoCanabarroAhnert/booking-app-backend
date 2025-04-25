@@ -13,57 +13,57 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.GuestRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.GuestResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.UserRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.UserResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserWithPropertyAlreadyExistsDTO;
-import com.fernandocanabarro.booking_app_backend.services.GuestService;
+import com.fernandocanabarro.booking_app_backend.services.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/guests")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-public class GuestController {
+public class UserController {
 
-    private final GuestService guestService;
+    private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<Page<GuestResponseDTO>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(this.guestService.findAll(pageable));
+    public ResponseEntity<Page<UserResponseDTO>> findAll(Pageable pageable) {
+        return ResponseEntity.ok(this.userService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GuestResponseDTO> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(this.guestService.findById(id));
+    public ResponseEntity<UserResponseDTO> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(this.userService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@Valid @RequestBody GuestRequestDTO request) {
-        this.guestService.create(request);
+    public ResponseEntity<Void> create(@Valid @RequestBody UserRequestDTO request) {
+        this.userService.create(request);
         return ResponseEntity.status(201).build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody GuestRequestDTO request) {
-        this.guestService.update(id, request);
+    public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody UserRequestDTO request) {
+        this.userService.update(id, request);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        this.guestService.delete(id);
+        this.userService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/verify-email")
     public ResponseEntity<UserWithPropertyAlreadyExistsDTO> verifyEmail(@RequestParam(name = "email") String email) {
-        return ResponseEntity.ok(this.guestService.verifyIfGuestExistsByEmail(email));
+        return ResponseEntity.ok(this.userService.verifyIfUserExistsByEmail(email));
     }
 
     @GetMapping("/verify-cpf")
     public ResponseEntity<UserWithPropertyAlreadyExistsDTO> verifyCpf(@RequestParam(name = "cpf") String cpf) {
-        return ResponseEntity.ok(this.guestService.verifyIfGuestExistsByCpf(cpf));
+        return ResponseEntity.ok(this.userService.verifyIfUserExistsByCpf(cpf));
     }
 
 }

@@ -6,15 +6,15 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.BookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Booking;
 import com.fernandocanabarro.booking_app_backend.models.entities.CartaoPayment;
-import com.fernandocanabarro.booking_app_backend.models.entities.Guest;
+import com.fernandocanabarro.booking_app_backend.models.entities.User;
 import com.fernandocanabarro.booking_app_backend.models.entities.Room;
 
 public class BookingMapper {
 
-    public static Booking convertRequestToEntity(BookingRequestDTO request, Room room, Guest guest) {
+    public static Booking convertRequestToEntity(BookingRequestDTO request, Room room, User user) {
         return Booking.builder()
                 .room(room)
-                .guest(guest)
+                .user(user)
                 .checkIn(request.getCheckIn())
                 .checkOut(request.getCheckOut())
                 .createdAt(LocalDateTime.now())
@@ -30,7 +30,7 @@ public class BookingMapper {
     public static BookingResponseDTO convertEntityToResponse(Booking entity) {
         return BookingResponseDTO.builder()
                 .id(entity.getId())
-                .guest(GuestMapper.convertEntityToResponse(entity.getGuest()))
+                .user(UserMapper.convertEntityToResponse(entity.getUser()))
                 .room(RoomMapper.convertEntityToResponse(entity.getRoom()))
                 .checkIn(entity.getCheckIn())
                 .checkOut(entity.getCheckOut())

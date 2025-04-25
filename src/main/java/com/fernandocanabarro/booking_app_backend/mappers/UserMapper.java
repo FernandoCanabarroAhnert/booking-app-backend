@@ -1,0 +1,48 @@
+package com.fernandocanabarro.booking_app_backend.mappers;
+
+import java.time.LocalDateTime;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import com.fernandocanabarro.booking_app_backend.models.dtos.RegistrationRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.UserRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.entities.User;
+
+public class UserMapper {
+
+    public static User convertRequestToEntity(RegistrationRequestDTO request, PasswordEncoder passwordEncoder) {
+        return User.builder()
+                .fullName(request.getFullName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .phone(request.getPhone())
+                .cpf(request.getCpf())
+                .birthDate(request.getBirthDate())
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static void updateEntity(User entity, UserRequestDTO request) {
+        entity.setFullName(request.getFullName());
+        entity.setEmail(request.getEmail());
+        entity.setPhone(request.getPhone());
+        entity.setCpf(request.getCpf());
+        entity.setBirthDate(request.getBirthDate());
+    }
+
+    public static UserResponseDTO convertEntityToResponse(User entity) {
+        return UserResponseDTO.builder()
+                .id(entity.getId())
+                .fullName(entity.getFullName())
+                .email(entity.getEmail())
+                .phone(entity.getPhone())
+                .cpf(entity.getCpf())
+                .birthDate(entity.getBirthDate())
+                .createdAt(entity.getCreatedAt())
+                .roles(entity.getRoles().stream().map(RoleMapper::convertEntityToResponse).toList())
+                .workingHotelId(entity.getWorkingHotel() != null ? entity.getWorkingHotel().getId() : null)
+                .build();
+    }
+
+}

@@ -35,8 +35,8 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
-    @JoinColumn(name = "guest_id", foreignKey = @ForeignKey(name = "fk_booking_guest", value = ConstraintMode.CONSTRAINT))
-    private Guest guest;
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_booking_user", value = ConstraintMode.CONSTRAINT))
+    private User user;
     @ManyToOne
     @JoinColumn(name = "room_id", foreignKey = @ForeignKey(name = "fk_booking_room", value = ConstraintMode.CONSTRAINT))
     private Room room;

@@ -36,7 +36,11 @@ public class Hotel {
     private String zipCode;
     private String state;
     private String phone;
+
     @OneToMany(mappedBy = "hotel", fetch = FetchType.LAZY)
     private List<Room> rooms;
+
+    @OneToMany(mappedBy = "workingHotel", fetch = FetchType.LAZY)
+    private List<User> workers;
 
 }

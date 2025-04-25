@@ -15,7 +15,7 @@ import lombok.Setter;
 public class BookingRequestDTO {
 
     @NotNull(message = "Required field")
-    private Long guestId;
+    private Long userId;
     @NotNull(message = "Required field")
     private Long roomId;
     @NotNull(message = "Required field")

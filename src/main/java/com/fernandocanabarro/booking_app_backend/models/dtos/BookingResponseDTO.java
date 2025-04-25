@@ -18,7 +18,7 @@ import lombok.Setter;
 public class BookingResponseDTO {
 
     private Long id;
-    private GuestResponseDTO guest;
+    private UserResponseDTO user;
     private RoomResponseDTO room;
     private LocalDate checkIn;
     private LocalDate checkOut;

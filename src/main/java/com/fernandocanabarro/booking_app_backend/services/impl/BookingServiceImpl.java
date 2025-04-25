@@ -12,11 +12,11 @@ import com.fernandocanabarro.booking_app_backend.mappers.BookingMapper;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Booking;
-import com.fernandocanabarro.booking_app_backend.models.entities.Guest;
+import com.fernandocanabarro.booking_app_backend.models.entities.User;
 import com.fernandocanabarro.booking_app_backend.models.entities.Payment;
 import com.fernandocanabarro.booking_app_backend.models.entities.Room;
 import com.fernandocanabarro.booking_app_backend.repositories.BookingRepository;
-import com.fernandocanabarro.booking_app_backend.repositories.GuestRepository;
+import com.fernandocanabarro.booking_app_backend.repositories.UserRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.PaymentRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
@@ -36,7 +36,7 @@ public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
-    private final GuestRepository guestRepository;
+    private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
     
     @Override
@@ -61,9 +61,9 @@ public class BookingServiceImpl implements BookingService {
         if (!room.isAvalableToBook(request.getCheckIn(), request.getCheckOut())) {
             throw new RoomIsUnavailableForBookingException(room.getId(), request.getCheckIn(), request.getCheckOut());
         }
-        Guest guest = this.guestRepository.findById(request.getGuestId())
-            .orElseThrow(() -> new ResourceNotFoundException("Guest", request.getGuestId()));
-        Booking entity = BookingMapper.convertRequestToEntity(request, room, guest);
+        User User = this.userRepository.findById(request.getUserId())
+            .orElseThrow(() -> new ResourceNotFoundException("User", request.getUserId()));
+        Booking entity = BookingMapper.convertRequestToEntity(request, room, User);
         Payment payment = this.getBookingPayment(request.getPaymentType(), entity.getTotalPrice(), request.getInstallmentQuantity());
         payment = this.paymentRepository.save(payment);
         entity.setPayment(payment);
@@ -94,10 +94,10 @@ public class BookingServiceImpl implements BookingService {
         if (!request.getRoomId().equals(entity.getRoom().getId())) {
             entity.setRoom(room);
         }
-        if (!request.getGuestId().equals(entity.getGuest().getId())) {
-            Guest guest = this.guestRepository.findById(request.getGuestId())
-                .orElseThrow(() -> new ResourceNotFoundException("Guest", request.getGuestId()));
-            entity.setGuest(guest);
+        if (!request.getUserId().equals(entity.getUser().getId())) {
+            User User = this.userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User", request.getUserId()));
+            entity.setUser(User);
         }
         this.bookingRepository.save(entity);
     }

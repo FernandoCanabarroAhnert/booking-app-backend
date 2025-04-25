@@ -12,13 +12,37 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.fernandocanabarro.booking_app_backend.models.dtos.exceptions.StandardError;
 import com.fernandocanabarro.booking_app_backend.models.dtos.exceptions.ValidationError;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.AlreadyExistingPropertyException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredWorkingHotelIdException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RoomIsUnavailableForBookingException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.UnauthorizedException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(RequiredWorkingHotelIdException.class)
+    public ResponseEntity<StandardError> requiredWorkingHotelId(RequiredWorkingHotelIdException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        StandardError error = new StandardError(Instant.now(), status.value(), "Bad Request", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<StandardError> uanuthorized(UnauthorizedException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        StandardError error = new StandardError(Instant.now(), status.value(), "Unauthorized", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<StandardError> forbidden(ForbiddenException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        StandardError error = new StandardError(Instant.now(), status.value(), "Forbidden", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(error);
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<StandardError> notFound(ResourceNotFoundException ex, HttpServletRequest request) {
