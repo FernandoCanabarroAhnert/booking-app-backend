@@ -2,6 +2,8 @@ package com.fernandocanabarro.booking_app_backend.services;
 
 import com.fernandocanabarro.booking_app_backend.models.dtos.LoginRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.LoginResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.NewPasswordRequestoDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.PasswordRecoverRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.RegistrationRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdateInfosRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdatePasswordRequestDTO;
@@ -18,6 +20,8 @@ public interface AuthService {
     void verifyToken(HttpServletRequest request);
     void userSelfUpdateInfos(UserSelfUpdateInfosRequestDTO request);
     void userSelfUpdatePassword(UserSelfUpdatePasswordRequestDTO request);
+    void sendPasswordRecoverEmail(PasswordRecoverRequestDTO request);
+    void setNewPasswordFromPasswordRecover(NewPasswordRequestoDTO request);
     UserWithPropertyAlreadyExistsDTO verifyIfUserExistsByEmail(String email);
     UserWithPropertyAlreadyExistsDTO verifyIfUserExistsByCpf(String cpf);
 }

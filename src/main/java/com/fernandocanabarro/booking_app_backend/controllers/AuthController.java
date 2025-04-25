@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fernandocanabarro.booking_app_backend.models.dtos.LoginRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.LoginResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.NewPasswordRequestoDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.PasswordRecoverRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.RegistrationRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdateInfosRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdatePasswordRequestDTO;
@@ -54,6 +56,18 @@ public class AuthController {
     @PutMapping("/update-password")
     public ResponseEntity<Void> userSelfUpdatePassword(@Valid @RequestBody UserSelfUpdatePasswordRequestDTO request) {
         authService.userSelfUpdatePassword(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/password-recover")
+    public ResponseEntity<Void> sendPasswordRecoverEmail(@RequestBody PasswordRecoverRequestDTO request) {
+        authService.sendPasswordRecoverEmail(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/new-password")
+    public ResponseEntity<Void> setNewPasswordFromPasswordRecover(@RequestBody @Valid NewPasswordRequestoDTO request) {
+        authService.setNewPasswordFromPasswordRecover(request);
         return ResponseEntity.ok().build();
     }
 
