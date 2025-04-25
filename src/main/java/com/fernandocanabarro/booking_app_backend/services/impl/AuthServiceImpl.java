@@ -20,6 +20,8 @@ import com.fernandocanabarro.booking_app_backend.mappers.UserMapper;
 import com.fernandocanabarro.booking_app_backend.models.dtos.LoginRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.LoginResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.RegistrationRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdateInfosRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.UserWithPropertyAlreadyExistsDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Role;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
 import com.fernandocanabarro.booking_app_backend.repositories.RoleRepository;
@@ -28,6 +30,7 @@ import com.fernandocanabarro.booking_app_backend.services.AuthService;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.AlreadyExistingPropertyException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.UnauthorizedException;
+import com.fernandocanabarro.booking_app_backend.utils.UserUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -78,8 +81,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public User getConnectedUser() {
+        String email = UserUtils.getConnectedUserEmail();
+        User user = this.userRepository.findByEmail(email)
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
+        return user;
+    }
+
+    @Override
     public void verifyToken(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").split("")[1];
+        String token = request.getHeader("Authorization").split(" ")[1];
         if (token == null || token.isEmpty()) {
             throw new UnauthorizedException("Token not provided");
         }
@@ -91,6 +102,36 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    @Override
+    public void userSelfUpdateInfos(UserSelfUpdateInfosRequestDTO request) {
+        User user = this.getConnectedUser();
+        Optional<User> UserByEmail = this.userRepository.findByEmail(request.getEmail());
+        if (UserByEmail.isPresent()) {
+            if (!UserByEmail.get().getId().equals(user.getId())) {
+                throw new AlreadyExistingPropertyException("E-mail");
+            }
+        }
+        Optional<User> UserByCpf = this.userRepository.findByCpf(request.getCpf());
+        if (UserByCpf.isPresent()) {
+            if (!UserByCpf.get().getId().equals(user.getId())) {
+                throw new AlreadyExistingPropertyException("CPF");
+            }
+        }
+        UserMapper.updateUser(user, request);
+        userRepository.save(user);
+    }
+
+    @Override
+    public UserWithPropertyAlreadyExistsDTO verifyIfUserExistsByEmail(String email) {
+        Optional<User> UserByEmail = this.userRepository.findByEmail(email);
+        return new UserWithPropertyAlreadyExistsDTO(UserByEmail.isPresent());
+    }
+
+    @Override
+    public UserWithPropertyAlreadyExistsDTO verifyIfUserExistsByCpf(String cpf) {
+        Optional<User> UserByCpf = this.userRepository.findByCpf(cpf);
+        return new UserWithPropertyAlreadyExistsDTO(UserByCpf.isPresent());
+    }
     
 
 }

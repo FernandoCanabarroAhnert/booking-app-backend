@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.RegistrationRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.UserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseUserProperties;
+import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseUserPropertiesWithPassword;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
 
 public class UserMapper {
 
-    public static User convertRequestToEntity(RegistrationRequestDTO request, PasswordEncoder passwordEncoder) {
+    public static User convertRequestToEntity(BaseUserPropertiesWithPassword request, PasswordEncoder passwordEncoder) {
         return User.builder()
                 .fullName(request.getFullName())
                 .email(request.getEmail())
@@ -23,7 +23,7 @@ public class UserMapper {
                 .build();
     }
 
-    public static void updateEntity(User entity, UserRequestDTO request) {
+    public static void updateUser(User entity, BaseUserProperties request) {
         entity.setFullName(request.getFullName());
         entity.setEmail(request.getEmail());
         entity.setPhone(request.getPhone());

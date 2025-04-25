@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fernandocanabarro.booking_app_backend.mappers.UserMapper;
-import com.fernandocanabarro.booking_app_backend.models.dtos.UserRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.AdminCreateUserRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.AdminUpdateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.UserWithPropertyAlreadyExistsDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
 import com.fernandocanabarro.booking_app_backend.models.entities.Role;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
@@ -36,13 +36,13 @@ public class UserServiceImpl implements UserService {
     
     @Override
     @Transactional(readOnly = true)
-    public Page<UserResponseDTO> findAll(Pageable pageable) {
+    public Page<UserResponseDTO> adminFindAllUsers(Pageable pageable) {
         return this.userRepository.findAll(pageable).map(UserMapper::convertEntityToResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UserResponseDTO findById(Long id) {
+    public UserResponseDTO adminFindUserById(Long id) {
         return this.userRepository.findById(id)
             .map(UserMapper::convertEntityToResponse)
             .orElseThrow(() -> new ResourceNotFoundException("User", id));
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void create(UserRequestDTO request) {
+    public void adminCreateUser(AdminCreateUserRequestDTO request) {
         Optional<User> UserByEmail = this.userRepository.findByEmail(request.getEmail());
         if (UserByEmail.isPresent()) {
             throw new AlreadyExistingPropertyException("E-mail");
@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void update(Long id, UserRequestDTO request) {
+    public void adminUpdateUser(Long id, AdminUpdateUserRequestDTO request) {
         User entity = this.userRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("User", id));
         Optional<User> UserByEmail = this.userRepository.findByEmail(request.getEmail());
@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
                 throw new AlreadyExistingPropertyException("CPF");
             }
         }
-        UserMapper.updateEntity(entity, request);
+        UserMapper.updateUser(entity, request);
         entity.getRoles().clear();
         request.getRolesIds().stream()
             .forEach(roleId -> {
@@ -103,28 +103,33 @@ public class UserServiceImpl implements UserService {
                     .orElseThrow(() -> new ResourceNotFoundException("Role", roleId));
                 entity.addRole(role);
             });
+        if (entity.hasRole("ROLE_OPERATOR") || entity.hasRole("ROLE_ADMIN")) {
+            if (request.getWorkingHotelId() == null) {
+                throw new RequiredWorkingHotelIdException();
+            }
+            if (entity.getWorkingHotel() == null) {
+                Hotel hotel = hotelRepository.findById(request.getWorkingHotelId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Hotel", request.getWorkingHotelId()));    
+                entity.setWorkingHotel(hotel);
+            }
+            if (!request.getWorkingHotelId().equals(entity.getWorkingHotel().getId())) {
+                Hotel hotel = hotelRepository.findById(request.getWorkingHotelId())
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel", request.getWorkingHotelId()));    
+                entity.setWorkingHotel(hotel);
+            }
+        }
         this.userRepository.save(entity);
     }
 
     @Override
     @Transactional
-    public void delete(Long id) {
+    public void adminDeleteUser(Long id) {
         if (!this.userRepository.existsById(id)) {
             throw new ResourceNotFoundException("User", id);
         }
         this.userRepository.deleteById(id);
     }
 
-    @Override
-    public UserWithPropertyAlreadyExistsDTO verifyIfUserExistsByEmail(String email) {
-        Optional<User> UserByEmail = this.userRepository.findByEmail(email);
-        return new UserWithPropertyAlreadyExistsDTO(UserByEmail.isPresent());
-    }
-
-    @Override
-    public UserWithPropertyAlreadyExistsDTO verifyIfUserExistsByCpf(String cpf) {
-        Optional<User> UserByCpf = this.userRepository.findByCpf(cpf);
-        return new UserWithPropertyAlreadyExistsDTO(UserByCpf.isPresent());
-    }
+    
 
 }
