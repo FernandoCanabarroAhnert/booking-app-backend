@@ -1,6 +1,7 @@
 package com.fernandocanabarro.booking_app_backend.controllers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -42,18 +43,21 @@ public class AuthController {
     }
 
     @GetMapping("/verify-token")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Void> verifyToken(HttpServletRequest request) {
         authService.verifyToken(request);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/update-infos")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Void> userSelfUpdateInfos(@Valid @RequestBody UserSelfUpdateInfosRequestDTO request) {
         authService.userSelfUpdateInfos(request);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/update-password")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Void> userSelfUpdatePassword(@Valid @RequestBody UserSelfUpdatePasswordRequestDTO request) {
         authService.userSelfUpdatePassword(request);
         return ResponseEntity.ok().build();
@@ -72,11 +76,13 @@ public class AuthController {
     }
 
     @GetMapping("/verify-email")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<UserWithPropertyAlreadyExistsDTO> verifyEmail(@RequestParam(name = "email") String email) {
         return ResponseEntity.ok(this.authService.verifyIfUserExistsByEmail(email));
     }
 
     @GetMapping("/verify-cpf")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<UserWithPropertyAlreadyExistsDTO> verifyCpf(@RequestParam(name = "cpf") String cpf) {
         return ResponseEntity.ok(this.authService.verifyIfUserExistsByCpf(cpf));
     }
