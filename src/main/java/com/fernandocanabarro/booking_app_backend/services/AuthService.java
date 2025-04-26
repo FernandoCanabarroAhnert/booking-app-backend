@@ -24,4 +24,5 @@ public interface AuthService {
     void setNewPasswordFromPasswordRecover(NewPasswordRequestoDTO request);
     UserWithPropertyAlreadyExistsDTO verifyIfUserExistsByEmail(String email);
     UserWithPropertyAlreadyExistsDTO verifyIfUserExistsByCpf(String cpf);
+    void verifyIfConnectedUserHasAdminPermission(Long id);
 }

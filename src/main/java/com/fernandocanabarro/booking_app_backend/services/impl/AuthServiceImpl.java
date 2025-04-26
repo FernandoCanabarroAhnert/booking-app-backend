@@ -204,6 +204,18 @@ public class AuthServiceImpl implements AuthService {
         return new UserWithPropertyAlreadyExistsDTO(UserByCpf.isPresent());
     }
 
+    @Override
+    public void verifyIfConnectedUserHasAdminPermission(Long id) {
+        User connectedUser = this.getConnectedUser();
+        if (!connectedUser.getId().equals(id)) {
+            boolean hasAdminPermission = connectedUser.hasRole("ROLE_OPERATOR") || connectedUser.hasRole("ROLE_ADMIN");
+            if (hasAdminPermission) {
+                return;
+            }
+            throw new ForbiddenException("User does not have permission to perform this action");
+        }
+    }
+
     
     
 
