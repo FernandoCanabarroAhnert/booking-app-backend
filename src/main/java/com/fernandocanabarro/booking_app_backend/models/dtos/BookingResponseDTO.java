@@ -25,7 +25,6 @@ public class BookingResponseDTO {
     private LocalDateTime createdAt;
     private boolean isFinished;
     private BigDecimal totalPrice;
-    private Integer paymentType;
-    private Integer installmentQuantity;
+    private BookingPaymentResponseDTO payment;
 
 }

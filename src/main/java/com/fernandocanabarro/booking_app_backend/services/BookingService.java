@@ -10,8 +10,8 @@ public interface BookingService {
 
     Page<BookingResponseDTO> findAll(Pageable pageable);
     BookingResponseDTO findById(Long id);
-    void create(BookingRequestDTO request);
-    void update(Long id, BookingRequestDTO request);
+    void create(BookingRequestDTO request, boolean isSelfBooking);
+    void update(Long id, BookingRequestDTO request, boolean isSelfBooking);
     void delete(Long id);
 
 }

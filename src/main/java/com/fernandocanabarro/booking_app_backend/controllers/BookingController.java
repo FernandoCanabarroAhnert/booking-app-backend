@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fernandocanabarro.booking_app_backend.models.dtos.AdminBookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
@@ -37,14 +38,26 @@ public class BookingController {
     }
 
     @PostMapping
+    public ResponseEntity<Void> adminCreate(@Valid @RequestBody AdminBookingRequestDTO request) {
+        this.bookingService.create(request, false);
+        return ResponseEntity.status(201).build();
+    }
+
+    @PostMapping("/self")
     public ResponseEntity<Void> create(@Valid @RequestBody BookingRequestDTO request) {
-        this.bookingService.create(request);
+        this.bookingService.create(request, true);
         return ResponseEntity.status(201).build();
     }
 
     @PutMapping("/{id}")
+    public ResponseEntity<Void> adminUpdate(@PathVariable Long id, @Valid @RequestBody AdminBookingRequestDTO request) {
+        this.bookingService.update(id, request, false);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/self")
     public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody BookingRequestDTO request) {
-        this.bookingService.update(id, request);
+        this.bookingService.update(id, request, true);
         return ResponseEntity.ok().build();
     }
 

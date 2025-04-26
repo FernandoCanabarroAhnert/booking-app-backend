@@ -52,10 +52,11 @@ public class Room {
     @JoinColumn(name = "hotel_id", foreignKey = @ForeignKey(name = "fk_room_hotel", value = ConstraintMode.CONSTRAINT))
     private Hotel hotel;
 
-    public boolean isAvalableToBook(LocalDate checkIn, LocalDate checkOut) {
+    public boolean isAvalableToBook(LocalDate checkIn, LocalDate checkOut, Long bookingIdToIgnore) {
         List<Booking> bookings = this.bookings.stream()
-            .filter(booking -> !booking.isFinished())
-            .filter(booking -> checkIn.isBefore(booking.getCheckOut().plusDays(1)) && checkOut.plusDays(1).isAfter(booking.getCheckIn()))
+            .filter(roomBooking -> !roomBooking.isFinished())
+            .filter(roomBooking -> roomBooking.getId() != bookingIdToIgnore)
+            .filter(roomBooking -> checkIn.isBefore(roomBooking.getCheckOut().plusDays(1)) && checkOut.plusDays(1).isAfter(roomBooking.getCheckIn()))
             .toList();
         return bookings.isEmpty();
     }

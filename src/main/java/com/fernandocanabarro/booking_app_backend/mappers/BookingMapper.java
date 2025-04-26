@@ -2,6 +2,7 @@ package com.fernandocanabarro.booking_app_backend.mappers;
 
 import java.time.LocalDateTime;
 
+import com.fernandocanabarro.booking_app_backend.models.dtos.BookingPaymentResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Booking;
@@ -37,11 +38,12 @@ public class BookingMapper {
                 .createdAt(entity.getCreatedAt())
                 .isFinished(entity.isFinished())
                 .totalPrice(entity.getTotalPrice())
-                .paymentType(entity.getPayment().getPaymentType().getPaymentType())
-                .installmentQuantity(
+                .payment(new BookingPaymentResponseDTO(
+                    entity.getPayment().getPaymentType().getPaymentType(), 
                     entity.getPayment() instanceof CartaoPayment
                         ? ((CartaoPayment) entity.getPayment()).getInstallmentQuantity()
                         : null
+                    )
                 )
                 .build();
     }
