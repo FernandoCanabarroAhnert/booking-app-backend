@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.RoomRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.RoomResponseDTO;
+import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.RoomService;
 
 import jakarta.validation.Valid;
@@ -29,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class RoomController {
 
     private final RoomService RoomService;
+    private final BookingService bookingService;
 
     @GetMapping
     public ResponseEntity<Page<RoomResponseDTO>> findAll(Pageable pageable) {
@@ -67,4 +70,9 @@ public class RoomController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{id}/bookings")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<Page<BookingResponseDTO>> findAllBookingsByRoom(@PathVariable Long id, Pageable pageable) {
+        return ResponseEntity.ok(this.bookingService.findAllBookingsByRoom(id, pageable));
+    }
 }

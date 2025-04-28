@@ -14,4 +14,7 @@ public interface BookingService {
     void update(Long id, BookingRequestDTO request, boolean isSelfBooking);
     void delete(Long id);
 
+    Page<BookingResponseDTO> findAllBookingsByUser(Long userId, Pageable pageable, boolean isSelfUser);
+    Page<BookingResponseDTO> findAllBookingsByRoom(Long roomId, Pageable pageable);
+
 }

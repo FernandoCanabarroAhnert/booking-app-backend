@@ -156,4 +156,22 @@ public class BookingServiceImpl implements BookingService {
         this.bookingRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BookingResponseDTO> findAllBookingsByUser(Long userId, Pageable pageable, boolean isSelfUser) {
+        Page<Booking> response = isSelfUser
+            ? this.bookingRepository.findByUserId(authService.getConnectedUser().getId(), pageable)
+            : this.bookingRepository.findByUserId(userId, pageable);
+        return response.map(BookingMapper::convertEntityToResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BookingResponseDTO> findAllBookingsByRoom(Long roomId, Pageable pageable) {
+        this.roomRepository.findById(roomId)
+            .orElseThrow(() -> new ResourceNotFoundException("Room", roomId));
+        return this.bookingRepository.findByRoomId(roomId, pageable)
+            .map(BookingMapper::convertEntityToResponse);
+    }
+
 }

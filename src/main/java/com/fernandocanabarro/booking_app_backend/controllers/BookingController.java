@@ -75,4 +75,10 @@ public class BookingController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/my-bookings")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<Page<BookingResponseDTO>> findMyBookings(Pageable pageable) {
+        return ResponseEntity.ok(this.bookingService.findAllBookingsByUser(null, pageable, true));
+    }
+
 }

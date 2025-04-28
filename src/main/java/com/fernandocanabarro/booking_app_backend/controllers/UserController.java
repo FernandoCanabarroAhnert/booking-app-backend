@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fernandocanabarro.booking_app_backend.models.dtos.AdminCreateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.AdminUpdateUserRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.UserService;
 
 import jakarta.validation.Valid;
@@ -27,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final UserService userService;
+    private final BookingService bookingService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
@@ -59,6 +62,12 @@ public class UserController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         this.userService.adminDeleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/bookings")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
+    public Page<BookingResponseDTO> findUserBookings(@PathVariable Long id, Pageable pageable) {
+        return this.bookingService.findAllBookingsByUser(id, pageable, false);
     }
 
     
