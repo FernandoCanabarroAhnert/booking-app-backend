@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fernandocanabarro.booking_app_backend.models.dtos.AdminBookingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.BookingDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
@@ -36,7 +37,7 @@ public class BookingController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<BookingResponseDTO> findById(@PathVariable Long id) {
+    public ResponseEntity<BookingDetailResponseDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(this.bookingService.findById(id));
     }
 

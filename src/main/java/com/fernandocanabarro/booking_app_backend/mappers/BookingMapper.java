@@ -2,6 +2,7 @@ package com.fernandocanabarro.booking_app_backend.mappers;
 
 import java.time.LocalDateTime;
 
+import com.fernandocanabarro.booking_app_backend.models.dtos.BookingDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingPaymentResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
@@ -29,23 +30,36 @@ public class BookingMapper {
     }
 
     public static BookingResponseDTO convertEntityToResponse(Booking entity) {
-        return BookingResponseDTO.builder()
-                .id(entity.getId())
-                .user(UserMapper.convertEntityToResponse(entity.getUser()))
-                .room(RoomMapper.convertEntityToResponse(entity.getRoom()))
-                .checkIn(entity.getCheckIn())
-                .checkOut(entity.getCheckOut())
-                .createdAt(entity.getCreatedAt())
-                .isFinished(entity.isFinished())
-                .totalPrice(entity.getTotalPrice())
-                .payment(new BookingPaymentResponseDTO(
-                    entity.getPayment().getPaymentType().getPaymentType(), 
-                    entity.getPayment() instanceof CartaoPayment
-                        ? ((CartaoPayment) entity.getPayment()).getInstallmentQuantity()
-                        : null
-                    )
-                )
-                .build();
+        BookingResponseDTO response = new BookingResponseDTO();
+        response.setId(entity.getId());
+        response.setCheckIn(entity.getCheckIn());
+        response.setCheckOut(entity.getCheckOut());
+        response.setCreatedAt(entity.getCreatedAt());
+        response.setFinished(entity.isFinished());
+        response.setTotalPrice(entity.getTotalPrice());
+        response.setUserId(entity.getUser().getId());
+        response.setRoomId(entity.getRoom().getId());
+        return response;
+    }
+
+    public static BookingDetailResponseDTO convertEntityToDetailResponse(Booking entity) {
+        BookingDetailResponseDTO response = new BookingDetailResponseDTO();
+        response.setId(entity.getId());
+        response.setCheckIn(entity.getCheckIn());
+        response.setCheckOut(entity.getCheckOut());
+        response.setCreatedAt(entity.getCreatedAt());
+        response.setFinished(entity.isFinished());
+        response.setTotalPrice(entity.getTotalPrice());
+        response.setUser(UserMapper.convertEntityToResponse(entity.getUser()));
+        response.setRoom(RoomMapper.convertEntityToResponse(entity.getRoom()));
+        response.setPayment(new BookingPaymentResponseDTO(
+            entity.getPayment().getPaymentType().getPaymentType(),
+            entity.getPayment() instanceof CartaoPayment
+                    ? ((CartaoPayment) entity.getPayment()).getInstallmentQuantity()
+                    : null
+            )
+        );
+        return response;
     }
 
 }

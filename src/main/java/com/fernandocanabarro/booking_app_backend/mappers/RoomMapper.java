@@ -3,6 +3,7 @@ package com.fernandocanabarro.booking_app_backend.mappers;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import com.fernandocanabarro.booking_app_backend.models.dtos.RoomDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.RoomRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
@@ -21,6 +22,7 @@ public class RoomMapper {
                 .capacity(request.getCapacity())
                 .bookings(new ArrayList<>(Arrays.asList()))
                 .hotel(hotel)
+                .images(new ArrayList<>(Arrays.asList()))
                 .build();
     }
 
@@ -34,16 +36,35 @@ public class RoomMapper {
     }
 
     public static RoomResponseDTO convertEntityToResponse(Room entity) {
-        return RoomResponseDTO.builder()
-                .id(entity.getId())
-                .number(entity.getNumber())
-                .floor(entity.getFloor())
-                .type(entity.getType().getRoomType())
-                .pricePerNight(entity.getPricePerNight())
-                .description(entity.getDescription())
-                .capacity(entity.getCapacity())
-                .hotelId(entity.getHotel().getId())
-                .build();
+        RoomResponseDTO response = new RoomResponseDTO();
+        response.setId(entity.getId());
+        response.setNumber(entity.getNumber());
+        response.setFloor(entity.getFloor());
+        response.setType(entity.getType().getRoomType());
+        response.setPricePerNight(entity.getPricePerNight());
+        response.setDescription(entity.getDescription());
+        response.setCapacity(entity.getCapacity());
+        response.setHotelId(entity.getHotel().getId());
+        response.setCardDisplayImage(ImageMapper.convertEntityResponseDTO(entity.getImages().get(0)));
+        return response;
     }
+
+    public static RoomDetailResponseDTO convertEntityToDetailResponse(Room entity) {
+        RoomDetailResponseDTO response = new RoomDetailResponseDTO();
+        response.setId(entity.getId());
+        response.setNumber(entity.getNumber());
+        response.setFloor(entity.getFloor());
+        response.setType(entity.getType().getRoomType());
+        response.setPricePerNight(entity.getPricePerNight());
+        response.setDescription(entity.getDescription());
+        response.setCapacity(entity.getCapacity());
+        response.setHotelId(entity.getHotel().getId());
+        response.setImages(entity.getImages().stream()
+                .map(ImageMapper::convertEntityResponseDTO)
+                .toList());
+        return response;
+    }
+
+
 
 }

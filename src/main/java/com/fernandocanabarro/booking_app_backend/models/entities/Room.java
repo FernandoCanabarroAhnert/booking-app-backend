@@ -51,6 +51,8 @@ public class Room {
     @ManyToOne
     @JoinColumn(name = "hotel_id", foreignKey = @ForeignKey(name = "fk_room_hotel", value = ConstraintMode.CONSTRAINT))
     private Hotel hotel;
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    public List<Image> images;
 
     public boolean isAvalableToBook(LocalDate checkIn, LocalDate checkOut, Long bookingIdToIgnore) {
         List<Booking> bookings = this.bookings.stream()

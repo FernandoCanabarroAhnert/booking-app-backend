@@ -1,5 +1,7 @@
 package com.fernandocanabarro.booking_app_backend.models.dtos;
 
+import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseHotelResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,15 +13,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class HotelResponseDTO {
+public class HotelResponseDTO extends BaseHotelResponse {
 
-    private Long id;
-    private String name;
-    private Integer roomQuantity;
-    private String address;
-    private String city;
-    private String zipCode;
-    private String state;
-    private String phone;
+    private ImageResponseDTO cardDisplayImage;
 
 }

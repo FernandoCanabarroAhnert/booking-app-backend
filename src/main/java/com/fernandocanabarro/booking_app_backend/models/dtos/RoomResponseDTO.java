@@ -1,6 +1,6 @@
 package com.fernandocanabarro.booking_app_backend.models.dtos;
 
-import java.math.BigDecimal;
+import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseRoomResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,15 +13,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RoomResponseDTO {
-
-    private Long id;
-    private String number;
-    private Integer floor;
-    private Integer type;
-    private BigDecimal pricePerNight;
-    private String description;
-    private Integer capacity;
-    private Long hotelId;
+public class RoomResponseDTO extends BaseRoomResponse {
+    
+    private ImageResponseDTO cardDisplayImage;
 
 }

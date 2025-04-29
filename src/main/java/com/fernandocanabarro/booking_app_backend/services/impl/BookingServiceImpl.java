@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fernandocanabarro.booking_app_backend.mappers.BookingMapper;
 import com.fernandocanabarro.booking_app_backend.models.dtos.AdminBookingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.BookingDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Booking;
@@ -51,11 +52,11 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public BookingResponseDTO findById(Long id) {
+    public BookingDetailResponseDTO findById(Long id) {
         Booking booking = this.bookingRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Booking", id));
         authService.verifyIfConnectedUserHasAdminPermission(booking.getUser().getId());
-        return BookingMapper.convertEntityToResponse(booking);
+        return BookingMapper.convertEntityToDetailResponse(booking);
     }
 
     @Override

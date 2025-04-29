@@ -53,7 +53,7 @@ public class User implements UserDetails, Principal {
     private LocalDateTime createdAt;
     
     @ManyToOne
-    @JoinColumn(name = "hotel_id", foreignKey = @ForeignKey(name = "fk_user_hotel", value = ConstraintMode.CONSTRAINT))
+    @JoinColumn(name = "hotel_id", nullable = true, foreignKey = @ForeignKey(name = "fk_user_hotel", value = ConstraintMode.CONSTRAINT))
     private Hotel workingHotel;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)

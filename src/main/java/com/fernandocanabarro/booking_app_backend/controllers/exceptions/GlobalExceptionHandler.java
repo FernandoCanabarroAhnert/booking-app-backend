@@ -14,6 +14,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.exceptions.Validati
 import com.fernandocanabarro.booking_app_backend.services.exceptions.AlreadyExistingPropertyException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.EmailException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.ImageGeneratingException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidCurrentPasswordException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredWorkingHotelIdException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
@@ -27,6 +28,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailException.class)
     public ResponseEntity<StandardError> email(EmailException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        StandardError error = new StandardError(Instant.now(), status.value(), "Bad Request", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(ImageGeneratingException.class)
+    public ResponseEntity<StandardError> imageGenerating(ImageGeneratingException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         StandardError error = new StandardError(Instant.now(), status.value(), "Bad Request", ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(error);

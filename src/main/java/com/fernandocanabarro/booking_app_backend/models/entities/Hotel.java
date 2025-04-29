@@ -43,4 +43,7 @@ public class Hotel {
     @OneToMany(mappedBy = "workingHotel", fetch = FetchType.LAZY)
     private List<User> workers;
 
+    @OneToMany(mappedBy = "hotel", fetch = FetchType.LAZY)
+    private List<Image> images;
+
 }

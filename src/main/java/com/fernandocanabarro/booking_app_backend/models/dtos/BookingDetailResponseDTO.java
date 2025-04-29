@@ -3,6 +3,7 @@ package com.fernandocanabarro.booking_app_backend.models.dtos;
 import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseBookingResponseDTO;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,9 +12,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookingResponseDTO extends BaseBookingResponseDTO {
+@Builder
+public class BookingDetailResponseDTO extends BaseBookingResponseDTO {
 
-    private Long userId;
-    private Long roomId;
+    private UserResponseDTO user;
+    private RoomResponseDTO room;
+    private BookingPaymentResponseDTO payment;
 
 }

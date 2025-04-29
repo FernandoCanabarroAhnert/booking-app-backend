@@ -1,6 +1,8 @@
 package com.fernandocanabarro.booking_app_backend.models.dtos;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseBookingResponseDTO;
+import java.util.List;
+
+import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseHotelResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,9 +13,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookingResponseDTO extends BaseBookingResponseDTO {
+public class HotelDetailResponseDTO extends BaseHotelResponse {
 
-    private Long userId;
-    private Long roomId;
+    private List<ImageResponseDTO> images;
 
 }

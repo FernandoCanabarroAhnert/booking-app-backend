@@ -19,6 +19,7 @@ import lombok.Setter;
 @Table(name = "cartao_payments")
 public class CartaoPayment extends Payment {
 
+    public static final Object CARTAO = null;
     private Integer installmentQuantity;
 
     public CartaoPayment(BigDecimal amount, Integer installmentQuantity) {
