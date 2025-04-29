@@ -18,6 +18,5 @@ public class AdminUpdateUserRequestDTO extends BaseUserProperties {
 
     @NotEmpty(message = "Required field")
     private List<Long> rolesIds;
-    private Long workingHotelId;
 
 }

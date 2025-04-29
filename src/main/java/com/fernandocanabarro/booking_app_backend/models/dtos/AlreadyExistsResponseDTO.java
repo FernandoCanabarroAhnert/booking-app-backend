@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserWithPropertyAlreadyExistsDTO {
+public class AlreadyExistsResponseDTO {
 
     private boolean alreadyExists;
 

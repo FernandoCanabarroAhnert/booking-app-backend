@@ -18,6 +18,5 @@ public class AdminCreateUserRequestDTO extends BaseUserPropertiesWithPassword {
 
     @NotEmpty(message = "Required field")
     private List<Long> rolesIds;
-    private Long workingHotelId;
 
 }

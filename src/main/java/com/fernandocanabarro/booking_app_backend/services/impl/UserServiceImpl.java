@@ -1,5 +1,6 @@
 package com.fernandocanabarro.booking_app_backend.services.impl;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import com.fernandocanabarro.booking_app_backend.mappers.UserMapper;
 import com.fernandocanabarro.booking_app_backend.models.dtos.AdminCreateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.AdminUpdateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseUserProperties;
 import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
 import com.fernandocanabarro.booking_app_backend.models.entities.Role;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
@@ -51,26 +53,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void adminCreateUser(AdminCreateUserRequestDTO request) {
-        Optional<User> UserByEmail = this.userRepository.findByEmail(request.getEmail());
-        if (UserByEmail.isPresent()) {
-            throw new AlreadyExistingPropertyException("E-mail");
-        }
-        Optional<User> UserByCpf = this.userRepository.findByCpf(request.getCpf());
-        if (UserByCpf.isPresent()) {
-            throw new AlreadyExistingPropertyException("CPF");
-        }
-        
+        this.verifyIfEmailIsAlreadyInUse(request.getEmail());
+        this.verifyIfCpfIsAlreadyInUse(request.getCpf());
         User entity = UserMapper.convertRequestToEntity(request, passwordEncoder);
-        request.getRolesIds().stream()
-            .forEach(roleId -> {
-                Role role = this.roleRepository.findById(roleId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Role", roleId));
-                entity.addRole(role);
-            });
+        this.setUserRoles(entity, request.getRolesIds());
         if (entity.hasRole("ROLE_OPERATOR") || entity.hasRole("ROLE_ADMIN")) {
-            if (request.getWorkingHotelId() == null) {
-                throw new RequiredWorkingHotelIdException();
-            }
+            this.verifyIfRequestHasWorkingHotelIdWhenUserHasRoleOperatorOrAdmin(request);
             Hotel hotel = hotelRepository.findById(request.getWorkingHotelId())
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel", request.getWorkingHotelId()));    
             entity.setWorkingHotel(hotel);
@@ -78,47 +66,77 @@ public class UserServiceImpl implements UserService {
         this.userRepository.save(entity);
     }
 
+    private void verifyIfEmailIsAlreadyInUse(String email) {
+        Optional<User> UserByEmail = this.userRepository.findByEmail(email);
+        if (UserByEmail.isPresent()) {
+            throw new AlreadyExistingPropertyException("E-mail");
+        }
+    }
+
+    private void verifyIfCpfIsAlreadyInUse(String cpf) {
+        Optional<User> UserByCpf = this.userRepository.findByCpf(cpf);
+        if (UserByCpf.isPresent()) {
+            throw new AlreadyExistingPropertyException("CPF");
+        }
+    }
+
+    private void setUserRoles(User entity, List<Long> rolesIds) {
+        rolesIds.forEach(roleId -> {
+                Role role = this.roleRepository.findById(roleId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Role", roleId));
+                entity.addRole(role);
+            });
+    }
+
+    private void verifyIfRequestHasWorkingHotelIdWhenUserHasRoleOperatorOrAdmin(BaseUserProperties request) {
+        if (request.getWorkingHotelId() == null) {
+            throw new RequiredWorkingHotelIdException();
+        }
+    }
+
     @Override
     @Transactional
     public void adminUpdateUser(Long id, AdminUpdateUserRequestDTO request) {
         User entity = this.userRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("User", id));
-        Optional<User> UserByEmail = this.userRepository.findByEmail(request.getEmail());
+        this.verifyIfUpdateRequestEmailIsAlreadyInUse(request.getEmail(), entity);
+        this.verifyIfUpdateRequestCpfIsAlreadyInUse(request.getCpf(), entity);
+        UserMapper.updateUser(entity, request);
+        entity.getRoles().clear();
+        this.setUserRoles(entity, request.getRolesIds());
+        if (entity.hasRole("ROLE_OPERATOR") || entity.hasRole("ROLE_ADMIN")) {
+            this.verifyIfRequestHasWorkingHotelIdWhenUserHasRoleOperatorOrAdmin(request);
+            this.updateUserWorkingHotelIfNeeded(entity, request);
+        }
+        this.userRepository.save(entity);
+    }
+
+    private void verifyIfUpdateRequestEmailIsAlreadyInUse(String email, User entity) {
+        Optional<User> UserByEmail = this.userRepository.findByEmail(email);
         if (UserByEmail.isPresent()) {
             if (!UserByEmail.get().getId().equals(entity.getId())) {
                 throw new AlreadyExistingPropertyException("E-mail");
             }
         }
-        Optional<User> UserByCpf = this.userRepository.findByCpf(request.getCpf());
+    }
+
+    private void verifyIfUpdateRequestCpfIsAlreadyInUse(String cpf, User entity) {
+        Optional<User> UserByCpf = this.userRepository.findByCpf(cpf);
         if (UserByCpf.isPresent()) {
             if (!UserByCpf.get().getId().equals(entity.getId())) {
                 throw new AlreadyExistingPropertyException("CPF");
             }
         }
-        UserMapper.updateUser(entity, request);
-        entity.getRoles().clear();
-        request.getRolesIds().stream()
-            .forEach(roleId -> {
-                Role role = this.roleRepository.findById(roleId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Role", roleId));
-                entity.addRole(role);
-            });
-        if (entity.hasRole("ROLE_OPERATOR") || entity.hasRole("ROLE_ADMIN")) {
-            if (request.getWorkingHotelId() == null) {
-                throw new RequiredWorkingHotelIdException();
-            }
-            if (entity.getWorkingHotel() == null) {
-                Hotel hotel = hotelRepository.findById(request.getWorkingHotelId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Hotel", request.getWorkingHotelId()));    
-                entity.setWorkingHotel(hotel);
-            }
-            if (!request.getWorkingHotelId().equals(entity.getWorkingHotel().getId())) {
-                Hotel hotel = hotelRepository.findById(request.getWorkingHotelId())
-                .orElseThrow(() -> new ResourceNotFoundException("Hotel", request.getWorkingHotelId()));    
-                entity.setWorkingHotel(hotel);
-            }
+    }
+
+    private void updateUserWorkingHotelIfNeeded(User entity, AdminUpdateUserRequestDTO request) {
+        boolean needsUpdate = entity.getWorkingHotel() == null ||
+                          !request.getWorkingHotelId().equals(entity.getWorkingHotel().getId());
+        if (needsUpdate) {
+            Hotel hotel = hotelRepository.findById(request.getWorkingHotelId())
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel", request.getWorkingHotelId()));
+            entity.setWorkingHotel(hotel);
         }
-        this.userRepository.save(entity);
     }
 
     @Override

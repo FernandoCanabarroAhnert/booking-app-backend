@@ -17,7 +17,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.PasswordRecoverRequ
 import com.fernandocanabarro.booking_app_backend.models.dtos.RegistrationRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdateInfosRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdatePasswordRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.UserWithPropertyAlreadyExistsDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.AlreadyExistsResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -77,13 +77,13 @@ public class AuthController {
 
     @GetMapping("/verify-email")
     @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<UserWithPropertyAlreadyExistsDTO> verifyEmail(@RequestParam(name = "email") String email) {
+    public ResponseEntity<AlreadyExistsResponseDTO> verifyEmail(@RequestParam(name = "email") String email) {
         return ResponseEntity.ok(this.authService.verifyIfUserExistsByEmail(email));
     }
 
     @GetMapping("/verify-cpf")
     @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<UserWithPropertyAlreadyExistsDTO> verifyCpf(@RequestParam(name = "cpf") String cpf) {
+    public ResponseEntity<AlreadyExistsResponseDTO> verifyCpf(@RequestParam(name = "cpf") String cpf) {
         return ResponseEntity.ok(this.authService.verifyIfUserExistsByCpf(cpf));
     }
 

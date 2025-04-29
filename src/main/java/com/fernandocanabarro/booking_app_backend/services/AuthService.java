@@ -7,7 +7,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.PasswordRecoverRequ
 import com.fernandocanabarro.booking_app_backend.models.dtos.RegistrationRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdateInfosRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdatePasswordRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.UserWithPropertyAlreadyExistsDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.AlreadyExistsResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ public interface AuthService {
     void userSelfUpdatePassword(UserSelfUpdatePasswordRequestDTO request);
     void sendPasswordRecoverEmail(PasswordRecoverRequestDTO request);
     void setNewPasswordFromPasswordRecover(NewPasswordRequestoDTO request);
-    UserWithPropertyAlreadyExistsDTO verifyIfUserExistsByEmail(String email);
-    UserWithPropertyAlreadyExistsDTO verifyIfUserExistsByCpf(String cpf);
+    AlreadyExistsResponseDTO verifyIfUserExistsByEmail(String email);
+    AlreadyExistsResponseDTO verifyIfUserExistsByCpf(String cpf);
     void verifyIfConnectedUserHasAdminPermission(Long id);
 }

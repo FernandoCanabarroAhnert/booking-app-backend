@@ -31,4 +31,6 @@ public class BaseUserProperties {
     @NotNull(message = "Required field")
     private LocalDate birthDate;
 
+    private Long workingHotelId;
+
 }

@@ -26,7 +26,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.PasswordRecoverRequ
 import com.fernandocanabarro.booking_app_backend.models.dtos.RegistrationRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdateInfosRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdatePasswordRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.UserWithPropertyAlreadyExistsDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.AlreadyExistsResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.PasswordRecover;
 import com.fernandocanabarro.booking_app_backend.models.entities.Role;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
@@ -193,15 +193,15 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserWithPropertyAlreadyExistsDTO verifyIfUserExistsByEmail(String email) {
+    public AlreadyExistsResponseDTO verifyIfUserExistsByEmail(String email) {
         Optional<User> UserByEmail = this.userRepository.findByEmail(email);
-        return new UserWithPropertyAlreadyExistsDTO(UserByEmail.isPresent());
+        return new AlreadyExistsResponseDTO(UserByEmail.isPresent());
     }
 
     @Override
-    public UserWithPropertyAlreadyExistsDTO verifyIfUserExistsByCpf(String cpf) {
+    public AlreadyExistsResponseDTO verifyIfUserExistsByCpf(String cpf) {
         Optional<User> UserByCpf = this.userRepository.findByCpf(cpf);
-        return new UserWithPropertyAlreadyExistsDTO(UserByCpf.isPresent());
+        return new AlreadyExistsResponseDTO(UserByCpf.isPresent());
     }
 
     @Override
