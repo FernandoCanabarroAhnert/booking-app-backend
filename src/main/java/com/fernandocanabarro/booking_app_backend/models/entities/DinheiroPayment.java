@@ -13,8 +13,8 @@ public class DinheiroPayment extends Payment {
 
     public DinheiroPayment() {}
 
-    public DinheiroPayment(BigDecimal amount) {
-        super(PaymentTypeEnum.DINHEIRO, amount);
+    public DinheiroPayment(BigDecimal amount, boolean isOnlinePayment) {
+        super(PaymentTypeEnum.DINHEIRO, amount, isOnlinePayment);
     }
 
 }

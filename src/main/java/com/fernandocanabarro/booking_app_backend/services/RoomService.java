@@ -7,9 +7,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.RoomDetailResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.RoomRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.RoomResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
 
 public interface RoomService {
 

@@ -8,8 +8,8 @@ import com.fernandocanabarro.booking_app_backend.models.entities.Payment;
 public class DinheiroPaymentStrategy implements PaymentStrategy {
 
     @Override
-    public Payment processBookingPayment(BigDecimal amount, Integer installmentQuantity) {
-        return new DinheiroPayment(amount);
+    public Payment processBookingPayment(BigDecimal amount, Integer installmentQuantity, boolean isOnlinePayment) {
+        return new DinheiroPayment(amount, isOnlinePayment);
     }
 
 }

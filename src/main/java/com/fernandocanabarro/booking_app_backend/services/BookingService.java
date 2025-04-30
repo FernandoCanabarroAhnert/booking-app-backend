@@ -3,9 +3,9 @@ package com.fernandocanabarro.booking_app_backend.services;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.BookingDetailResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.BookingRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
 
 public interface BookingService {
 

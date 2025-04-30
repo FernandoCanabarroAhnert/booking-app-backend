@@ -6,10 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.HotelDetailResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.HotelRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.HotelResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.RoomResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
 
 public interface HotelService {
 

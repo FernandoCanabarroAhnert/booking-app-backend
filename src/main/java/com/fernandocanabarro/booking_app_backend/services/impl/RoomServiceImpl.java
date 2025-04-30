@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fernandocanabarro.booking_app_backend.mappers.RoomMapper;
-import com.fernandocanabarro.booking_app_backend.models.dtos.RoomDetailResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.RoomRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.RoomResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
 import com.fernandocanabarro.booking_app_backend.models.entities.Image;
 import com.fernandocanabarro.booking_app_backend.models.entities.Room;

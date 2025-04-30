@@ -66,6 +66,9 @@ public class User implements UserDetails, Principal {
         inverseJoinColumns = @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "fk_user_role_role", value = ConstraintMode.CONSTRAINT)))
     private Set<Role> roles = new HashSet<>();
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<CreditCard> creditCards;
+
     @Override
     public String getName() {
         return this.email;

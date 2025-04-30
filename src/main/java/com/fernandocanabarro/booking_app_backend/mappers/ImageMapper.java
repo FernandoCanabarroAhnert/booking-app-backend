@@ -1,6 +1,6 @@
 package com.fernandocanabarro.booking_app_backend.mappers;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.ImageResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.image.ImageResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Image;
 
 public class ImageMapper {

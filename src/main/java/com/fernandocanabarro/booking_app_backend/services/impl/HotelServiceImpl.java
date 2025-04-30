@@ -10,10 +10,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fernandocanabarro.booking_app_backend.mappers.HotelMapper;
 import com.fernandocanabarro.booking_app_backend.mappers.RoomMapper;
-import com.fernandocanabarro.booking_app_backend.models.dtos.HotelDetailResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.HotelRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.HotelResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.RoomResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
 import com.fernandocanabarro.booking_app_backend.models.entities.Image;
 import com.fernandocanabarro.booking_app_backend.models.enums.ImageTypeEnum;

@@ -8,8 +8,8 @@ import com.fernandocanabarro.booking_app_backend.models.entities.Payment;
 public class CartaoPaymentStrategy implements PaymentStrategy {
 
     @Override
-    public Payment processBookingPayment(BigDecimal amount, Integer installmentQuantity) {
-        return new CartaoPayment(amount, installmentQuantity);
+    public Payment processBookingPayment(BigDecimal amount, Integer installmentQuantity, boolean isOnlinePayment) {
+        return new CartaoPayment(amount, installmentQuantity, isOnlinePayment);
     }
 
 }

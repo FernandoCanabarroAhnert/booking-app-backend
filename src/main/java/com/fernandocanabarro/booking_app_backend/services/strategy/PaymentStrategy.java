@@ -6,6 +6,6 @@ import com.fernandocanabarro.booking_app_backend.models.entities.Payment;
 
 public interface PaymentStrategy {
 
-    Payment processBookingPayment(BigDecimal amount, Integer installmentQuantity);
+    Payment processBookingPayment(BigDecimal amount, Integer installmentQuantity, boolean isOnlinePayment);
 
 }

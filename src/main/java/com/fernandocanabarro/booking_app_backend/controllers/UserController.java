@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.AdminCreateUserRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.AdminUpdateUserRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminCreateUserRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminUpdateUserRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.UserService;
 

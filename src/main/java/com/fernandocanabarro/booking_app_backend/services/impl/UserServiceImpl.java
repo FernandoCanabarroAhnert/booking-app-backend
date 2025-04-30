@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fernandocanabarro.booking_app_backend.mappers.UserMapper;
-import com.fernandocanabarro.booking_app_backend.models.dtos.AdminCreateUserRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.AdminUpdateUserRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminCreateUserRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminUpdateUserRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseUserProperties;
 import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
 import com.fernandocanabarro.booking_app_backend.models.entities.Role;

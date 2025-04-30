@@ -3,9 +3,9 @@ package com.fernandocanabarro.booking_app_backend.mappers;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.HotelDetailResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.HotelRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.HotelResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
 
 public class HotelMapper {

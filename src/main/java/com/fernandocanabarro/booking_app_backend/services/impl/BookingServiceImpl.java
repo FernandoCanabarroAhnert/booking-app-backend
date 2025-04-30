@@ -9,21 +9,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fernandocanabarro.booking_app_backend.mappers.BookingMapper;
-import com.fernandocanabarro.booking_app_backend.models.dtos.AdminBookingRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.BookingDetailResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.BookingRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.AdminBookingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingPaymentRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Booking;
+import com.fernandocanabarro.booking_app_backend.models.entities.CartaoPayment;
+import com.fernandocanabarro.booking_app_backend.models.entities.CreditCard;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
 import com.fernandocanabarro.booking_app_backend.models.entities.Payment;
 import com.fernandocanabarro.booking_app_backend.models.entities.Room;
 import com.fernandocanabarro.booking_app_backend.repositories.BookingRepository;
+import com.fernandocanabarro.booking_app_backend.repositories.CreditCardRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.UserRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.PaymentRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredCreditCardIdException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RoomIsUnavailableForBookingException;
 import com.fernandocanabarro.booking_app_backend.services.strategy.BoletoPaymentStrategy;
@@ -42,6 +47,7 @@ public class BookingServiceImpl implements BookingService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
+    private final CreditCardRepository creditCardRepository;
     private final AuthService authService;
     
     @Override
@@ -62,25 +68,30 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public void create(BookingRequestDTO request, boolean isSelfBooking) {
+        this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndWithCreditCard(request.getPayment());
         Room room = this.roomRepository.findById(request.getRoomId())
             .orElseThrow(() -> new ResourceNotFoundException("Room", request.getRoomId()));
         this.validateRoomAvailability(request, room, null);
         User user = this.getUserForBookingLogic(isSelfBooking, request);
         Booking entity = BookingMapper.convertRequestToEntity(request, room, user);
-        Payment payment = this.getBookingPayment(request.getPayment().getPaymentType(), entity.getTotalPrice(), request.getPayment().getInstallmentQuantity());
+        Payment payment = this.getBookingPayment(request.getPayment().getPaymentType(), entity.getTotalPrice(),
+            request.getPayment().getInstallmentQuantity(), request.getPayment().getIsOnlinePayment());
+        this.setCartaoPaymentDataWhenPaymentIsOnlineAndWithCreditCard(payment, request.getPayment());
         payment = this.paymentRepository.save(payment);
         entity.setPayment(payment);
         this.bookingRepository.save(entity);
     }
 
-    private Payment getBookingPayment(Integer paymentType, BigDecimal amount, Integer installmentQuantity) {
-        Map<Integer, PaymentStrategy> paymentStrategyMap = Map.of(
-            1, new DinheiroPaymentStrategy(),
-            2, new CartaoPaymentStrategy(),
-            3, new PixPaymentStrategy(),
-            4, new BoletoPaymentStrategy()
-        );
-        return paymentStrategyMap.get(paymentType).processBookingPayment(amount, installmentQuantity);
+    private void validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndWithCreditCard(BookingPaymentRequestDTO payment) {
+        if (payment.getIsOnlinePayment() && payment.getPaymentType() == 2  && payment.getCreditCardId() == null) {
+            throw new RequiredCreditCardIdException();
+        }
+    }
+
+    private void validateRoomAvailability(BookingRequestDTO request, Room room, Long bookingIdToIgnore) {
+        if (!room.isAvalableToBook(request.getCheckIn(), request.getCheckOut(), bookingIdToIgnore)) {
+            throw new RoomIsUnavailableForBookingException(room.getId(), request.getCheckIn(), request.getCheckOut());
+        }
     }
 
     private User getUserForBookingLogic(boolean isSelfBooking, BookingRequestDTO request) {
@@ -94,9 +105,25 @@ public class BookingServiceImpl implements BookingService {
             .orElseThrow(() -> new ResourceNotFoundException("User", ((AdminBookingRequestDTO) request).getUserId())); 
     }
 
-    private void validateRoomAvailability(BookingRequestDTO request, Room room, Long bookingIdToIgnore) {
-        if (!room.isAvalableToBook(request.getCheckIn(), request.getCheckOut(), bookingIdToIgnore)) {
-            throw new RoomIsUnavailableForBookingException(room.getId(), request.getCheckIn(), request.getCheckOut());
+    private Payment getBookingPayment(Integer paymentType, BigDecimal amount, Integer installmentQuantity, boolean isOnlinePayment) {
+        Map<Integer, PaymentStrategy> paymentStrategyMap = Map.of(
+            1, new DinheiroPaymentStrategy(),
+            2, new CartaoPaymentStrategy(),
+            3, new PixPaymentStrategy(),
+            4, new BoletoPaymentStrategy()
+        );
+        return paymentStrategyMap.get(paymentType).processBookingPayment(amount, installmentQuantity, isOnlinePayment);
+    }
+
+    private void setCartaoPaymentDataWhenPaymentIsOnlineAndWithCreditCard(Payment payment, BookingPaymentRequestDTO paymentRequest) {
+        if (payment instanceof CartaoPayment && paymentRequest.getIsOnlinePayment()) {
+            CreditCard creditCard = this.creditCardRepository.findById(paymentRequest.getCreditCardId())
+                .orElseThrow(() -> new ResourceNotFoundException("Credit Card", paymentRequest.getCreditCardId()));
+            ((CartaoPayment)payment).setCreditCardId(creditCard.getId());
+            ((CartaoPayment)payment).setCardHolderName(creditCard.getHolderName());
+            ((CartaoPayment)payment).setLastFourDigits(creditCard.getCardNumber().substring(creditCard.getCardNumber().length() - 4));
+            ((CartaoPayment)payment).setBrand(creditCard.getBrand());
+            ((CartaoPayment)payment).setExpirationDate(creditCard.getExpirationDate());
         }
     }
 
@@ -136,16 +163,30 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void updateBookingPaymentIfNeeded(Booking entity, BookingRequestDTO request) {
-        if (request.getPayment() != null) {
-            if (!((Integer) entity.getPayment().getPaymentType().getPaymentType()).equals(request.getPayment().getPaymentType())) {
-                Payment oldPayment = this.paymentRepository.findById(entity.getPayment().getId()).get();
-                entity.setPayment(null);
-                paymentRepository.delete(oldPayment);
-                Payment newPayment = this.getBookingPayment(request.getPayment().getPaymentType(), entity.getTotalPrice(), request.getPayment().getInstallmentQuantity());
-                newPayment = this.paymentRepository.save(newPayment);
-                entity.setPayment(newPayment);
+        if (request.getPayment() == null) return;
+        this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndWithCreditCard(request.getPayment());
+        if (entity.getPayment() instanceof CartaoPayment && request.getPayment().getIsOnlinePayment() && request.getPayment().getPaymentType() == 2) {
+            if (((CartaoPayment) entity.getPayment()).getCreditCardId() == null || !((CartaoPayment) entity.getPayment()).getCreditCardId().equals(request.getPayment().getCreditCardId())) {
+                this.updateBookingPayment(entity, request);
             }
-        } 
+        }
+        if (entity.getPayment() instanceof CartaoPayment && !request.getPayment().getIsOnlinePayment() && request.getPayment().getPaymentType() == 2) {
+            this.updateBookingPayment(entity, request);
+        }
+        if (!((Integer) entity.getPayment().getPaymentType().getPaymentType()).equals(request.getPayment().getPaymentType())) {
+            this.updateBookingPayment(entity, request);
+        }
+    }
+
+    private void updateBookingPayment(Booking entity, BookingRequestDTO request) {
+        Payment oldPayment = this.paymentRepository.findById(entity.getPayment().getId()).get();
+        entity.setPayment(null);
+        paymentRepository.delete(oldPayment);
+        Payment newPayment = this.getBookingPayment(request.getPayment().getPaymentType(), entity.getTotalPrice(), 
+            request.getPayment().getInstallmentQuantity(), request.getPayment().getIsOnlinePayment());
+        this.setCartaoPaymentDataWhenPaymentIsOnlineAndWithCreditCard(newPayment, request.getPayment());
+        newPayment = this.paymentRepository.save(newPayment);
+        entity.setPayment(newPayment);
     }
 
     @Override

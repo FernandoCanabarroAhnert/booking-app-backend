@@ -3,9 +3,9 @@ package com.fernandocanabarro.booking_app_backend.services;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.AdminCreateUserRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.AdminUpdateUserRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminCreateUserRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminUpdateUserRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserResponseDTO;
 
 public interface UserService {
 

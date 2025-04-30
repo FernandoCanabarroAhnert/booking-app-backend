@@ -22,8 +22,8 @@ public class BoletoPayment extends Payment {
 
     private LocalDate expirationDate;
 
-    public BoletoPayment(BigDecimal amount) {
-        super(PaymentTypeEnum.BOLETO, amount);
+    public BoletoPayment(BigDecimal amount, boolean isOnlinePayment) {
+        super(PaymentTypeEnum.BOLETO, amount, isOnlinePayment);
         this.expirationDate = LocalDate.now().plusDays(30);
     }
 

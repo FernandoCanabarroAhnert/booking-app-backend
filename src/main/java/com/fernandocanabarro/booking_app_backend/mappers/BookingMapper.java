@@ -2,10 +2,10 @@ package com.fernandocanabarro.booking_app_backend.mappers;
 
 import java.time.LocalDateTime;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.BookingDetailResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.BookingPaymentResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.BookingRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingPaymentResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Booking;
 import com.fernandocanabarro.booking_app_backend.models.entities.CartaoPayment;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
@@ -54,6 +54,7 @@ public class BookingMapper {
         response.setRoom(RoomMapper.convertEntityToResponse(entity.getRoom()));
         response.setPayment(new BookingPaymentResponseDTO(
             entity.getPayment().getPaymentType().getPaymentType(),
+            entity.getPayment().isOnlinePayment(),
             entity.getPayment() instanceof CartaoPayment
                     ? ((CartaoPayment) entity.getPayment()).getInstallmentQuantity()
                     : null

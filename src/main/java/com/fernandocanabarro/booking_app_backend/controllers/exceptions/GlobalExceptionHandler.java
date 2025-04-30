@@ -16,6 +16,7 @@ import com.fernandocanabarro.booking_app_backend.services.exceptions.EmailExcept
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ImageGeneratingException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidCurrentPasswordException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredCreditCardIdException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredWorkingHotelIdException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RoomIsUnavailableForBookingException;
@@ -28,6 +29,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailException.class)
     public ResponseEntity<StandardError> email(EmailException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        StandardError error = new StandardError(Instant.now(), status.value(), "Bad Request", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(RequiredCreditCardIdException.class)
+    public ResponseEntity<StandardError> requiredCreditCardId(RequiredCreditCardIdException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         StandardError error = new StandardError(Instant.now(), status.value(), "Bad Request", ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(error);

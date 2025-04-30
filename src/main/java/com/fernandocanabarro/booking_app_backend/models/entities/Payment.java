@@ -33,14 +33,17 @@ public abstract class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private boolean isOnlinePayment;
+
     @Enumerated(EnumType.STRING)
     private PaymentTypeEnum paymentType;
 
     private BigDecimal amount;
 
-    public Payment(PaymentTypeEnum paymentType, BigDecimal amount) {
+    public Payment(PaymentTypeEnum paymentType, BigDecimal amount, boolean isOnlinePayment) {
         this.paymentType = paymentType;
         this.amount = amount;
+        this.isOnlinePayment = isOnlinePayment;
     }
 
 }

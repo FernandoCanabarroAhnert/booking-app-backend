@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseUserProperties;
 import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseUserPropertiesWithPassword;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;

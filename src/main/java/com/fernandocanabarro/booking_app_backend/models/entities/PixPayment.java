@@ -13,8 +13,8 @@ public class PixPayment extends Payment {
 
     public PixPayment() {}
 
-    public PixPayment(BigDecimal amount) {
-        super(PaymentTypeEnum.PIX, amount);
+    public PixPayment(BigDecimal amount, boolean isOnlinePayment) {
+        super(PaymentTypeEnum.PIX, amount, isOnlinePayment);
     }
 
 }

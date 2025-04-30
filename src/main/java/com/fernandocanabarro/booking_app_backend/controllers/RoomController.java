@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.BookingResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.RoomDetailResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.RoomRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.RoomResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.RoomService;
 

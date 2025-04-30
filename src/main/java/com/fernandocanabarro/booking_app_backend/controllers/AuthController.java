@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fernandocanabarro.booking_app_backend.models.dtos.LoginRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.LoginResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.NewPasswordRequestoDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.PasswordRecoverRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.RegistrationRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdateInfosRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.UserSelfUpdatePasswordRequestDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.AlreadyExistsResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.LoginRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.LoginResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.NewPasswordRequestoDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.PasswordRecoverRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.RegistrationRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdateInfosRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdatePasswordRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AlreadyExistsResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
