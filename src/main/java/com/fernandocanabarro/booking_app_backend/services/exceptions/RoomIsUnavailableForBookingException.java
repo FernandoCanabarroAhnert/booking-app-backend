@@ -12,4 +12,8 @@ public class RoomIsUnavailableForBookingException extends RuntimeException {
             checkOut.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
     }
 
+    public RoomIsUnavailableForBookingException(String message) {
+        super(message);
+    }
+
 }

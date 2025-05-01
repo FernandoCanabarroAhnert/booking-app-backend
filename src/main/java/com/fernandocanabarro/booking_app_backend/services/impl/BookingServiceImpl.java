@@ -28,6 +28,7 @@ import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidPaymentException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredCreditCardIdException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RoomIsUnavailableForBookingException;
@@ -68,6 +69,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public void create(BookingRequestDTO request, boolean isSelfBooking) {
+        this.validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(request.getPayment());
         this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndWithCreditCard(request.getPayment());
         Room room = this.roomRepository.findById(request.getRoomId())
             .orElseThrow(() -> new ResourceNotFoundException("Room", request.getRoomId()));
@@ -82,6 +84,12 @@ public class BookingServiceImpl implements BookingService {
         this.bookingRepository.save(entity);
     }
 
+    private void validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(BookingPaymentRequestDTO payment) {
+        if (payment.getPaymentType() == 1 && payment.getIsOnlinePayment()) {
+            throw new InvalidPaymentException("Dinheiro payment cannot be online.");
+        }
+    }
+
     private void validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndWithCreditCard(BookingPaymentRequestDTO payment) {
         if (payment.getIsOnlinePayment() && payment.getPaymentType() == 2  && payment.getCreditCardId() == null) {
             throw new RequiredCreditCardIdException();
@@ -91,6 +99,9 @@ public class BookingServiceImpl implements BookingService {
     private void validateRoomAvailability(BookingRequestDTO request, Room room, Long bookingIdToIgnore) {
         if (!room.isAvalableToBook(request.getCheckIn(), request.getCheckOut(), bookingIdToIgnore)) {
             throw new RoomIsUnavailableForBookingException(room.getId(), request.getCheckIn(), request.getCheckOut());
+        }
+        if (request.getCheckOut().isBefore(request.getCheckIn())) {
+            throw new RoomIsUnavailableForBookingException("Check-out date cannot be before check-in date.");
         }
     }
 
@@ -130,6 +141,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public void update(Long id, BookingRequestDTO request, boolean isSelfBooking) {
+        this.validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(request.getPayment());
         User user = this.getUserForBookingLogic(isSelfBooking, request);
         Booking entity = this.bookingRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Booking", id));

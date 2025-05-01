@@ -14,7 +14,8 @@ public class HotelMapper {
         return Hotel.builder()
             .name(request.getName())
             .roomQuantity(request.getRoomQuantity())
-            .address(request.getAddress())
+            .street(request.getStreet())
+            .number(request.getNumber())
             .city(request.getCity())
             .zipCode(request.getZipCode())
             .state(request.getState())
@@ -28,7 +29,8 @@ public class HotelMapper {
     public static void updateEntity(Hotel hotel, HotelRequestDTO request) {
         hotel.setName(request.getName());
         hotel.setRoomQuantity(request.getRoomQuantity());
-        hotel.setAddress(request.getAddress());
+        hotel.setStreet(request.getStreet());
+        hotel.setNumber(request.getNumber());
         hotel.setCity(request.getCity());
         hotel.setZipCode(request.getZipCode());
         hotel.setState(request.getState());
@@ -40,7 +42,8 @@ public class HotelMapper {
         response.setId(entity.getId());
         response.setName(entity.getName());
         response.setRoomQuantity(entity.getRoomQuantity());
-        response.setAddress(entity.getAddress());
+        response.setStreet(entity.getStreet());
+        response.setNumber(entity.getNumber());
         response.setCity(entity.getCity());
         response.setZipCode(entity.getZipCode());
         response.setState(entity.getState());
@@ -54,7 +57,8 @@ public class HotelMapper {
         response.setId(entity.getId());
         response.setName(entity.getName());
         response.setRoomQuantity(entity.getRoomQuantity());
-        response.setAddress(entity.getAddress());
+        response.setStreet(entity.getStreet());
+        response.setNumber(entity.getNumber());
         response.setCity(entity.getCity());
         response.setZipCode(entity.getZipCode());
         response.setState(entity.getState());

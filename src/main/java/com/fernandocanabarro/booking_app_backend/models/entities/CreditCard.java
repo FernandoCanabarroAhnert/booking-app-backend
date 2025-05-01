@@ -37,7 +37,7 @@ public class CreditCard {
     private String cardNumber;
     @Enumerated(EnumType.STRING)
     private CreditCardBrandEnum brand;
-    private Integer cvv;
+    private String cvv;
     private LocalDate expirationDate;
     @ManyToOne
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_credit_card_user", value = ConstraintMode.CONSTRAINT))

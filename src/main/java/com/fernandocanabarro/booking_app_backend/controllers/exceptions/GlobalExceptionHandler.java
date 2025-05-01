@@ -16,6 +16,7 @@ import com.fernandocanabarro.booking_app_backend.services.exceptions.EmailExcept
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ImageGeneratingException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidCurrentPasswordException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidPaymentException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredCreditCardIdException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredWorkingHotelIdException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
@@ -27,74 +28,44 @@ import jakarta.servlet.http.HttpServletRequest;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(EmailException.class)
-    public ResponseEntity<StandardError> email(EmailException ex, HttpServletRequest request) {
+    @ExceptionHandler({
+        EmailException.class,
+        RequiredCreditCardIdException.class,
+        ImageGeneratingException.class,
+        RequiredWorkingHotelIdException.class,
+        InvalidPaymentException.class
+    })
+    public ResponseEntity<StandardError> badRequest(RuntimeException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
-        StandardError error = new StandardError(Instant.now(), status.value(), "Bad Request", ex.getMessage(), request.getRequestURI());
-        return ResponseEntity.status(status).body(error);
-    }
-
-    @ExceptionHandler(RequiredCreditCardIdException.class)
-    public ResponseEntity<StandardError> requiredCreditCardId(RequiredCreditCardIdException ex, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        StandardError error = new StandardError(Instant.now(), status.value(), "Bad Request", ex.getMessage(), request.getRequestURI());
-        return ResponseEntity.status(status).body(error);
-    }
-
-    @ExceptionHandler(ImageGeneratingException.class)
-    public ResponseEntity<StandardError> imageGenerating(ImageGeneratingException ex, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        StandardError error = new StandardError(Instant.now(), status.value(), "Bad Request", ex.getMessage(), request.getRequestURI());
-        return ResponseEntity.status(status).body(error);
-    }
-
-    @ExceptionHandler(RequiredWorkingHotelIdException.class)
-    public ResponseEntity<StandardError> requiredWorkingHotelId(RequiredWorkingHotelIdException ex, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        StandardError error = new StandardError(Instant.now(), status.value(), "Bad Request", ex.getMessage(), request.getRequestURI());
-        return ResponseEntity.status(status).body(error);
+        return this.buildStandardError(status, "Bad Request", ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<StandardError> uanuthorized(UnauthorizedException ex, HttpServletRequest request) {
+    public ResponseEntity<StandardError> unauthorized(UnauthorizedException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
-        StandardError error = new StandardError(Instant.now(), status.value(), "Unauthorized", ex.getMessage(), request.getRequestURI());
-        return ResponseEntity.status(status).body(error);
+        return this.buildStandardError(status, "Unauthorized", ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<StandardError> forbidden(ForbiddenException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.FORBIDDEN;
-        StandardError error = new StandardError(Instant.now(), status.value(), "Forbidden", ex.getMessage(), request.getRequestURI());
-        return ResponseEntity.status(status).body(error);
+        return this.buildStandardError(status, "Forbidden", ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<StandardError> notFound(ResourceNotFoundException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.NOT_FOUND;
-        StandardError error = new StandardError(Instant.now(), status.value(), "Not Found", ex.getMessage(), request.getRequestURI());
-        return ResponseEntity.status(status).body(error);
+        return this.buildStandardError(status, "Not Found", ex.getMessage(), request.getRequestURI());
     }
 
-    @ExceptionHandler(RoomIsUnavailableForBookingException.class)
-    public ResponseEntity<StandardError> roomIsUnavailableForBookingException(RoomIsUnavailableForBookingException ex, HttpServletRequest request) {
+    @ExceptionHandler({
+        RoomIsUnavailableForBookingException.class,
+        AlreadyExistingPropertyException.class,
+        InvalidCurrentPasswordException.class
+    })
+    public ResponseEntity<StandardError> conflict(RuntimeException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.CONFLICT;
-        StandardError error = new StandardError(Instant.now(), status.value(), "Conflict", ex.getMessage(), request.getRequestURI());
-        return ResponseEntity.status(status).body(error);
-    }
-
-    @ExceptionHandler(AlreadyExistingPropertyException.class)
-    public ResponseEntity<StandardError> alreadyExistingProperty(AlreadyExistingPropertyException ex, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.CONFLICT;
-        StandardError error = new StandardError(Instant.now(), status.value(), "Conflict", ex.getMessage(), request.getRequestURI());
-        return ResponseEntity.status(status).body(error);
-    }
-
-    @ExceptionHandler(InvalidCurrentPasswordException.class)
-    public ResponseEntity<StandardError> invalidCurrentPassword(InvalidCurrentPasswordException ex, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.CONFLICT;
-        StandardError error = new StandardError(Instant.now(), status.value(), "Conflict", ex.getMessage(), request.getRequestURI());
-        return ResponseEntity.status(status).body(error);
+        return this.buildStandardError(status, "Conflict", ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -104,6 +75,11 @@ public class GlobalExceptionHandler {
         for (FieldError f : ex.getBindingResult().getFieldErrors()) {
             error.addError(f.getField(), f.getDefaultMessage());
         }
+        return ResponseEntity.status(status).body(error);
+    }
+
+    private ResponseEntity<StandardError> buildStandardError(HttpStatus status, String title, String message, String path) {
+        StandardError error = new StandardError(Instant.now(), status.value(), title, message, path);
         return ResponseEntity.status(status).body(error);
     }
 

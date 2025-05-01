@@ -17,6 +17,7 @@ public class CreditCardMapper {
                 .holderName(request.getHolderName())
                 .cardNumber(request.getCardNumber())
                 .brand(CreditCardBrandEnum.fromValue(request.getBrand()))
+                .cvv(request.getCvv())
                 .expirationDate(LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), 1))
                 .user(user)
                 .build();

@@ -17,11 +17,11 @@ public interface AuthService {
     LoginResponseDTO login(LoginRequestDTO request);
     void register(RegistrationRequestDTO request);
     User getConnectedUser();
-    void verifyToken(HttpServletRequest request);
+    void validateJWTToken(HttpServletRequest request);
     void userSelfUpdateInfos(UserSelfUpdateInfosRequestDTO request);
     void userSelfUpdatePassword(UserSelfUpdatePasswordRequestDTO request);
-    void sendPasswordRecoverEmail(PasswordRecoverRequestDTO request);
-    void setNewPasswordFromPasswordRecover(NewPasswordRequestoDTO request);
+    void sendPasswordRecoverRequestEmail(PasswordRecoverRequestDTO request);
+    void setNewPasswordFromPasswordRecoverRequest(NewPasswordRequestoDTO request);
     AlreadyExistsResponseDTO verifyIfUserExistsByEmail(String email);
     AlreadyExistsResponseDTO verifyIfUserExistsByCpf(String cpf);
     void verifyIfConnectedUserHasAdminPermission(Long id);

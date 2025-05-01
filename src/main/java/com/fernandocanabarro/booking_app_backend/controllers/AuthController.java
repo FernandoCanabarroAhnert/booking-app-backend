@@ -42,36 +42,36 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
-    @GetMapping("/verify-token")
+    @GetMapping("/token/validate")
     @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<Void> verifyToken(HttpServletRequest request) {
-        authService.verifyToken(request);
+    public ResponseEntity<Void> validateJWTToken(HttpServletRequest request) {
+        authService.validateJWTToken(request);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/update-infos")
+    @PutMapping("/profile")
     @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Void> userSelfUpdateInfos(@Valid @RequestBody UserSelfUpdateInfosRequestDTO request) {
         authService.userSelfUpdateInfos(request);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/update-password")
+    @PutMapping("/profile/password")
     @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Void> userSelfUpdatePassword(@Valid @RequestBody UserSelfUpdatePasswordRequestDTO request) {
         authService.userSelfUpdatePassword(request);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/password-recover")
-    public ResponseEntity<Void> sendPasswordRecoverEmail(@RequestBody PasswordRecoverRequestDTO request) {
-        authService.sendPasswordRecoverEmail(request);
+    @PostMapping("/password/reset-request")
+    public ResponseEntity<Void> sendPasswordRecoverRequestEmail(@RequestBody PasswordRecoverRequestDTO request) {
+        authService.sendPasswordRecoverRequestEmail(request);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/new-password")
-    public ResponseEntity<Void> setNewPasswordFromPasswordRecover(@RequestBody @Valid NewPasswordRequestoDTO request) {
-        authService.setNewPasswordFromPasswordRecover(request);
+    @PutMapping("/password/reset")
+    public ResponseEntity<Void> setNewPasswordFromPasswordRecoverRequest(@RequestBody @Valid NewPasswordRequestoDTO request) {
+        authService.setNewPasswordFromPasswordRecoverRequest(request);
         return ResponseEntity.ok().build();
     }
 

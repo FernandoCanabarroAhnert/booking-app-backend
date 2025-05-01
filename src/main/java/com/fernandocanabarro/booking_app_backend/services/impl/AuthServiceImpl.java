@@ -103,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void verifyToken(HttpServletRequest request) {
+    public void validateJWTToken(HttpServletRequest request) {
         String token = request.getHeader("Authorization").split(" ")[1];
         if (token == null || token.isEmpty()) {
             throw new UnauthorizedException("Token not provided");
@@ -146,7 +146,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void sendPasswordRecoverEmail(PasswordRecoverRequestDTO request) {
+    public void sendPasswordRecoverRequestEmail(PasswordRecoverRequestDTO request) {
         User user = this.userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User with " + request.getEmail() + "email not found"));
         String code = this.generateCode();
@@ -176,7 +176,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void setNewPasswordFromPasswordRecover(NewPasswordRequestoDTO request) {
+    public void setNewPasswordFromPasswordRecoverRequest(NewPasswordRequestoDTO request) {
         Optional<PasswordRecover> passwordRecover = this.passwordRecoverRepository.findByCode(request.getCode());
         if (passwordRecover.isEmpty()) {
             throw new ResourceNotFoundException("Password recover  with code " + request.getCode() + " not found");
