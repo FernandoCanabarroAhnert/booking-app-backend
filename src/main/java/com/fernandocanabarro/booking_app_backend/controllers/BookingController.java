@@ -1,5 +1,9 @@
 package com.fernandocanabarro.booking_app_backend.controllers;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.AdminBookingRequestDTO;
@@ -18,7 +23,10 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDeta
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
+import com.fernandocanabarro.booking_app_backend.services.jasper.JasperService;
+import com.fernandocanabarro.booking_app_backend.utils.DateUtils;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final JasperService jasperService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
@@ -82,4 +91,61 @@ public class BookingController {
         return ResponseEntity.ok(this.bookingService.findAllBookingsByUser(null, pageable, true));
     }
 
+    @GetMapping("/pdf")
+    public void exportToPdf(HttpServletResponse response,
+                        @RequestParam(required = false) BigDecimal minAmount,
+                        @RequestParam(required = false) BigDecimal maxAmount,
+                        @RequestParam(required = false) Long hotelId,
+                        @RequestParam(required = false) Long roomId,
+                        @RequestParam(required = false) Long userId,
+                        @RequestParam(required = false) String minCheckInDate,
+                        @RequestParam(required = false) String maxCheckOutDate,
+                        @RequestParam(required = false) String dinheiro,
+                        @RequestParam(required = false) String cartao,
+                        @RequestParam(required = false) String pix,
+                        @RequestParam(required = false) String boleto
+                        ){
+        response.setContentType("application/pdf");
+        String headerKey = "Content-Disposition";
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
+        String fileName = "bookings_" + currentDateTime + ".pdf";
+        String headerValue = "inline; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+        jasperService.addParams("MIN_AMOUNT", minAmount);
+        jasperService.addParams("MAX_AMOUNT", maxAmount);
+        jasperService.addParams("HOTEL_ID", hotelId);
+        jasperService.addParams("ROOM_ID", roomId);
+        jasperService.addParams("USER_ID", userId);
+        jasperService.addParams("MIN_CHECK_IN_DATE", DateUtils.convertStringParamToDate(minCheckInDate));
+        jasperService.addParams("MAX_CHECK_OUT_DATE", DateUtils.convertStringParamToDate(maxCheckOutDate));
+        jasperService.addParams("DINHEIRO_PAYMENT", dinheiro);
+        jasperService.addParams("CARTAO_PAYMENT", cartao);
+        jasperService.addParams("PIX_PAYMENT", pix);
+        jasperService.addParams("BOLETO_PAYMENT", boleto);
+        jasperService.exportToPdf(response, JasperService.BOOKINGS);
+    }
+
+    @GetMapping("/{id}/pdf")
+    public void exportBookingSummaryToPdf(HttpServletResponse response, @PathVariable Long id) {
+        response.setContentType("application/pdf");
+        String headerKey = "Content-Disposition";
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
+        String fileName = "booking_" + id + currentDateTime + ".pdf";
+        String headerValue = "inline; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+        jasperService.addParams("BOOKING_ID", id);
+        jasperService.exportToPdf(response, JasperService.BOOKING_SUMMARY);
+    }
+
+    @GetMapping("/{id}/boleto/pdf")
+    public void exportBoletoToPdf(HttpServletResponse response, @PathVariable Long id) {
+        response.setContentType("application/pdf");
+        String headerKey = "Content-Disposition";
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
+        String fileName = "boleto_" + id + currentDateTime + ".pdf";
+        String headerValue = "inline; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+        jasperService.addParams("BOOKING_ID", id);
+        jasperService.exportToPdf(response, JasperService.BOLETO);
+    }
 }

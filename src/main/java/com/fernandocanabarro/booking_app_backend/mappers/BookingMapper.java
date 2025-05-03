@@ -27,6 +27,7 @@ public class BookingMapper {
     public static void updateEntity(Booking entity, BookingRequestDTO request) {
         entity.setCheckIn(request.getCheckIn());
         entity.setCheckOut(request.getCheckOut());
+        entity.setFinished(request.getIsFinished());
     }
 
     public static BookingResponseDTO convertEntityToResponse(Booking entity) {

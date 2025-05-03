@@ -46,19 +46,15 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public Mail createEmail(String fullName, String emailTo, String code) {
-        Map<String, Object> variables = Map.of(
-            "username", fullName,
-            "code", code
-        );
+    public Mail createEmail(String emailTo, String subject, Map<String, Object> variables, String templateName) {
         Context context = new Context();
         context.setVariables(variables);
-        String content = templateEngine.process("password-recover-email", context);
+        String content = templateEngine.process(templateName, context);
         Content emailContent = new Content("text/html", content);
 
         Email to = new Email(emailTo);
         Email from = new Email(EMAIL_FROM);
-        return new Mail(from, "Recuperação de Senha", to, emailContent);
+        return new Mail(from, subject, to, emailContent);
     }
 
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recuperação de Senha</title>
+    <title></title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,32 +19,38 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .code {
-            font-size: 36px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
         .link {
             display: block;
+            position: relative;
             text-align: center;
             margin-top: 20px;
             display: inline-block;
             padding: 10px 20px;
-            background-color: #FF6767;
+            background-color: #698167;
             color: #fff;
             text-decoration: none;
             border-radius: 5px;
             cursor: pointer;
+            border: none;
+        }
+        .link:active {
+            bottom: -2px;
+        }
+        .link a {
+            font-size: 1rem;
+            color: #fff;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>Ativaçao de Conta</h1>
+    <h1 th:text="${titleText}"></h1>
     <p class="greeting" th:text="'Olá ' + ${username} + ','"></p>
-    <p>Obrigado por se registrar! Por favor, utilize o código de ativação a seguir para ativar sua conta:</p>
-    <div class="code"><span th:text="${code}"></span></div>
-    <a class="link" href="https://app.fernandocanabarrodev.tech/activate-account" target="_blank">Ativar sua conta</a>
+    <p th:text="${bodyText}"></p>
+    <button class="link">
+        <a th:href="${link}" target="_blank">Abrir PDF</a>
+    </button>
 </div>
 </body>
 </html>

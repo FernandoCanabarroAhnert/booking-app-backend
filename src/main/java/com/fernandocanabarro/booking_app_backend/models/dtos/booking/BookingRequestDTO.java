@@ -28,4 +28,5 @@ public class BookingRequestDTO {
     @Valid
     @NotNull(message = "Required field")
     private BookingPaymentRequestDTO payment;
+    private Boolean isFinished;
 }

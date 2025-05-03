@@ -27,20 +27,20 @@ public class CreditCardController {
     private final CreditCardService creditCardService;
 
     @GetMapping("/my-credit-cards")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_OPERATOR','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Page<CreditCardResponseDTO>> getConnectedUserCreditCards(Pageable pageable) {
         return ResponseEntity.ok(this.creditCardService.getConnectedUserCreditCards(pageable));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_OPERATOR','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Void> addCreditCard(@Valid @RequestBody CreditCardRequestDTO request) {
         this.creditCardService.addCreditCard(request);
         return ResponseEntity.status(201).build();
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_OPERATOR','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Void> deleteCreditCard(@PathVariable Long id) {
         this.creditCardService.deleteCreditCard(id);
         return ResponseEntity.noContent().build();

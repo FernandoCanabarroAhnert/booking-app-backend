@@ -1,6 +1,8 @@
 package com.fernandocanabarro.booking_app_backend.controllers;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -24,7 +26,9 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomRequestDTO
 import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.RoomService;
+import com.fernandocanabarro.booking_app_backend.services.jasper.JasperService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -35,6 +39,7 @@ public class RoomController {
 
     private final RoomService RoomService;
     private final BookingService bookingService;
+    private final JasperService jasperService;
 
     @GetMapping
     public ResponseEntity<Page<RoomResponseDTO>> findAll(Pageable pageable) {
@@ -80,5 +85,27 @@ public class RoomController {
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Page<BookingResponseDTO>> findAllBookingsByRoom(@PathVariable Long id, Pageable pageable) {
         return ResponseEntity.ok(this.bookingService.findAllBookingsByRoom(id, pageable));
+    }
+
+    @GetMapping("/pdf")
+    public void exportToPdf(HttpServletResponse response) {
+        response.setContentType("application/pdf");
+        String headerKey = "Content-Disposition";
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
+        String fileName = "rooms_" + currentDateTime + ".pdf";
+        String headerValue = "inline; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+        jasperService.exportToPdf(response, JasperService.ROOMS);
+    }
+
+    @GetMapping("/pdf/group-by-hotel")
+    public void exportToPdfGroupByHotel(HttpServletResponse response) {
+        response.setContentType("application/pdf");
+        String headerKey = "Content-Disposition";
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
+        String fileName = "rooms-group-by-hotel_" + currentDateTime + ".pdf";
+        String headerValue = "inline; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+        jasperService.exportToPdf(response, JasperService.ROOMS_GROUP_BY_HOTEL);
     }
 }

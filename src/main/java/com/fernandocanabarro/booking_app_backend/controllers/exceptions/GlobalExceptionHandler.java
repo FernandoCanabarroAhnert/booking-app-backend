@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.fernandocanabarro.booking_app_backend.models.dtos.exceptions.StandardError;
 import com.fernandocanabarro.booking_app_backend.models.dtos.exceptions.ValidationError;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.AlreadyExistingPropertyException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.BadRequestException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.EmailException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ImageGeneratingException;
@@ -33,7 +34,8 @@ public class GlobalExceptionHandler {
         RequiredCreditCardIdException.class,
         ImageGeneratingException.class,
         RequiredWorkingHotelIdException.class,
-        InvalidPaymentException.class
+        InvalidPaymentException.class,
+        BadRequestException.class
     })
     public ResponseEntity<StandardError> badRequest(RuntimeException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;

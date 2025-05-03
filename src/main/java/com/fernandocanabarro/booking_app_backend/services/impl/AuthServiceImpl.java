@@ -3,6 +3,7 @@ package com.fernandocanabarro.booking_app_backend.services.impl;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -159,7 +160,12 @@ public class AuthServiceImpl implements AuthService {
             .usedAt(null)
             .build();
         passwordRecoverRepository.save(passwordRecover);
-        Mail mail = this.emailService.createEmail(user.getFullName(), user.getEmail(), code);
+        Map<String, Object> variables = Map.of(
+            "username", user.getFullName(),
+            "code", code
+        );
+        Mail mail = this.emailService.createEmail(user.getEmail(), 
+            "Recuperação de Senha", variables, "password-recover-email");
         this.emailService.sendEmail(mail);
     }
 

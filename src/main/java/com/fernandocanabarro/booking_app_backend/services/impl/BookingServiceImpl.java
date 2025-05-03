@@ -14,6 +14,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDeta
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingPaymentRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.entities.BoletoPayment;
 import com.fernandocanabarro.booking_app_backend.models.entities.Booking;
 import com.fernandocanabarro.booking_app_backend.models.entities.CartaoPayment;
 import com.fernandocanabarro.booking_app_backend.models.entities.CreditCard;
@@ -27,6 +28,7 @@ import com.fernandocanabarro.booking_app_backend.repositories.PaymentRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
+import com.fernandocanabarro.booking_app_backend.services.EmailService;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidPaymentException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredCreditCardIdException;
@@ -37,6 +39,7 @@ import com.fernandocanabarro.booking_app_backend.services.strategy.CartaoPayment
 import com.fernandocanabarro.booking_app_backend.services.strategy.DinheiroPaymentStrategy;
 import com.fernandocanabarro.booking_app_backend.services.strategy.PaymentStrategy;
 import com.fernandocanabarro.booking_app_backend.services.strategy.PixPaymentStrategy;
+import com.sendgrid.helpers.mail.Mail;
 
 import lombok.RequiredArgsConstructor;
 
@@ -50,6 +53,7 @@ public class BookingServiceImpl implements BookingService {
     private final PaymentRepository paymentRepository;
     private final CreditCardRepository creditCardRepository;
     private final AuthService authService;
+    private final EmailService emailService;
     
     @Override
     @Transactional(readOnly = true)
@@ -82,6 +86,8 @@ public class BookingServiceImpl implements BookingService {
         payment = this.paymentRepository.save(payment);
         entity.setPayment(payment);
         this.bookingRepository.save(entity);
+        this.sendBookingSummaryEmail(entity, user);
+        this.sendBookingBoletoEmailWhenPaymentIsBoleto(entity, user, payment instanceof BoletoPayment);
     }
 
     private void validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(BookingPaymentRequestDTO payment) {
@@ -138,6 +144,39 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    private void sendBookingSummaryEmail(Booking booking, User user) {
+        Map<String, Object> variables = this.createEmailVariables(
+            "Resumo da Reserva #" + booking.getId(),
+            user.getFullName(),
+            "Sua reserva foi aprovada! Clique no botão abaixo para visualizar/imprimir o resumo da sua reserva:",
+            "http://localhost:8080/api/v1/bookings/"  + booking.getId() + "/pdf"
+        );
+        Mail mail = this.emailService.createEmail(user.getEmail(), "Resumo da Reserva", variables, "booking-email");
+        this.emailService.sendEmail(mail);
+    }
+
+    private void sendBookingBoletoEmailWhenPaymentIsBoleto(Booking booking, User user, boolean isBoletoPayment) {
+        if (isBoletoPayment) {
+            Map<String, Object> variables = this.createEmailVariables(
+                "Boleto da Reserva #" + booking.getId(),
+                user.getFullName(),
+                "O seu pagamento foi aprovado! Clique no botão abaixo para visualizar/imprimir o boleto da sua reserva:",
+                "http://localhost:8080/api/v1/bookings/"  + booking.getId() + "/boleto/pdf"
+            );
+            Mail mail = this.emailService.createEmail(user.getEmail(), "Boleto da Reserva", variables, "booking-email");
+            this.emailService.sendEmail(mail);
+        }
+    }
+
+    private Map<String, Object> createEmailVariables(String titleText, String username, String bodyText, String link) {
+        return Map.of(
+            "titleText", titleText,
+            "username", username,
+            "bodyText", bodyText,
+            "link", link
+        );
+    }
+
     @Override
     @Transactional
     public void update(Long id, BookingRequestDTO request, boolean isSelfBooking) {
@@ -177,15 +216,22 @@ public class BookingServiceImpl implements BookingService {
     private void updateBookingPaymentIfNeeded(Booking entity, BookingRequestDTO request) {
         if (request.getPayment() == null) return;
         this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndWithCreditCard(request.getPayment());
-        if (entity.getPayment() instanceof CartaoPayment && request.getPayment().getIsOnlinePayment() && request.getPayment().getPaymentType() == 2) {
-            if (((CartaoPayment) entity.getPayment()).getCreditCardId() == null || !((CartaoPayment) entity.getPayment()).getCreditCardId().equals(request.getPayment().getCreditCardId())) {
+        boolean isPaymentCartaoOnlineAndBookingEntityPaymentIsCartao = entity.getPayment() instanceof CartaoPayment
+                                    && request.getPayment().getIsOnlinePayment()
+                                    && request.getPayment().getPaymentType() == 2;
+        boolean isCreditCardIdChangedOrBookingEntityPaymentIsCartaoButNotOnline = ((CartaoPayment) entity.getPayment()).getCreditCardId() == null 
+            || !((CartaoPayment) entity.getPayment()).getCreditCardId().equals(request.getPayment().getCreditCardId());
+        boolean isCartaoPaymentNowLocalCartaoPayment = entity.getPayment() instanceof CartaoPayment && !request.getPayment().getIsOnlinePayment() && request.getPayment().getPaymentType() == 2;
+        boolean isPaymentTypeChanged = !((Integer) entity.getPayment().getPaymentType().getPaymentType()).equals(request.getPayment().getPaymentType());
+        if (isPaymentCartaoOnlineAndBookingEntityPaymentIsCartao) {
+            if (isCreditCardIdChangedOrBookingEntityPaymentIsCartaoButNotOnline) {
                 this.updateBookingPayment(entity, request);
             }
         }
-        if (entity.getPayment() instanceof CartaoPayment && !request.getPayment().getIsOnlinePayment() && request.getPayment().getPaymentType() == 2) {
+        if (isCartaoPaymentNowLocalCartaoPayment) {
             this.updateBookingPayment(entity, request);
         }
-        if (!((Integer) entity.getPayment().getPaymentType().getPaymentType()).equals(request.getPayment().getPaymentType())) {
+        if (isPaymentTypeChanged) {
             this.updateBookingPayment(entity, request);
         }
     }

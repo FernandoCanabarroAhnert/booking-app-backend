@@ -1,5 +1,8 @@
 package com.fernandocanabarro.booking_app_backend.controllers;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +22,9 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserRespo
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.UserService;
+import com.fernandocanabarro.booking_app_backend.services.jasper.JasperService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +35,7 @@ public class UserController {
 
     private final UserService userService;
     private final BookingService bookingService;
+    private final JasperService jasperService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
@@ -68,6 +74,17 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
     public Page<BookingResponseDTO> findUserBookings(@PathVariable Long id, Pageable pageable) {
         return this.bookingService.findAllBookingsByUser(id, pageable, false);
+    }
+
+    @GetMapping("/pdf")
+    public void exportToPdf(HttpServletResponse response) {
+        response.setContentType("application/pdf");
+        String headerKey = "Content-Disposition";
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
+        String fileName = "users_" + currentDateTime + ".pdf";
+        String headerValue = "inline; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+        jasperService.exportToPdf(response, JasperService.USERS);
     }
 
     
