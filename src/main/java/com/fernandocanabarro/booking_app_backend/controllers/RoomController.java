@@ -26,6 +26,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomRequestDTO
 import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.RoomService;
+import com.fernandocanabarro.booking_app_backend.services.excel.RoomsExcelExporter;
 import com.fernandocanabarro.booking_app_backend.services.jasper.JasperService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,31 +38,31 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RoomController {
 
-    private final RoomService RoomService;
+    private final RoomService roomService;
     private final BookingService bookingService;
     private final JasperService jasperService;
 
     @GetMapping
     public ResponseEntity<Page<RoomResponseDTO>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(this.RoomService.findAll(pageable));
+        return ResponseEntity.ok(this.roomService.findAllPageable(pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RoomDetailResponseDTO> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(this.RoomService.findById(id));
+        return ResponseEntity.ok(this.roomService.findById(id));
     }
 
     @GetMapping("/{id}/unavailable-days")
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<List<LocalDate>> getUnavailableDatesFromRoomByRoomId(@PathVariable Long id) {
-        return ResponseEntity.ok(this.RoomService.getUnavailableDatesFromRoomByRoomId(id));
+        return ResponseEntity.ok(this.roomService.getUnavailableDatesFromRoomByRoomId(id));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Void> create(@Valid @RequestPart("request") RoomRequestDTO request,
                                        @RequestPart(value = "images") List<MultipartFile> images) {                   
-        this.RoomService.create(request, images);
+        this.roomService.create(request, images);
         return ResponseEntity.status(201).build();
     }
 
@@ -70,14 +71,14 @@ public class RoomController {
     public ResponseEntity<Void> update(@PathVariable Long id,
                                     @Valid @RequestPart("request") RoomRequestDTO request,
                                     @RequestPart(value = "images", required = false) List<MultipartFile> images) {
-        this.RoomService.update(id, request, images);
+        this.roomService.update(id, request, images);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        this.RoomService.delete(id);
+        this.roomService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -108,4 +109,18 @@ public class RoomController {
         response.setHeader(headerKey, headerValue);
         jasperService.exportToPdf(response, JasperService.ROOMS_GROUP_BY_HOTEL);
     }
+
+    @GetMapping("/excel")
+    public void exportToExcel(HttpServletResponse response) {
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
+        String fileName = "rooms_" + currentDateTime + ".xlsx";
+        String headerValue = "attachment; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+        List<RoomResponseDTO> rooms = roomService.findAll();
+        RoomsExcelExporter roomsExcelExporter = new RoomsExcelExporter(rooms);
+        roomsExcelExporter.export(response);
+    }
+
 }

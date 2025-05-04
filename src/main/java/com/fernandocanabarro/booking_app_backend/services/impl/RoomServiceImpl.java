@@ -33,10 +33,16 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
     private final ImageRepository imageRepository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RoomResponseDTO> findAll() {
+        return this.roomRepository.findAll().stream().map(RoomMapper::convertEntityToResponse).toList();
+    }
     
     @Override
     @Transactional(readOnly = true)
-    public Page<RoomResponseDTO> findAll(Pageable pageable) {
+    public Page<RoomResponseDTO> findAllPageable(Pageable pageable) {
         return this.roomRepository.findAll(pageable).map(RoomMapper::convertEntityToResponse);
     }
 

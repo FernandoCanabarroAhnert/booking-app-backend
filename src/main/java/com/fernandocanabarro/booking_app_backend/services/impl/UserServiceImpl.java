@@ -35,10 +35,16 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final HotelRepository hotelRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> adminFindAllUsers() {
+        return this.userRepository.findAll().stream().map(UserMapper::convertEntityToResponse).toList();
+    }
     
     @Override
     @Transactional(readOnly = true)
-    public Page<UserResponseDTO> adminFindAllUsers(Pageable pageable) {
+    public Page<UserResponseDTO> adminFindAllUsersPageable(Pageable pageable) {
         return this.userRepository.findAll(pageable).map(UserMapper::convertEntityToResponse);
     }
 

@@ -24,6 +24,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelRequestD
 import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.HotelService;
+import com.fernandocanabarro.booking_app_backend.services.excel.HotelExcelExporter;
 import com.fernandocanabarro.booking_app_backend.services.jasper.JasperService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,7 +41,7 @@ public class HotelController {
 
     @GetMapping
     public ResponseEntity<Page<HotelResponseDTO>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(this.hotelService.findAll(pageable));
+        return ResponseEntity.ok(this.hotelService.findAllPageable(pageable));
     }
 
     @GetMapping("/{id}/rooms")
@@ -86,6 +87,19 @@ public class HotelController {
         String headerValue = "inline; filename=" + fileName;
         response.setHeader(headerKey, headerValue);
         jasperService.exportToPdf(response, JasperService.HOTELS);
+    }
+
+    @GetMapping("/excel")
+    public void exportToExcel(HttpServletResponse response) {
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
+        String fileName = "hotels_" + currentDateTime + ".xlsx";
+        String headerValue = "attachment; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+        List<HotelResponseDTO> hotels = hotelService.findAll();
+        HotelExcelExporter hotelExcelExporter = new HotelExcelExporter(hotels);
+        hotelExcelExporter.export(response);
     }
 
 }

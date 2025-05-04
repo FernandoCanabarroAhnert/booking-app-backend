@@ -1,6 +1,7 @@
 package com.fernandocanabarro.booking_app_backend.services.impl;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -57,7 +58,13 @@ public class BookingServiceImpl implements BookingService {
     
     @Override
     @Transactional(readOnly = true)
-    public Page<BookingResponseDTO> findAll(Pageable pageable) {
+    public List<BookingDetailResponseDTO> findAllBookingsDetailed() {
+        return this.bookingRepository.findAll().stream().map(BookingMapper::convertEntityToDetailResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BookingResponseDTO> findAllPageable(Pageable pageable) {
         return this.bookingRepository.findAll(pageable).map(BookingMapper::convertEntityToResponse);
     }
 

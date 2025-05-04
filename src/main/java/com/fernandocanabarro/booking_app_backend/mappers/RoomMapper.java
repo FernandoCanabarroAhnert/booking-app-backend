@@ -45,6 +45,7 @@ public class RoomMapper {
         response.setDescription(entity.getDescription());
         response.setCapacity(entity.getCapacity());
         response.setHotelId(entity.getHotel().getId());
+        response.setHotelName(entity.getHotel().getName());
         response.setCardDisplayImage(ImageMapper.convertEntityResponseDTO(entity.getImages().get(0)));
         return response;
     }
@@ -59,6 +60,7 @@ public class RoomMapper {
         response.setDescription(entity.getDescription());
         response.setCapacity(entity.getCapacity());
         response.setHotelId(entity.getHotel().getId());
+        response.setHotelName(entity.getHotel().getName());
         response.setImages(entity.getImages().stream()
                 .map(ImageMapper::convertEntityResponseDTO)
                 .toList());

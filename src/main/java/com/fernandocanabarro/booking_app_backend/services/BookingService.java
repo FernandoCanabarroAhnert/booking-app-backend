@@ -1,5 +1,7 @@
 package com.fernandocanabarro.booking_app_backend.services;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -9,7 +11,8 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResp
 
 public interface BookingService {
 
-    Page<BookingResponseDTO> findAll(Pageable pageable);
+    List<BookingDetailResponseDTO> findAllBookingsDetailed();
+    Page<BookingResponseDTO> findAllPageable(Pageable pageable);
     BookingDetailResponseDTO findById(Long id);
     void create(BookingRequestDTO request, boolean isSelfBooking);
     void update(Long id, BookingRequestDTO request, boolean isSelfBooking);

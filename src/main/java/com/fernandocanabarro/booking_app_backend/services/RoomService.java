@@ -13,7 +13,8 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDT
 
 public interface RoomService {
 
-    Page<RoomResponseDTO> findAll(Pageable pageable);
+    List<RoomResponseDTO> findAll();
+    Page<RoomResponseDTO> findAllPageable(Pageable pageable);
     RoomDetailResponseDTO findById(Long id);
     List<LocalDate> getUnavailableDatesFromRoomByRoomId(Long id);
     void create(RoomRequestDTO request, List<MultipartFile> images);

@@ -13,7 +13,8 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDT
 
 public interface HotelService {
 
-    Page<HotelResponseDTO> findAll(Pageable pageable);
+    List<HotelResponseDTO> findAll();
+    Page<HotelResponseDTO> findAllPageable(Pageable pageable);
     Page<RoomResponseDTO> findRoomsByHotelId(Long hotelId, Pageable pageable);
     HotelDetailResponseDTO findById(Long id);
     void create(HotelRequestDTO request, List<MultipartFile> images);

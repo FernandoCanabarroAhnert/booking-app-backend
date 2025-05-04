@@ -3,6 +3,7 @@ package com.fernandocanabarro.booking_app_backend.controllers;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDeta
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
+import com.fernandocanabarro.booking_app_backend.services.excel.BookingsExcelExporter;
 import com.fernandocanabarro.booking_app_backend.services.jasper.JasperService;
 import com.fernandocanabarro.booking_app_backend.utils.DateUtils;
 
@@ -41,7 +43,7 @@ public class BookingController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Page<BookingResponseDTO>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(this.bookingService.findAll(pageable));
+        return ResponseEntity.ok(this.bookingService.findAllPageable(pageable));
     }
 
     @GetMapping("/{id}")
@@ -147,5 +149,18 @@ public class BookingController {
         response.setHeader(headerKey, headerValue);
         jasperService.addParams("BOOKING_ID", id);
         jasperService.exportToPdf(response, JasperService.BOLETO);
+    }
+
+    @GetMapping("/excel")
+    public void exportToExcel(HttpServletResponse response) {
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
+        String fileName = "bookings_" + currentDateTime + ".xlsx";
+        String headerValue = "attachment; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+        List<BookingDetailResponseDTO> bookings = this.bookingService.findAllBookingsDetailed();
+        BookingsExcelExporter bookingsExcelExporter = new BookingsExcelExporter(bookings);
+        bookingsExcelExporter.export(response);
     }
 }

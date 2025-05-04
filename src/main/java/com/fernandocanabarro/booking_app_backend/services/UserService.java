@@ -1,5 +1,7 @@
 package com.fernandocanabarro.booking_app_backend.services;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -9,7 +11,8 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserRespo
 
 public interface UserService {
 
-    Page<UserResponseDTO> adminFindAllUsers(Pageable pageable);
+    List<UserResponseDTO> adminFindAllUsers();
+    Page<UserResponseDTO> adminFindAllUsersPageable(Pageable pageable);
     UserResponseDTO adminFindUserById(Long id);
     void adminCreateUser(AdminCreateUserRequestDTO request);
     void adminUpdateUser(Long id, AdminUpdateUserRequestDTO request);

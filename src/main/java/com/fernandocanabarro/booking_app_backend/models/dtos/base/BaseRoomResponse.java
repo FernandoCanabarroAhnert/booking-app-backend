@@ -21,5 +21,5 @@ public abstract class BaseRoomResponse {
     private String description;
     private Integer capacity;
     private Long hotelId;
-
+    private String hotelName;
 }

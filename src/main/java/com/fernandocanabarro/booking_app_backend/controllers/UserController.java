@@ -2,6 +2,7 @@ package com.fernandocanabarro.booking_app_backend.controllers;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserRespo
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.UserService;
+import com.fernandocanabarro.booking_app_backend.services.excel.UsersExcelExporter;
 import com.fernandocanabarro.booking_app_backend.services.jasper.JasperService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,7 +42,7 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
     public ResponseEntity<Page<UserResponseDTO>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(this.userService.adminFindAllUsers(pageable));
+        return ResponseEntity.ok(this.userService.adminFindAllUsersPageable(pageable));
     }
 
     @GetMapping("/{id}")
@@ -87,6 +89,17 @@ public class UserController {
         jasperService.exportToPdf(response, JasperService.USERS);
     }
 
-    
+    @GetMapping("/excel")
+    public void exportToExcel(HttpServletResponse response) {
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
+        String fileName = "users_" + currentDateTime + ".xlsx";
+        String headerValue = "attachment; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+        List<UserResponseDTO> users = this.userService.adminFindAllUsers();
+        UsersExcelExporter usersExcelExporter = new UsersExcelExporter(users);
+        usersExcelExporter.export(response);
+    }
 
 }
