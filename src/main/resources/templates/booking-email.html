@@ -14,18 +14,32 @@
         .container {
             max-width: 600px;
             margin: 10px auto;
-            padding: 20px;
             background-color: #fff;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
+        .container__header {
+            background-color: #a89172;
+            padding: 2rem;
+        }
+        .container__body {
+            padding: 1.5rem;
+        }
+        .container__title {
+            font-size: 2rem;
+            text-align: center;
+            font-weight: 700;
+        }
+        .container__text {
+            font-size: 1.25rem;
+            text-align: center;
+        }
         .link {
-            display: block;
             position: relative;
             text-align: center;
             margin-top: 20px;
             display: inline-block;
-            padding: 10px 20px;
+            padding: 16px 24px;
             background-color: #698167;
             color: #fff;
             text-decoration: none;
@@ -37,20 +51,28 @@
             bottom: -2px;
         }
         .link a {
-            font-size: 1rem;
+            font-size: 1.25rem;
             color: #fff;
             text-decoration: none;
+        }
+        .greeting {
+            font-size: 1.375rem;
+            text-align: center;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1 th:text="${titleText}"></h1>
-    <p class="greeting" th:text="'Olá ' + ${username} + ','"></p>
-    <p th:text="${bodyText}"></p>
-    <button class="link">
-        <a th:href="${link}" target="_blank">Abrir PDF</a>
-    </button>
+    <div class="container__header"></div>
+    <div class="container__body">
+        <h1 class="container__title" th:text="${titleText}"></h1>
+        <p class="greeting" th:text="'Olá ' + ${username} + ','"></p>
+        <p class="container__text" th:text="${bodyText}"></p>
+        <button class="link">
+            <a th:href="${link}" target="_blank">Abrir PDF</a>
+        </button>
+    </div>
 </div>
 </body>
 </html>

@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseBookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.AdminBookingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.AdminUpdateBookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingPaymentRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
@@ -54,36 +57,50 @@ public class BookingController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<Void> adminCreate(@Valid @RequestBody AdminBookingRequestDTO request) {
-        this.bookingService.create(request, false);
-        return ResponseEntity.status(201).build();
-    }
-
-    @PostMapping("/self")
-    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<Void> create(@Valid @RequestBody BookingRequestDTO request) {
-        this.bookingService.create(request, true);
+    public ResponseEntity<Void> adminCreateBooking(@Valid @RequestBody AdminBookingRequestDTO request) {
+        this.bookingService.createBooking(request, false);
         return ResponseEntity.status(201).build();
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<Void> adminUpdate(@PathVariable Long id, @Valid @RequestBody AdminBookingRequestDTO request) {
-        this.bookingService.update(id, request, false);
+    public ResponseEntity<Void> adminUpdateBooking(@PathVariable Long id, @Valid @RequestBody AdminUpdateBookingRequestDTO request) {
+        this.bookingService.updateBooking(id, request, false);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/payment")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<Void> adminUpdateBookingPayment(@PathVariable Long id, @Valid @RequestBody BookingPaymentRequestDTO request) {
+        this.bookingService.updateBookingPayment(id, request, false);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/self")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<Void> userSelfCreateBooking(@Valid @RequestBody BookingRequestDTO request) {
+        this.bookingService.createBooking(request, true);
+        return ResponseEntity.status(201).build();
     }
 
     @PutMapping("/{id}/self")
     @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<Void> update(@PathVariable Long id, @Valid @RequestBody BookingRequestDTO request) {
-        this.bookingService.update(id, request, true);
+    public ResponseEntity<Void> userSelfUpdateBooking(@PathVariable Long id, @Valid @RequestBody BaseBookingRequestDTO request) {
+        this.bookingService.updateBooking(id, request, true);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/payment/self")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<Void> userSelfUpdateBookingPayment(@PathVariable Long id, @Valid @RequestBody BookingPaymentRequestDTO request) {
+        this.bookingService.updateBookingPayment(id, request, true);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        this.bookingService.delete(id);
+        this.bookingService.deleteBooking(id);
         return ResponseEntity.noContent().build();
     }
 

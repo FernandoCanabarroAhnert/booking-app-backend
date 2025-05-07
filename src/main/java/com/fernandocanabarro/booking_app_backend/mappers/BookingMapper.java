@@ -2,6 +2,7 @@ package com.fernandocanabarro.booking_app_backend.mappers;
 
 import java.time.LocalDateTime;
 
+import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseBookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingPaymentResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
@@ -24,10 +25,10 @@ public class BookingMapper {
                 .build();
     }
 
-    public static void updateEntity(Booking entity, BookingRequestDTO request) {
+    public static void updateEntity(Booking entity, BaseBookingRequestDTO request) {
         entity.setCheckIn(request.getCheckIn());
         entity.setCheckOut(request.getCheckOut());
-        entity.setFinished(request.getIsFinished());
+        entity.getPayment().setAmount(entity.getTotalPrice());
     }
 
     public static BookingResponseDTO convertEntityToResponse(Booking entity) {
