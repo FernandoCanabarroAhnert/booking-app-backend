@@ -118,6 +118,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void userSelfUpdateInfos(UserSelfUpdateInfosRequestDTO request) {
         User user = this.getConnectedUser();
         Optional<User> UserByEmail = this.userRepository.findByEmail(request.getEmail());
@@ -137,6 +138,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void userSelfUpdatePassword(UserSelfUpdatePasswordRequestDTO request) {
         User user = this.getConnectedUser();
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
@@ -147,6 +149,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void sendPasswordRecoverRequestEmail(PasswordRecoverRequestDTO request) {
         User user = this.userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User with " + request.getEmail() + "email not found"));
@@ -182,6 +185,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void setNewPasswordFromPasswordRecoverRequest(NewPasswordRequestoDTO request) {
         Optional<PasswordRecover> passwordRecover = this.passwordRecoverRepository.findByCode(request.getCode());
         if (passwordRecover.isEmpty()) {

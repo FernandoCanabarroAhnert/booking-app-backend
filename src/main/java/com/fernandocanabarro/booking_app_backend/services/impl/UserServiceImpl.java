@@ -3,10 +3,12 @@ package com.fernandocanabarro.booking_app_backend.services.impl;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fernandocanabarro.booking_app_backend.mappers.UserMapper;
@@ -22,6 +24,7 @@ import com.fernandocanabarro.booking_app_backend.repositories.RoleRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.UserRepository;
 import com.fernandocanabarro.booking_app_backend.services.UserService;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.AlreadyExistingPropertyException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.BadRequestException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredWorkingHotelIdException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 
@@ -146,12 +149,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.SUPPORTS)
     public void adminDeleteUser(Long id) {
         if (!this.userRepository.existsById(id)) {
             throw new ResourceNotFoundException("User", id);
         }
-        this.userRepository.deleteById(id);
+        try {
+            this.userRepository.deleteById(id);
+        }
+        catch (DataIntegrityViolationException ex) {
+            throw new BadRequestException("User can not be deleted because it has bookings associated with");
+        }
     }
 
     

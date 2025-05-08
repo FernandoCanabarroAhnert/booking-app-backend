@@ -2,9 +2,11 @@ package com.fernandocanabarro.booking_app_backend.services.impl;
 
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +23,7 @@ import com.fernandocanabarro.booking_app_backend.repositories.HotelRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.ImageRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
 import com.fernandocanabarro.booking_app_backend.services.HotelService;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.BadRequestException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.utils.FileUtils;
 
@@ -94,12 +97,17 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Long id) {
         if (!this.hotelRepository.existsById(id)) {
             throw new ResourceNotFoundException("Hotel", id);
         }
-        this.hotelRepository.deleteById(id);
+        try {
+            this.hotelRepository.deleteById(id);
+        }
+        catch (DataIntegrityViolationException e) {
+            throw new BadRequestException("Hotel cannot be deleted because it has rooms associated with it.");
+        }
     }
 
 }

@@ -1,0 +1,221 @@
+package com.fernandocanabarro.booking_app_backend.it;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
+
+import com.fernandocanabarro.booking_app_backend.factories.BookingFactory;
+import com.fernandocanabarro.booking_app_backend.factories.HotelFactory;
+import com.fernandocanabarro.booking_app_backend.factories.RoomFactory;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
+import com.fernandocanabarro.booking_app_backend.models.entities.Room;
+import com.fernandocanabarro.booking_app_backend.repositories.HotelRepository;
+import com.fernandocanabarro.booking_app_backend.repositories.ImageRepository;
+import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
+import com.fernandocanabarro.booking_app_backend.services.impl.RoomServiceImpl;
+
+@ExtendWith(MockitoExtension.class)
+public class RoomServiceTests {
+
+    @InjectMocks
+    private RoomServiceImpl roomService;
+    @Mock
+    private RoomRepository roomRepository;
+    @Mock
+    private HotelRepository hotelRepository;
+    @Mock
+    private ImageRepository imageRepository;
+
+    private Hotel hotel;
+    private Room room;
+    private MockMultipartFile mockImage;
+    private RoomRequestDTO request;
+    private Long existingId;
+    private Long nonExistingId;
+
+    @BeforeEach
+    public void setup() {
+        this.hotel = HotelFactory.createHotel();
+        this.room = RoomFactory.createRoom();
+        this.mockImage = new MockMultipartFile(
+            "image",                   
+            "imagem.jpg",           
+            "image/jpeg",        
+            "image".getBytes()
+        );
+        this.request = new RoomRequestDTO("102", 2, 2, BigDecimal.valueOf(100.0), "Description", 2, 1L);
+        this.existingId = 1L;
+        this.nonExistingId = 1000L;
+    }
+
+    @Test
+    public void findAllRoomsShouldReturnListOfRooms() {
+        when(this.roomRepository.findAll()).thenReturn(List.of(this.room));
+
+        List<RoomResponseDTO> response = this.roomService.findAll();
+
+        assertThat(response).isNotEmpty();
+        assertThat(response.get(0).getId()).isEqualTo(1L);
+        assertThat(response.get(0).getNumber()).isEqualTo("101");
+        assertThat(response.get(0).getPricePerNight()).isEqualTo(BigDecimal.valueOf(100));
+        assertThat(response.get(0).getType()).isEqualTo(1);
+    }
+
+    @Test
+    public void findAllRoomsPageableShouldReturnPageOfRooms() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Room> page = new PageImpl<>(List.of(this.room));
+
+        when(this.roomRepository.findAll(pageable)).thenReturn(page);
+
+        Page<RoomResponseDTO> response = this.roomService.findAllPageable(pageable);
+
+        assertThat(response).isNotEmpty();
+        assertThat(response.getContent().get(0).getId()).isEqualTo(1L);
+        assertThat(response.getContent().get(0).getNumber()).isEqualTo("101");
+        assertThat(response.getContent().get(0).getPricePerNight()).isEqualTo(BigDecimal.valueOf(100));
+        assertThat(response.getContent().get(0).getType()).isEqualTo(1);
+    }
+
+    @Test
+    public void findRoomByIdSHouldReturnRoomDetailResponseDTOWhenIdExists() {
+        when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
+
+        RoomDetailResponseDTO response = roomService.findById(existingId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getNumber()).isEqualTo("101");
+        assertThat(response.getPricePerNight()).isEqualTo(BigDecimal.valueOf(100));
+        assertThat(response.getType()).isEqualTo(1);
+    }
+
+    @Test
+    public void findRoomByIdShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist() {
+        when(roomRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> roomService.findById(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void getUnavailableDatesFromRoomByRoomIdShoulReturnListOfLocalDate() {
+        room.getBookings().add(BookingFactory.createBooking());
+        when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
+
+        List<LocalDate> expectedResponse = List.of(
+            LocalDate.of(2025, 7, 1),
+            LocalDate.of(2025, 7, 2),
+            LocalDate.of(2025, 7, 3),
+            LocalDate.of(2025, 7, 4),
+            LocalDate.of(2025, 7, 5),
+            LocalDate.of(2025, 7, 6),
+            LocalDate.of(2025, 7, 7)
+        );
+
+        List<LocalDate> response = roomService.getUnavailableDatesFromRoomByRoomId(existingId);
+
+        assertThat(response).isEqualTo(expectedResponse);
+    }
+
+    @Test
+    public void getUnavailableDatesFromRoomByRoomIdShoulThrowResourceNotFoundExceptionWhenIdDoesNotExist() {
+        when(roomRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> roomService.getUnavailableDatesFromRoomByRoomId(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void createShouldThrowNoExceptionWhenHotelExists() {
+        when(hotelRepository.findById(existingId)).thenReturn(Optional.of(hotel));
+        when(roomRepository.save(any(Room.class))).thenReturn(room);
+
+        assertThatCode(() -> roomService.create(request, List.of(mockImage))).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void createShouldThrowResourceNotFoundExceptionWhenHotelIdDoesNotExist() {
+        when(hotelRepository.findById(existingId)).thenReturn(Optional.empty());
+        
+        assertThatThrownBy(() -> roomService.create(request, List.of(mockImage))).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void updateShouldThrowNoExceptionWhenRoomIdExists() {
+        when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
+        when(roomRepository.save(any(Room.class))).thenReturn(room);
+
+        assertThatCode(() -> roomService.update(existingId, request, List.of(mockImage))).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void updateShouldThrowResourceNotFoundExceptionWhenRoomIdDoesNotExist() {
+        when(roomRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> roomService.update(nonExistingId, request, List.of(mockImage))).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void updateShouldThrowNoExceptionWhenHotelIdIsChangedAndHotelExists() {
+        request.setHotelId(2L);
+        when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
+        when(hotelRepository.findById(2L)).thenReturn(Optional.of(hotel));
+        when(roomRepository.save(any(Room.class))).thenReturn(room);
+
+        assertThatCode(() -> roomService.update(existingId, request, List.of(mockImage))).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void updateShouldThrowNoExceptionWhenHotelIdIsChangedButHotelDoesNotExist() {
+        request.setHotelId(2L);
+        when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
+        when(hotelRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> roomService.update(existingId, request, List.of(mockImage))).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void updateShouldThrowNoExceptionWhenImagesAreNull() {
+        when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
+        when(roomRepository.save(any(Room.class))).thenReturn(room);
+
+        assertThatCode(() -> roomService.update(existingId, request, null)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void deleteShouldThrowNoExceptionWhenIdExists() {
+        when(roomRepository.existsById(existingId)).thenReturn(true);
+
+        assertThatCode(() -> roomService.delete(existingId)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void deleteShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist() {
+        when(roomRepository.existsById(nonExistingId)).thenReturn(false);
+        
+        assertThatThrownBy(() -> roomService.delete(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+}
