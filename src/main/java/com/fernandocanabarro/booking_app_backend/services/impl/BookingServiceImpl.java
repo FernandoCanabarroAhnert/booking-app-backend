@@ -32,9 +32,9 @@ import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.EmailService;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.BadRequestException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidPaymentException;
-import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredCreditCardIdException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RoomIsUnavailableForBookingException;
 import com.fernandocanabarro.booking_app_backend.services.strategy.BoletoPaymentStrategy;
@@ -83,7 +83,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public void createBooking(BookingRequestDTO request, boolean isSelfBooking) {
         this.validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(request.getPayment());
-        this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndWithCreditCard(request.getPayment());
+        this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndInstallmentQuantityWhenPaymentIsWithCreditCard(request.getPayment());
         Room room = this.roomRepository.findById(request.getRoomId())
             .orElseThrow(() -> new ResourceNotFoundException("Room", request.getRoomId()));
         this.validateRoomAvailability(request, room, null);
@@ -105,9 +105,14 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndWithCreditCard(BookingPaymentRequestDTO payment) {
-        if (payment.getIsOnlinePayment() && payment.getPaymentType() == 2  && payment.getCreditCardId() == null) {
-            throw new RequiredCreditCardIdException();
+    private void validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndInstallmentQuantityWhenPaymentIsWithCreditCard(BookingPaymentRequestDTO payment) {
+        if (payment.getPaymentType() == 2) {
+            if (payment.getIsOnlinePayment() && payment.getCreditCardId() == null) {
+                throw new BadRequestException("Credit Card ID must be provided for online credit card payments.");
+            }
+            if (payment.getInstallmentQuantity() == null) {
+                throw new BadRequestException("Installment quantity must be provided for credit card payments.");
+            }
         }
     }
 
@@ -239,7 +244,7 @@ public class BookingServiceImpl implements BookingService {
             .orElseThrow(() -> new ResourceNotFoundException("Booking", id));
         this.validateBookingOwnership(entity, entity.getUser(), isSelfBooking);
         this.validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(request);
-        this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndWithCreditCard(request);
+        this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndInstallmentQuantityWhenPaymentIsWithCreditCard(request);
         this.updatePayment(entity, request);
     }
 

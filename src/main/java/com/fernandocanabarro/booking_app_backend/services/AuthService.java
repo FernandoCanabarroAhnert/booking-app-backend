@@ -10,14 +10,12 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfU
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AlreadyExistsResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 public interface AuthService {
 
     LoginResponseDTO login(LoginRequestDTO request);
     void register(RegistrationRequestDTO request);
     User getConnectedUser();
-    void validateJWTToken(HttpServletRequest request);
+    void validateJWTToken(String token);
     void userSelfUpdateInfos(UserSelfUpdateInfosRequestDTO request);
     void userSelfUpdatePassword(UserSelfUpdatePasswordRequestDTO request);
     void sendPasswordRecoverRequestEmail(PasswordRecoverRequestDTO request);

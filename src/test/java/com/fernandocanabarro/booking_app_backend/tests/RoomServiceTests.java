@@ -1,4 +1,4 @@
-package com.fernandocanabarro.booking_app_backend.it;
+package com.fernandocanabarro.booking_app_backend.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;

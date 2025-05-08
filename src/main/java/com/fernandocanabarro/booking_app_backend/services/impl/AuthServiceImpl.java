@@ -45,7 +45,6 @@ import com.fernandocanabarro.booking_app_backend.services.exceptions.Unauthorize
 import com.fernandocanabarro.booking_app_backend.utils.UserUtils;
 import com.sendgrid.helpers.mail.Mail;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -60,6 +59,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtDecoder jwtDecoder;
     private final PasswordRecoverRepository passwordRecoverRepository;
     private final EmailService emailService;
+    private final UserUtils userUtils;
 
     private final long SECONDS_IN_A_DAY = 86400L;
 
@@ -97,15 +97,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public User getConnectedUser() {
-        String email = UserUtils.getConnectedUserEmail();
+        String email = this.userUtils.getConnectedUserEmail();
         User user = this.userRepository.findByEmail(email)
                 .orElseThrow(() -> new UnauthorizedException("User is not logged in"));
         return user;
     }
 
     @Override
-    public void validateJWTToken(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").split(" ")[1];
+    public void validateJWTToken(String token) {
         if (token == null || token.isEmpty()) {
             throw new UnauthorizedException("Token not provided");
         }

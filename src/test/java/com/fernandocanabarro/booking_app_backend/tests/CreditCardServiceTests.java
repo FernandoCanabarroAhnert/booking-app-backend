@@ -1,4 +1,4 @@
-package com.fernandocanabarro.booking_app_backend.it;
+package com.fernandocanabarro.booking_app_backend.tests;
 
 import static org.mockito.Mockito.when;
 

@@ -45,7 +45,8 @@ public class AuthController {
     @GetMapping("/token/validate")
     @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Void> validateJWTToken(HttpServletRequest request) {
-        authService.validateJWTToken(request);
+        String token = request.getHeader("Authorization").split(" ")[1];
+        authService.validateJWTToken(token);
         return ResponseEntity.ok().build();
     }
 
