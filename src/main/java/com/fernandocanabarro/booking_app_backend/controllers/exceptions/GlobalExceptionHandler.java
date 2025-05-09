@@ -17,7 +17,6 @@ import com.fernandocanabarro.booking_app_backend.services.exceptions.EmailExcept
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ImageGeneratingException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidCurrentPasswordException;
-import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidPaymentException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RequiredWorkingHotelIdException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RoomIsUnavailableForBookingException;
@@ -32,7 +31,6 @@ public class GlobalExceptionHandler {
         EmailException.class,
         ImageGeneratingException.class,
         RequiredWorkingHotelIdException.class,
-        InvalidPaymentException.class,
         BadRequestException.class
     })
     public ResponseEntity<StandardError> badRequest(RuntimeException ex, HttpServletRequest request) {

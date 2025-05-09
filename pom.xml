@@ -196,6 +196,8 @@
 								<exclude>com/fernandocanabarro/booking_app_backend/controllers/exceptions/**</exclude>
 								<exclude>com/fernandocanabarro/booking_app_backend/services/exceptions/**</exclude>
 								<exclude>com/fernandocanabarro/booking_app_backend/services/jasper/**</exclude>
+								<exclude>com/fernandocanabarro/booking_app_backend/services/strategy/**</exclude>
+								<exclude>com/fernandocanabarro/booking_app_backend/services/impl/EmailServiceImpl.class</exclude>
 								<exclude>com/fernandocanabarro/booking_app_backend/services/excel/**</exclude>
 								<exclude>com/fernandocanabarro/booking_app_backend/validators/**</exclude>
 								<exclude>com/fernandocanabarro/booking_app_backend/utils/**</exclude>

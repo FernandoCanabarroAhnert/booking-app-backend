@@ -34,7 +34,6 @@ import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.EmailService;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.BadRequestException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
-import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidPaymentException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.RoomIsUnavailableForBookingException;
 import com.fernandocanabarro.booking_app_backend.services.strategy.BoletoPaymentStrategy;
@@ -80,6 +79,24 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<BookingResponseDTO> findAllBookingsByUser(Long userId, Pageable pageable, boolean isSelfUser) {
+        Page<Booking> response = isSelfUser
+            ? this.bookingRepository.findByUserId(authService.getConnectedUser().getId(), pageable)
+            : this.bookingRepository.findByUserId(userId, pageable);
+        return response.map(BookingMapper::convertEntityToResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BookingResponseDTO> findAllBookingsByRoom(Long roomId, Pageable pageable) {
+        this.roomRepository.findById(roomId)
+            .orElseThrow(() -> new ResourceNotFoundException("Room", roomId));
+        return this.bookingRepository.findByRoomId(roomId, pageable)
+            .map(BookingMapper::convertEntityToResponse);
+    }
+
+    @Override
     @Transactional
     public void createBooking(BookingRequestDTO request, boolean isSelfBooking) {
         this.validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(request.getPayment());
@@ -101,7 +118,7 @@ public class BookingServiceImpl implements BookingService {
 
     private void validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(BookingPaymentRequestDTO payment) {
         if (payment.getPaymentType() == 1 && payment.getIsOnlinePayment()) {
-            throw new InvalidPaymentException("Dinheiro payment cannot be online.");
+            throw new BadRequestException("Dinheiro payment cannot be online.");
         }
     }
 
@@ -135,10 +152,8 @@ public class BookingServiceImpl implements BookingService {
         return request instanceof AdminBookingRequestDTO
             ? this.userRepository.findById(((AdminBookingRequestDTO) request).getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User", ((AdminBookingRequestDTO) request).getUserId()))
-            : request instanceof AdminUpdateBookingRequestDTO
-                ? this.userRepository.findById(((AdminUpdateBookingRequestDTO) request).getUserId())
-                    .orElseThrow(() -> new ResourceNotFoundException("User", ((AdminUpdateBookingRequestDTO) request).getUserId()))
-                : this.authService.getConnectedUser();
+            : this.userRepository.findById(((AdminUpdateBookingRequestDTO) request).getUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User", ((AdminUpdateBookingRequestDTO) request).getUserId()));
     }
 
     private Payment getBookingPayment(Integer paymentType, BigDecimal amount, Integer installmentQuantity, boolean isOnlinePayment) {
@@ -203,11 +218,8 @@ public class BookingServiceImpl implements BookingService {
         Booking entity = this.bookingRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Booking", id));
         this.validateBookingOwnership(entity, user, isSelfBooking); 
-        Room room = this.roomRepository.findById(request.getRoomId())
-            .orElseThrow(() -> new ResourceNotFoundException("Room", request.getRoomId()));
-        this.validateRoomAvailability(request, room, entity.getId());
         BookingMapper.updateEntity(entity, request);
-        this.updateBookingRoomIfNeeded(entity, request, room);
+        this.updateBookingRoomIfNeeded(entity, request);
         this.updateBookingUserIfNeeded(entity, request, user, isSelfBooking);
         this.updateBookingStatusIfIsAdminUpdateRequest(request, entity, isSelfBooking);
         this.bookingRepository.save(entity);
@@ -219,8 +231,11 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void updateBookingRoomIfNeeded(Booking entity, BaseBookingRequestDTO request, Room room) {
+    private void updateBookingRoomIfNeeded(Booking entity, BaseBookingRequestDTO request) {
         if (!request.getRoomId().equals(entity.getRoom().getId())) {
+            Room room = this.roomRepository.findById(request.getRoomId())
+                .orElseThrow(() -> new ResourceNotFoundException("Room", request.getRoomId()));
+            this.validateRoomAvailability(request, room, entity.getId());
             entity.setRoom(room);
         }
     }
@@ -242,7 +257,10 @@ public class BookingServiceImpl implements BookingService {
     public void updateBookingPayment(Long id, BookingPaymentRequestDTO request, boolean isSelfBooking) {
         Booking entity = this.bookingRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Booking", id));
-        this.validateBookingOwnership(entity, entity.getUser(), isSelfBooking);
+        if (isSelfBooking) {
+            User user = this.authService.getConnectedUser();
+            this.validateBookingOwnership(entity, user, isSelfBooking);
+        }
         this.validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(request);
         this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndInstallmentQuantityWhenPaymentIsWithCreditCard(request);
         this.updatePayment(entity, request);
@@ -258,33 +276,19 @@ public class BookingServiceImpl implements BookingService {
         this.setCartaoPaymentDataWhenPaymentIsOnlineAndWithCreditCard(newPayment, request);
         newPayment = this.paymentRepository.save(newPayment);
         entity.setPayment(newPayment);
+        bookingRepository.save(entity);
+        this.sendBookingBoletoEmailWhenPaymentIsBoleto(entity, entity.getUser(), newPayment instanceof BoletoPayment);
     }
 
     @Override
     @Transactional
     public void deleteBooking(Long id) {
-        if (!this.bookingRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Booking", id);
-        }
-        this.bookingRepository.deleteById(id);
+        Booking entity = this.bookingRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Booking", id));
+        this.authService.verifyIfConnectedUserHasAdminPermission(entity.getUser().getId());
+        this.bookingRepository.delete(entity);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<BookingResponseDTO> findAllBookingsByUser(Long userId, Pageable pageable, boolean isSelfUser) {
-        Page<Booking> response = isSelfUser
-            ? this.bookingRepository.findByUserId(authService.getConnectedUser().getId(), pageable)
-            : this.bookingRepository.findByUserId(userId, pageable);
-        return response.map(BookingMapper::convertEntityToResponse);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<BookingResponseDTO> findAllBookingsByRoom(Long roomId, Pageable pageable) {
-        this.roomRepository.findById(roomId)
-            .orElseThrow(() -> new ResourceNotFoundException("Room", roomId));
-        return this.bookingRepository.findByRoomId(roomId, pageable)
-            .map(BookingMapper::convertEntityToResponse);
-    }
+   
 
 }
