@@ -72,12 +72,12 @@
 <div class="container">
     <div class="container__header"></div>
     <div class="container__body">
-        <h1 class="container__title">Ativaçao de Conta</h1>
+        <h1 class="container__title" th:text="${title}"></h1>
         <p class="greeting" th:text="'Olá ' + ${username} + ','"></p>
-        <p class="container__text">Obrigado por se registrar! Por favor, utilize o código de ativação a seguir para ativar sua conta:</p>
+        <p class="container__text" th:text="${bodyText}"></p>
         <div class="code"><span th:text="${code}"></span></div>
         <button class="link">
-            <a href="https://app.fernandocanabarrodev.tech/activate-account" target="_blank">Ativar sua conta</a>
+            <a th:href="${link}" target="_blank" th:text="${buttonText}"></a>
         </button>
     </div>
 </div>

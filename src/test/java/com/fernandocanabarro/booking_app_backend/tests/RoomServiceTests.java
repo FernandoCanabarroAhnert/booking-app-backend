@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -101,7 +100,8 @@ public class RoomServiceTests {
     }
 
     @Test
-    public void findRoomByIdSHouldReturnRoomDetailResponseDTOWhenIdExists() {
+    public void findRoomByIdShouldReturnRoomDetailResponseDTOWhenIdExists() {
+        room.getBookings().add(BookingFactory.createBooking());
         when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
 
         RoomDetailResponseDTO response = roomService.findById(existingId);
@@ -118,33 +118,6 @@ public class RoomServiceTests {
         when(roomRepository.findById(nonExistingId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> roomService.findById(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
-    }
-
-    @Test
-    public void getUnavailableDatesFromRoomByRoomIdShoulReturnListOfLocalDate() {
-        room.getBookings().add(BookingFactory.createBooking());
-        when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
-
-        List<LocalDate> expectedResponse = List.of(
-            LocalDate.of(2025, 7, 1),
-            LocalDate.of(2025, 7, 2),
-            LocalDate.of(2025, 7, 3),
-            LocalDate.of(2025, 7, 4),
-            LocalDate.of(2025, 7, 5),
-            LocalDate.of(2025, 7, 6),
-            LocalDate.of(2025, 7, 7)
-        );
-
-        List<LocalDate> response = roomService.getUnavailableDatesFromRoomByRoomId(existingId);
-
-        assertThat(response).isEqualTo(expectedResponse);
-    }
-
-    @Test
-    public void getUnavailableDatesFromRoomByRoomIdShoulThrowResourceNotFoundExceptionWhenIdDoesNotExist() {
-        when(roomRepository.findById(nonExistingId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> roomService.getUnavailableDatesFromRoomByRoomId(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test

@@ -262,7 +262,15 @@ public class BookingServiceTests {
     }
 
     @Test
-    public void createBookingShouldThrowNoExceptionWhenIsNotSelfBookingButUserDoesNotExist() {
+    public void createBookingShouldThrowBadRequestExceptionWhenGuestsQuantityIsGreaterThanRoomCapacity() {
+        bookingRequest.setGuestsQuantity(100);
+        when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
+
+        assertThatThrownBy(() -> bookingService.createBooking(bookingRequest, true)).isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    public void createBookingShouldThrowResourceNotFoundExceptionWhenIsNotSelfBookingButUserDoesNotExist() {
         when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
         when(userRepository.findById(existingId)).thenReturn(Optional.empty());
 
@@ -339,6 +347,15 @@ public class BookingServiceTests {
     }
 
     @Test
+    public void updateBookingShouldThrowBadRequestExceptionWhenUpdateRequestGuestsQuantityIsGreaterThanCurrentRoomCapacity() {
+        updateBookingRequest.setGuestsQuantity(100);
+        when(authService.getConnectedUser()).thenReturn(user);
+        when(bookingRepository.findById(existingId)).thenReturn(Optional.of(booking));
+
+        assertThatThrownBy(() -> bookingService.updateBooking(existingId, updateBookingRequest, true)).isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
     public void updateBookingShouldThrowResourceNotFoundExceptionWhenRoomIsChangedButRoomDoesNotExistAndIsSelfBooking() {
         room.setId(2L);
         updateBookingRequest.setRoomId(2L);
@@ -347,6 +364,18 @@ public class BookingServiceTests {
         when(roomRepository.findById(2L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> bookingService.updateBooking(existingId, updateBookingRequest, true)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void updateBookingShouldThrowBadRequestExceptionWhenRoomIsChangedAndUpdateRequestGuestsQuantityIsGreaterThanNewRoomCapacity() {
+        room.setId(2L);
+        updateBookingRequest.setRoomId(2L);
+        updateBookingRequest.setGuestsQuantity(100);
+        when(authService.getConnectedUser()).thenReturn(user);
+        when(bookingRepository.findById(existingId)).thenReturn(Optional.of(booking));
+        when(roomRepository.findById(2L)).thenReturn(Optional.of(room));
+
+        assertThatThrownBy(() -> bookingService.updateBooking(existingId, updateBookingRequest, true)).isInstanceOf(BadRequestException.class);
     }
 
     @Test

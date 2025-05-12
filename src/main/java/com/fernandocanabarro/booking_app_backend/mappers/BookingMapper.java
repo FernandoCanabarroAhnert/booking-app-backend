@@ -36,6 +36,7 @@ public class BookingMapper {
         response.setId(entity.getId());
         response.setCheckIn(entity.getCheckIn());
         response.setCheckOut(entity.getCheckOut());
+        response.setGuestsQuantity(entity.getGuestsQuantity());
         response.setCreatedAt(entity.getCreatedAt());
         response.setFinished(entity.isFinished());
         response.setTotalPrice(entity.getTotalPrice());
@@ -49,6 +50,7 @@ public class BookingMapper {
         response.setId(entity.getId());
         response.setCheckIn(entity.getCheckIn());
         response.setCheckOut(entity.getCheckOut());
+        response.setGuestsQuantity(entity.getGuestsQuantity());
         response.setCreatedAt(entity.getCreatedAt());
         response.setFinished(entity.isFinished());
         response.setTotalPrice(entity.getTotalPrice());

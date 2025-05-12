@@ -27,10 +27,13 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.PasswordR
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.RegistrationRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdateInfosRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdatePasswordRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.ActivateAccountRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AlreadyExistsResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.entities.ActivationCode;
 import com.fernandocanabarro.booking_app_backend.models.entities.PasswordRecover;
 import com.fernandocanabarro.booking_app_backend.models.entities.Role;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
+import com.fernandocanabarro.booking_app_backend.repositories.ActivationCodeRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.PasswordRecoverRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.RoleRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.UserRepository;
@@ -60,6 +63,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordRecoverRepository passwordRecoverRepository;
     private final EmailService emailService;
     private final UserUtils userUtils;
+    private final ActivationCodeRepository activationCodeRepository;
 
     private final long SECONDS_IN_A_DAY = 86400L;
 
@@ -67,6 +71,10 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponseDTO login(LoginRequestDTO request) {
         Authentication authentication = UsernamePasswordAuthenticationToken.unauthenticated(request.getEmail(), request.getPassword());
         Authentication authenticated = authenticationManager.authenticate(authentication);
+        User user = this.userRepository.findByEmail(request.getEmail()).get();
+        if (!user.getActivated()) {
+            throw new ForbiddenException("User Account is not activated");
+        }
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("booking-app-backend-auth-service")
                 .subject(authenticated.getName())
@@ -93,6 +101,54 @@ public class AuthServiceImpl implements AuthService {
         Role role = roleRepository.findByAuthority("ROLE_GUEST");
         user.addRole(role);
         userRepository.save(user);
+        this.sendActivationEmail(user);
+    }
+
+    private void sendActivationEmail(User user) {
+        String code = this.createActivationCode(user);
+        Map<String, Object> variables = Map.of(
+            "title", "Ativação de Conta",
+            "username", user.getFullName(),
+            "bodyText", "Para ativar sua conta, utilize o código abaixo:",
+            "code", code,
+            "link", "http://localhost:4200/activate-account",
+            "buttonText", "Ativar Conta"
+        );
+        Mail mail = this.emailService.createEmail(user.getEmail(), 
+            "Ativação de Conta", variables, "auth-email");
+        this.emailService.sendEmail(mail);
+    }
+
+    private String createActivationCode(User user) {
+        String code = this.generateCode();
+        ActivationCode activationCode = ActivationCode.builder()
+            .code(code)
+            .email(user.getEmail())
+            .createdAt(LocalDateTime.now())
+            .expiresAt(LocalDateTime.now().plusMinutes(30L))
+            .used(false)
+            .usedAt(null)
+            .build();
+        this.activationCodeRepository.save(activationCode);
+        return code;
+    }
+
+    @Override
+    @Transactional
+    public void activateAccount(ActivateAccountRequestDTO request) {
+        ActivationCode activationCode = this.activationCodeRepository.findByCode(request.getCode())
+            .orElseThrow(() -> new ResourceNotFoundException("Activation code not found"));
+        User user = this.userRepository.findByEmail(activationCode.getEmail())
+            .orElseThrow(() -> new ResourceNotFoundException("User with email " + activationCode.getEmail() + " not found"));
+        if (!activationCode.isValid()) {
+            this.sendActivationEmail(user);
+            throw new ExpiredCodeException("The activation code is expired. A new account activation e-mail will be sent to " + user.getEmail());
+        }
+        user.setActivated(true);
+        userRepository.save(user);
+        activationCode.setUsed(true);
+        activationCode.setUsedAt(LocalDateTime.now());
+        this.activationCodeRepository.save(activationCode);
     }
 
     @Override
@@ -163,11 +219,15 @@ public class AuthServiceImpl implements AuthService {
             .build();
         passwordRecoverRepository.save(passwordRecover);
         Map<String, Object> variables = Map.of(
+            "title", "Recuperação de Senha",
             "username", user.getFullName(),
-            "code", code
+            "bodyText", "Para recuperar sua senha, utilize o código abaixo:",
+            "code", code,
+            "link", "http://localhost:4200/new-password",
+            "buttonText", "Recuperar Senha"
         );
         Mail mail = this.emailService.createEmail(user.getEmail(), 
-            "Recuperação de Senha", variables, "password-recover-email");
+            "Recuperação de Senha", variables, "auth-email");
         this.emailService.sendEmail(mail);
     }
 
@@ -191,7 +251,7 @@ public class AuthServiceImpl implements AuthService {
             throw new ResourceNotFoundException("Password recover  with code " + request.getCode() + " not found");
         }
         if (!passwordRecover.get().isValid()) {
-            throw new ExpiredCodeException();
+            throw new ExpiredCodeException("The reset password code is expired.");
         }
         passwordRecover.get().setUsed(true);
         passwordRecover.get().setUsedAt(LocalDateTime.now());

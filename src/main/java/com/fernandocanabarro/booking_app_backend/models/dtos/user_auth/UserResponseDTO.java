@@ -24,6 +24,7 @@ public class UserResponseDTO {
     private String cpf;
     private LocalDate birthDate;
     private LocalDateTime createdAt;
+    private Boolean activated;
     private List<RoleResponseDTO> roles;
     private Long workingHotelId;
 

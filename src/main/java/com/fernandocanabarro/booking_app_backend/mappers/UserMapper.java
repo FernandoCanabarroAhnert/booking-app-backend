@@ -20,6 +20,7 @@ public class UserMapper {
                 .cpf(request.getCpf())
                 .birthDate(request.getBirthDate())
                 .createdAt(LocalDateTime.now())
+                .activated(false)
                 .build();
     }
 
@@ -40,6 +41,7 @@ public class UserMapper {
                 .cpf(entity.getCpf())
                 .birthDate(entity.getBirthDate())
                 .createdAt(entity.getCreatedAt())
+                .activated(entity.getActivated())
                 .roles(entity.getRoles().stream().map(RoleMapper::convertEntityToResponse).toList())
                 .workingHotelId(entity.getWorkingHotel() != null ? entity.getWorkingHotel().getId() : null)
                 .build();

@@ -22,6 +22,7 @@ public class UserFactory {
                 .cpf("cpf")
                 .birthDate(LocalDate.of(2005, 10, 28))
                 .createdAt(LocalDateTime.now())
+                .activated(true)
                 .roles(Arrays.asList(RoleFactory.createGuestRole()).stream().collect(Collectors.toSet()))
                 .build();
     }

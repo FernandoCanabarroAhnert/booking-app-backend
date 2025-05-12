@@ -17,6 +17,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.PasswordR
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.RegistrationRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdateInfosRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdatePasswordRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.ActivateAccountRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AlreadyExistsResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
 
@@ -40,6 +41,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PutMapping("/activate-account")
+    public ResponseEntity<Void> activateAccoun(@RequestBody ActivateAccountRequestDTO request) {
+        this.authService.activateAccount(request);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/token/validate")
@@ -77,13 +84,11 @@ public class AuthController {
     }
 
     @GetMapping("/verify-email")
-    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<AlreadyExistsResponseDTO> verifyEmail(@RequestParam(name = "email") String email) {
         return ResponseEntity.ok(this.authService.verifyIfUserExistsByEmail(email));
     }
 
     @GetMapping("/verify-cpf")
-    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<AlreadyExistsResponseDTO> verifyCpf(@RequestParam(name = "cpf") String cpf) {
         return ResponseEntity.ok(this.authService.verifyIfUserExistsByCpf(cpf));
     }

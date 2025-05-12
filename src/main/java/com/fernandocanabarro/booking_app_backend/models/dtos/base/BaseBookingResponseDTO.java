@@ -18,6 +18,7 @@ public abstract class BaseBookingResponseDTO {
     private Long id;
     private LocalDate checkIn;
     private LocalDate checkOut;
+    private Integer guestsQuantity;
     private LocalDateTime createdAt;
     private boolean isFinished;
     private BigDecimal totalPrice;

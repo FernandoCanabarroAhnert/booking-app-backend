@@ -59,8 +59,8 @@ public class RoomMapper {
         response.setPricePerNight(entity.getPricePerNight());
         response.setDescription(entity.getDescription());
         response.setCapacity(entity.getCapacity());
-        response.setHotelId(entity.getHotel().getId());
-        response.setHotelName(entity.getHotel().getName());
+        response.setHotel(HotelMapper.convertEntityToResponse(entity.getHotel()));
+        response.setUnavailableDates(entity.getUnavailableDates());
         response.setImages(entity.getImages().stream()
                 .map(ImageMapper::convertEntityResponseDTO)
                 .toList());

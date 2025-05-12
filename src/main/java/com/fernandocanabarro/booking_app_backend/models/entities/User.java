@@ -51,6 +51,7 @@ public class User implements UserDetails, Principal {
     private String cpf;
     private LocalDate birthDate;
     private LocalDateTime createdAt;
+    private Boolean activated;
     
     @ManyToOne
     @JoinColumn(name = "hotel_id", nullable = true, foreignKey = @ForeignKey(name = "fk_user_hotel", value = ConstraintMode.CONSTRAINT))

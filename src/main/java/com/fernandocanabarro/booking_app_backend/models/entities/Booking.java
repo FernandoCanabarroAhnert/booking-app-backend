@@ -40,13 +40,11 @@ public class Booking {
     @ManyToOne
     @JoinColumn(name = "room_id", foreignKey = @ForeignKey(name = "fk_booking_room", value = ConstraintMode.CONSTRAINT))
     private Room room;
-
     private LocalDate checkIn;
     private LocalDate checkOut;
-
+    private Integer guestsQuantity;
     private LocalDateTime createdAt;
     private boolean isFinished;
-
     @OneToOne
     @JoinColumn(name = "payment_id", foreignKey = @ForeignKey(name = "fk_booking_payment", value = ConstraintMode.CONSTRAINT))
     private Payment payment;

@@ -103,6 +103,7 @@ public class BookingServiceImpl implements BookingService {
         this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndInstallmentQuantityWhenPaymentIsWithCreditCard(request.getPayment());
         Room room = this.roomRepository.findById(request.getRoomId())
             .orElseThrow(() -> new ResourceNotFoundException("Room", request.getRoomId()));
+        this.verifyIfBookingGuestsQuantityIsNotGreaterThanRoomCapacity(request, room);
         this.validateRoomAvailability(request, room, null);
         User user = this.getUserForBookingLogic(isSelfBooking, request);
         Booking entity = BookingMapper.convertRequestToEntity(request, room, user);
@@ -130,6 +131,12 @@ public class BookingServiceImpl implements BookingService {
             if (payment.getInstallmentQuantity() == null) {
                 throw new BadRequestException("Installment quantity must be provided for credit card payments.");
             }
+        }
+    }
+
+    private void verifyIfBookingGuestsQuantityIsNotGreaterThanRoomCapacity(BaseBookingRequestDTO request, Room room) {
+        if (request.getGuestsQuantity() > room.getCapacity()) {
+            throw new BadRequestException("Guests quantity cannot be greater than room capacity.");
         }
     }
 
@@ -217,7 +224,10 @@ public class BookingServiceImpl implements BookingService {
         User user = this.getUserForBookingLogic(isSelfBooking, request);
         Booking entity = this.bookingRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Booking", id));
-        this.validateBookingOwnership(entity, user, isSelfBooking); 
+        this.validateBookingOwnership(entity, user, isSelfBooking);
+        if (request.getRoomId() == entity.getRoom().getId()) {
+            this.verifyIfBookingGuestsQuantityIsNotGreaterThanRoomCapacity(request, entity.getRoom());
+        }
         BookingMapper.updateEntity(entity, request);
         this.updateBookingRoomIfNeeded(entity, request);
         this.updateBookingUserIfNeeded(entity, request, user, isSelfBooking);
@@ -235,6 +245,7 @@ public class BookingServiceImpl implements BookingService {
         if (!request.getRoomId().equals(entity.getRoom().getId())) {
             Room room = this.roomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Room", request.getRoomId()));
+            this.verifyIfBookingGuestsQuantityIsNotGreaterThanRoomCapacity(request, room);
             this.validateRoomAvailability(request, room, entity.getId());
             entity.setRoom(room);
         }

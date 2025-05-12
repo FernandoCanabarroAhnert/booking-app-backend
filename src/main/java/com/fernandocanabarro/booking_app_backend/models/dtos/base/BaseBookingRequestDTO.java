@@ -24,5 +24,7 @@ public class BaseBookingRequestDTO {
     @Future(message = "Check-out date must be in the future")
     @NotNull(message = "Required field")
     private LocalDate checkOut;
+    @NotNull(message = "Required field")
+    private Integer guestsQuantity;
 
 }

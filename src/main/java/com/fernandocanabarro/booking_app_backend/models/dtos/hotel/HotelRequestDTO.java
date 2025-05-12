@@ -15,6 +15,8 @@ public class HotelRequestDTO {
 
     @NotBlank(message = "Required field")
     private String name;
+    @NotBlank(message = "Required field")
+    private String description;
     @NotNull(message = "Required field")
     private Integer roomQuantity;
     @NotBlank(message = "Required field")

@@ -1,6 +1,5 @@
 package com.fernandocanabarro.booking_app_backend.services.impl;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -52,14 +51,6 @@ public class RoomServiceImpl implements RoomService {
         return this.roomRepository.findById(id)
             .map(RoomMapper::convertEntityToDetailResponse)
             .orElseThrow(() -> new ResourceNotFoundException("Room", id));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<LocalDate> getUnavailableDatesFromRoomByRoomId(Long id) {
-        Room room = this.roomRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Room", id));
-        return room.getUnavailableDates();
     }
 
     @Override

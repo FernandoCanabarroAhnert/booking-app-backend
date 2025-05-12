@@ -16,6 +16,8 @@ import lombok.Setter;
 @Builder
 public class RoomResponseDTO extends BaseRoomResponse {
     
+    private String hotelName;
+    private Long hotelId;
     private ImageResponseDTO cardDisplayImage;
 
 }

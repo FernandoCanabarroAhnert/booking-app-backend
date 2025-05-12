@@ -68,7 +68,7 @@ public class HotelServiceTests {
             "image/jpeg",        
             "image".getBytes()
         );
-        this.request = new HotelRequestDTO("name", 10, "street", "number", "city", "zipCode", "state", "(11) 99999-9999");
+        this.request = new HotelRequestDTO("name", "description", 10, "street", "number", "city", "zipCode", "state", "(11) 99999-9999");
         this.existingId = 1L;
         this.nonExistingId = 1000L;
     }

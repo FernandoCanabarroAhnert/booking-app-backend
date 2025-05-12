@@ -20,6 +20,5 @@ public abstract class BaseRoomResponse {
     private BigDecimal pricePerNight;
     private String description;
     private Integer capacity;
-    private Long hotelId;
-    private String hotelName;
+    
 }

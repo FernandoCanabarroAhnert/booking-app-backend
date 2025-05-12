@@ -1,6 +1,5 @@
 package com.fernandocanabarro.booking_app_backend.controllers;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -50,12 +49,6 @@ public class RoomController {
     @GetMapping("/{id}")
     public ResponseEntity<RoomDetailResponseDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(this.roomService.findById(id));
-    }
-
-    @GetMapping("/{id}/unavailable-days")
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<List<LocalDate>> getUnavailableDatesFromRoomByRoomId(@PathVariable Long id) {
-        return ResponseEntity.ok(this.roomService.getUnavailableDatesFromRoomByRoomId(id));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

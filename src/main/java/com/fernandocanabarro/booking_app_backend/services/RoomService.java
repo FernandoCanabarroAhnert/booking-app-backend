@@ -1,6 +1,5 @@
 package com.fernandocanabarro.booking_app_backend.services;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -16,7 +15,6 @@ public interface RoomService {
     List<RoomResponseDTO> findAll();
     Page<RoomResponseDTO> findAllPageable(Pageable pageable);
     RoomDetailResponseDTO findById(Long id);
-    List<LocalDate> getUnavailableDatesFromRoomByRoomId(Long id);
     void create(RoomRequestDTO request, List<MultipartFile> images);
     void update(Long id, RoomRequestDTO request, List<MultipartFile> images);
     void delete(Long id);

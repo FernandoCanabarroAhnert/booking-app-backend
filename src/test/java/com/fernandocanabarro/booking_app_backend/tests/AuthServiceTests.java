@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -31,13 +34,16 @@ import com.fernandocanabarro.booking_app_backend.factories.UserFactory;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.LoginResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.NewPasswordRequestoDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.PasswordRecoverRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.ActivateAccountRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AlreadyExistsResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.LoginRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.RegistrationRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdateInfosRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdatePasswordRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.entities.ActivationCode;
 import com.fernandocanabarro.booking_app_backend.models.entities.PasswordRecover;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
+import com.fernandocanabarro.booking_app_backend.repositories.ActivationCodeRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.PasswordRecoverRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.RoleRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.UserRepository;
@@ -50,6 +56,7 @@ import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNot
 import com.fernandocanabarro.booking_app_backend.services.exceptions.UnauthorizedException;
 import com.fernandocanabarro.booking_app_backend.services.impl.AuthServiceImpl;
 import com.fernandocanabarro.booking_app_backend.utils.UserUtils;
+import com.sendgrid.helpers.mail.Mail;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTests {
@@ -74,6 +81,8 @@ public class AuthServiceTests {
     private EmailService emailService;
     @Mock
     private UserUtils userUtils;
+    @Mock
+    private ActivationCodeRepository activationCodeRepository;
 
     private User user;
     private RegistrationRequestDTO registrationRequest;
@@ -84,6 +93,7 @@ public class AuthServiceTests {
     private UserSelfUpdatePasswordRequestDTO userSelfUpdatePasswordRequest;
     private PasswordRecover passwordRecover;
     private NewPasswordRequestoDTO newPasswordRequest;
+    private ActivationCode activationCode;
 
     @BeforeEach
     public void setup() {
@@ -104,10 +114,13 @@ public class AuthServiceTests {
         this.newPasswordRequest = new NewPasswordRequestoDTO();
         this.newPasswordRequest.setCode(passwordRecover.getCode());
         this.newPasswordRequest.setPassword("newPassword");
+        this.activationCode = new ActivationCode(1L, "code", "email", LocalDateTime.now(), 
+            LocalDateTime.now().plusMinutes(30L), false, null);
     }
 
     @Test
     public void loginShouldReturnLoginResponseDTOWhenLoginIsValid() {
+        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
         when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
         when(jwtEncoder.encode(any(JwtEncoderParameters.class))).thenReturn(jwt);
 
@@ -119,11 +132,23 @@ public class AuthServiceTests {
     }
 
     @Test
+    public void loginShouldThrowForbiddenExceptionWhenUserAccountIsNotActivated() {
+        user.setActivated(false);
+        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
+        when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
+
+        assertThatThrownBy(() -> authService.login(loginRequest)).isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
     public void registerShouldThrowNoExceptionWhenDataIsValid() {
         when(userRepository.findByEmail(registrationRequest.getEmail())).thenReturn(Optional.empty());
         when(userRepository.findByCpf(registrationRequest.getCpf())).thenReturn(Optional.empty());
         when(roleRepository.findByAuthority("ROLE_GUEST")).thenReturn(RoleFactory.createGuestRole());
         when(userRepository.save(any(User.class))).thenReturn(user);
+        when(activationCodeRepository.save(any(ActivationCode.class))).thenReturn(activationCode);
+        when(emailService.createEmail(anyString(), anyString(), anyMap(), anyString())).thenReturn(new Mail());
+        doNothing().when(emailService).sendEmail(any(Mail.class));
 
         assertThatCode(() -> authService.register(registrationRequest)).doesNotThrowAnyException();
     }
@@ -141,6 +166,42 @@ public class AuthServiceTests {
         when(userRepository.findByCpf(registrationRequest.getCpf())).thenReturn(Optional.of(user));
 
         assertThatThrownBy(() -> authService.register(registrationRequest)).isInstanceOf(AlreadyExistingPropertyException.class);
+    }
+
+    @Test
+    public void activateAccountShouldThrowNoExceptionWhenCodeIsValid() {
+        when(activationCodeRepository.findByCode(activationCode.getCode())).thenReturn(Optional.of(activationCode));
+        when(userRepository.findByEmail(activationCode.getEmail())).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(activationCodeRepository.save(any(ActivationCode.class))).thenReturn(activationCode);
+
+        assertThatCode(() -> authService.activateAccount(new ActivateAccountRequestDTO("code"))).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void activateAccountShouldThrowExpiredCodeExceptionWhenCodeIsExpired() {
+        activationCode.setExpiresAt(LocalDateTime.now().minusMinutes(5L));
+        when(activationCodeRepository.findByCode(activationCode.getCode())).thenReturn(Optional.of(activationCode));
+        when(userRepository.findByEmail(activationCode.getEmail())).thenReturn(Optional.of(user));
+        when(emailService.createEmail(anyString(), anyString(), anyMap(), anyString())).thenReturn(new Mail());
+        doNothing().when(emailService).sendEmail(any(Mail.class));
+
+        assertThatThrownBy(() -> authService.activateAccount(new ActivateAccountRequestDTO("code"))).isInstanceOf(ExpiredCodeException.class);
+    }
+
+    @Test
+    public void activateAccountShouldThrowResourceNotFoundExceptionWhenCodeDoesNotExist() {
+        when(activationCodeRepository.findByCode(activationCode.getCode())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.activateAccount(new ActivateAccountRequestDTO("code"))).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void activateAccountShouldThrowResourceNotFoundExceptionWhenUserDoesNotExist() {
+        when(activationCodeRepository.findByCode(activationCode.getCode())).thenReturn(Optional.of(activationCode));
+        when(userRepository.findByEmail(activationCode.getEmail())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.activateAccount(new ActivateAccountRequestDTO("code"))).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test

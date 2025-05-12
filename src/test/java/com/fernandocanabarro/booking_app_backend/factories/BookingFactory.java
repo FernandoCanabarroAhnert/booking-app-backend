@@ -18,6 +18,7 @@ public class BookingFactory {
             .checkOut(LocalDate.of(2025, 7, 7))
             .room(RoomFactory.createRoom())
             .user(UserFactory.createUser())
+            .guestsQuantity(1)
             .createdAt(LocalDateTime.now())
             .isFinished(false)
             .payment(PaymentFactory.createDinheiroPayment())
@@ -29,6 +30,7 @@ public class BookingFactory {
         request.setRoomId(1L);
         request.setCheckIn(LocalDate.of(2025, 7, 1));
         request.setCheckOut(LocalDate.of(2025, 7, 7));
+        request.setGuestsQuantity(1);
         request.setPayment(PaymentFactory.createDinheiroPaymentRequest());
         return request;
     }
@@ -38,6 +40,7 @@ public class BookingFactory {
         request.setRoomId(1L);
         request.setCheckIn(LocalDate.of(2025, 7, 1));
         request.setCheckOut(LocalDate.of(2025, 7, 7));
+        request.setGuestsQuantity(1);
         request.setPayment(PaymentFactory.createDinheiroPaymentRequest());
         request.setUserId(1L);
         return request;
@@ -48,6 +51,7 @@ public class BookingFactory {
         request.setRoomId(1L);
         request.setCheckIn(LocalDate.of(2025, 7, 1));
         request.setCheckOut(LocalDate.of(2025, 7, 7));
+        request.setGuestsQuantity(1);
         return request;
     }
 
@@ -56,6 +60,7 @@ public class BookingFactory {
         request.setRoomId(1L);
         request.setCheckIn(LocalDate.of(2025, 7, 1));
         request.setCheckOut(LocalDate.of(2025, 7, 7));
+        request.setGuestsQuantity(1);
         request.setUserId(1L);
         request.setIsFinished(true);
         return request;

@@ -13,6 +13,7 @@ public class HotelFactory {
         return Hotel.builder()
                 .id(1L)
                 .name("name")
+                .description("description")
                 .roomQuantity(10)
                 .street("street")
                 .number("number")
