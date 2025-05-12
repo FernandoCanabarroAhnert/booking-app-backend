@@ -119,16 +119,39 @@ public class AuthServiceTests {
     }
 
     @Test
-    public void loginShouldReturnLoginResponseDTOWhenLoginIsValid() {
+    public void guestLoginShouldReturnLoginResponseDTOWhenLoginIsValid() {
         when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
         when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
         when(jwtEncoder.encode(any(JwtEncoderParameters.class))).thenReturn(jwt);
 
-        LoginResponseDTO response = authService.login(loginRequest);
+        LoginResponseDTO response = authService.login(loginRequest, false);
 
         assertThat(response).isNotNull();
         assertThat(response.getToken()).isEqualTo(jwt.getTokenValue());
         assertThat(response.getExpiresIn()).isEqualTo(86400L);
+    }
+
+     @Test
+    public void adminLoginShouldReturnLoginResponseDTOWhenLoginIsValid() {
+        user.addRole(RoleFactory.createOperatorRole());
+        user.addRole(RoleFactory.createAdminRole());
+        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
+        when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
+        when(jwtEncoder.encode(any(JwtEncoderParameters.class))).thenReturn(jwt);
+
+        LoginResponseDTO response = authService.login(loginRequest, true);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getToken()).isEqualTo(jwt.getTokenValue());
+        assertThat(response.getExpiresIn()).isEqualTo(86400L);
+    }
+
+    @Test
+    public void loginShouldThrowForbiddenExceptionWhenLoginIsAdminLoginButUserDoesNotHaveOperatorOrAdminRole() {
+        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
+        when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
+
+        assertThatThrownBy(() -> authService.login(loginRequest, true)).isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -137,7 +160,7 @@ public class AuthServiceTests {
         when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
         when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
 
-        assertThatThrownBy(() -> authService.login(loginRequest)).isInstanceOf(ForbiddenException.class);
+        assertThatThrownBy(() -> authService.login(loginRequest, false)).isInstanceOf(ForbiddenException.class);
     }
 
     @Test

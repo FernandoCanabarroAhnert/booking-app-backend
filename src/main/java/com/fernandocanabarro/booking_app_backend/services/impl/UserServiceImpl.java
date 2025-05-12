@@ -65,6 +65,7 @@ public class UserServiceImpl implements UserService {
         this.verifyIfEmailIsAlreadyInUse(request.getEmail());
         this.verifyIfCpfIsAlreadyInUse(request.getCpf());
         User entity = UserMapper.convertRequestToEntity(request, passwordEncoder);
+        entity.setActivated(request.getActivated());
         this.setUserRoles(entity, request.getRolesIds());
         if (entity.hasRole("ROLE_OPERATOR") || entity.hasRole("ROLE_ADMIN")) {
             this.verifyIfRequestHasWorkingHotelIdWhenUserHasRoleOperatorOrAdmin(request);
@@ -111,6 +112,7 @@ public class UserServiceImpl implements UserService {
         this.verifyIfUpdateRequestEmailIsAlreadyInUse(request.getEmail(), entity);
         this.verifyIfUpdateRequestCpfIsAlreadyInUse(request.getCpf(), entity);
         UserMapper.updateUser(entity, request);
+        entity.setActivated(request.getActivated());
         entity.getRoles().clear();
         this.setUserRoles(entity, request.getRolesIds());
         if (entity.hasRole("ROLE_OPERATOR") || entity.hasRole("ROLE_ADMIN")) {

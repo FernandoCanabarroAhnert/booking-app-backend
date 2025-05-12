@@ -13,7 +13,7 @@ import com.fernandocanabarro.booking_app_backend.models.entities.User;
 
 public interface AuthService {
 
-    LoginResponseDTO login(LoginRequestDTO request);
+    LoginResponseDTO login(LoginRequestDTO request, boolean isAdminLogin);
     void register(RegistrationRequestDTO request);
     void activateAccount(ActivateAccountRequestDTO request);
     User getConnectedUser();

@@ -68,10 +68,12 @@ public class AuthServiceImpl implements AuthService {
     private final long SECONDS_IN_A_DAY = 86400L;
 
     @Override
-    public LoginResponseDTO login(LoginRequestDTO request) {
+    @Transactional
+    public LoginResponseDTO login(LoginRequestDTO request, boolean isAdminLogin) {
         Authentication authentication = UsernamePasswordAuthenticationToken.unauthenticated(request.getEmail(), request.getPassword());
         Authentication authenticated = authenticationManager.authenticate(authentication);
         User user = this.userRepository.findByEmail(request.getEmail()).get();
+        this.verifyIfLoginIsAdminLoginAndUserHasOperatorOrAdminRole(user, isAdminLogin);
         if (!user.getActivated()) {
             throw new ForbiddenException("User Account is not activated");
         }
@@ -84,6 +86,15 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         String token = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
         return new LoginResponseDTO(token, SECONDS_IN_A_DAY);
+    }
+
+    private void verifyIfLoginIsAdminLoginAndUserHasOperatorOrAdminRole(User user, boolean isAdminLogin) {
+        if (isAdminLogin) {
+            boolean userHasOperatorOrAdminRole = user.hasRole("ROLE_OPERATOR") || user.hasRole("ROLE_ADMIN");
+            if (!userHasOperatorOrAdminRole) {
+                throw new ForbiddenException("User does not have permission to perform this action");
+            }
+        }
     }
 
     @Override

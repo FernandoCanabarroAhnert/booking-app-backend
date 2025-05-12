@@ -39,8 +39,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<LoginResponseDTO> guestLogin(@RequestBody LoginRequestDTO request) {
+        return ResponseEntity.ok(authService.login(request, false));
+    }
+
+    @PostMapping("/login/admin")
+    public ResponseEntity<LoginResponseDTO> adminLogin(@RequestBody LoginRequestDTO request) {
+        return ResponseEntity.ok(authService.login(request, true));
     }
 
     @PutMapping("/activate-account")
