@@ -2,6 +2,7 @@ package com.fernandocanabarro.booking_app_backend.factories;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,8 @@ public class UserFactory {
                 .createdAt(LocalDateTime.now())
                 .activated(true)
                 .roles(Arrays.asList(RoleFactory.createGuestRole()).stream().collect(Collectors.toSet()))
+                .bookings(new ArrayList<>(Arrays.asList()))
+                .ratings(new ArrayList<>(Arrays.asList()))
                 .build();
     }
 

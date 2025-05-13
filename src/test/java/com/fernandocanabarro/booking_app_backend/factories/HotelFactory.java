@@ -21,6 +21,7 @@ public class HotelFactory {
                 .zipCode("zipCode")
                 .state("state")
                 .phone("(11) 99999-9999")
+                .rooms(new ArrayList<>(Arrays.asList()))
                 .images(new ArrayList<Image>(Arrays.asList(new Image(1L, "image.jpg", ImageTypeEnum.HOTEL, null, null))))
                 .build();
     }

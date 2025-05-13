@@ -70,6 +70,9 @@ public class User implements UserDetails, Principal {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<CreditCard> creditCards;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<RoomRating> ratings;
+
     @Override
     public String getName() {
         return this.email;
@@ -91,6 +94,12 @@ public class User implements UserDetails, Principal {
 
     public boolean hasRole(String roleName) {
         return this.roles.stream().anyMatch(role -> role.getAuthority().equals(roleName));
+    }
+
+    public boolean isAbleToRateRoom(Long roomId) {
+        long bookingsInRoom = this.bookings.stream().filter(booking -> booking.getRoom().getId().equals(roomId)).count();
+        long ratingsInRoom = this.ratings.stream().filter(rating -> rating.getRoom().getId().equals(roomId)).count();
+        return bookingsInRoom > ratingsInRoom;
     }
 
 }

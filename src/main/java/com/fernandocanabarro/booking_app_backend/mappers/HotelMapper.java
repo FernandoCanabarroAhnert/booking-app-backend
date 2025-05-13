@@ -44,6 +44,7 @@ public class HotelMapper {
         response.setId(entity.getId());
         response.setName(entity.getName());
         response.setDescription(entity.getDescription());
+        response.setAverageRating(entity.getAverageRating());
         response.setRoomQuantity(entity.getRoomQuantity());
         response.setStreet(entity.getStreet());
         response.setNumber(entity.getNumber());
@@ -60,6 +61,7 @@ public class HotelMapper {
         response.setId(entity.getId());
         response.setName(entity.getName());
         response.setDescription(entity.getDescription());
+        response.setAverageRating(entity.getAverageRating());
         response.setRoomQuantity(entity.getRoomQuantity());
         response.setStreet(entity.getStreet());
         response.setNumber(entity.getNumber());

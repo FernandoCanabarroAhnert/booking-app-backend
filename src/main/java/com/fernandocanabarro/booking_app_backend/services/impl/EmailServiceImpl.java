@@ -53,7 +53,7 @@ public class EmailServiceImpl implements EmailService {
         Content emailContent = new Content("text/html", content);
 
         Email to = new Email(emailTo);
-        Email from = new Email(EMAIL_FROM);
+        Email from = new Email(EMAIL_FROM, "Ybanté Hotéis");
         return new Mail(from, subject, to, emailContent);
     }
 

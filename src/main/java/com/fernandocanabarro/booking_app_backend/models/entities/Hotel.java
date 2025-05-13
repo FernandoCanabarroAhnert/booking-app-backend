@@ -1,5 +1,7 @@
 package com.fernandocanabarro.booking_app_backend.models.entities;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -47,5 +49,15 @@ public class Hotel {
 
     @OneToMany(mappedBy = "hotel", fetch = FetchType.LAZY)
     private List<Image> images;
+
+    public BigDecimal getAverageRating() {
+        if (this.rooms.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return this.rooms.stream()
+            .map(Room::getAverageRating)
+            .reduce(BigDecimal.ZERO, (a, b) -> a.add(b))
+            .divide(BigDecimal.valueOf(this.rooms.size())).setScale(2, RoundingMode.HALF_UP);
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.fernandocanabarro.booking_app_backend.models.entities;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -53,6 +54,8 @@ public class Room {
     private Hotel hotel;
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     public List<Image> images;
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    private List<RoomRating> ratings;
 
     public boolean isAvalableToBook(LocalDate checkIn, LocalDate checkOut, Long bookingIdToIgnore) {
         List<Booking> bookings = this.bookings.stream()
@@ -68,6 +71,16 @@ public class Room {
             .filter(booking -> !booking.isFinished())
             .flatMap(booking -> booking.getCheckIn().datesUntil(booking.getCheckOut().plusDays(1L)))
             .toList();
+    }
+
+    public BigDecimal getAverageRating() {
+        if (this.ratings.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return this.ratings.stream()
+            .map(RoomRating::getRating)
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .divide(new BigDecimal(this.ratings.size())).setScale(2, RoundingMode.HALF_UP);
     }
 
 }

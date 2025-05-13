@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomRatingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomRatingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
@@ -114,6 +117,33 @@ public class RoomController {
         List<RoomResponseDTO> rooms = roomService.findAll();
         RoomsExcelExporter roomsExcelExporter = new RoomsExcelExporter(rooms);
         roomsExcelExporter.export(response);
+    }
+
+    @GetMapping("/{id}/ratings")
+    public ResponseEntity<Page<RoomRatingResponseDTO>> findAllRatingsByRoomId(@PathVariable Long id, Pageable pageable) {
+        return ResponseEntity.ok(this.roomService.findAllRatingsByRoomId(id, pageable));
+    }
+
+    @PostMapping("/{id}/ratings")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<Void> addRating(@PathVariable Long id, @Valid @RequestBody RoomRatingRequestDTO request) {
+        this.roomService.addRating(id, request);
+        return ResponseEntity.status(201).build();
+    }
+
+    @PutMapping("/ratings/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<Void> updateRating(@PathVariable Long id,
+                                             @Valid @RequestBody RoomRatingRequestDTO request) {
+        this.roomService.updateRating(id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/ratings/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteRating(@PathVariable Long id) {
+        this.roomService.deleteRating(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

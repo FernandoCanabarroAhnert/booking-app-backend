@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -24,15 +25,25 @@ import org.springframework.mock.web.MockMultipartFile;
 
 import com.fernandocanabarro.booking_app_backend.factories.BookingFactory;
 import com.fernandocanabarro.booking_app_backend.factories.HotelFactory;
+import com.fernandocanabarro.booking_app_backend.factories.RoleFactory;
 import com.fernandocanabarro.booking_app_backend.factories.RoomFactory;
+import com.fernandocanabarro.booking_app_backend.factories.UserFactory;
 import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomDetailResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomRatingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomRatingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.entities.Booking;
 import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
 import com.fernandocanabarro.booking_app_backend.models.entities.Room;
+import com.fernandocanabarro.booking_app_backend.models.entities.RoomRating;
+import com.fernandocanabarro.booking_app_backend.models.entities.User;
 import com.fernandocanabarro.booking_app_backend.repositories.HotelRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.ImageRepository;
+import com.fernandocanabarro.booking_app_backend.repositories.RoomRatingRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
+import com.fernandocanabarro.booking_app_backend.services.AuthService;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.services.impl.RoomServiceImpl;
 
@@ -47,6 +58,10 @@ public class RoomServiceTests {
     private HotelRepository hotelRepository;
     @Mock
     private ImageRepository imageRepository;
+    @Mock
+    private RoomRatingRepository roomRatingRepository;
+    @Mock
+    private AuthService authService;
 
     private Hotel hotel;
     private Room room;
@@ -54,6 +69,9 @@ public class RoomServiceTests {
     private RoomRequestDTO request;
     private Long existingId;
     private Long nonExistingId;
+    private RoomRating roomRating;
+    private RoomRatingRequestDTO roomRatingRequest;
+    private User user;
 
     @BeforeEach
     public void setup() {
@@ -68,6 +86,9 @@ public class RoomServiceTests {
         this.request = new RoomRequestDTO("102", 2, 2, BigDecimal.valueOf(100.0), "Description", 2, 1L);
         this.existingId = 1L;
         this.nonExistingId = 1000L;
+        this.roomRating = RoomFactory.createRoomRating();
+        this.roomRatingRequest = new RoomRatingRequestDTO(BigDecimal.valueOf(4.5), "description");
+        this.user = UserFactory.createUser();
     }
 
     @Test
@@ -190,5 +211,124 @@ public class RoomServiceTests {
         
         assertThatThrownBy(() -> roomService.delete(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
     }
+
+    @Test
+    public void findRatingsByRoomIdShouldReturnPageOfRoomRatings() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<RoomRating> page = new PageImpl<>(List.of(this.roomRating));
+        when(roomRatingRepository.findAllByRoomId(existingId, pageable)).thenReturn(page);
+
+        Page<RoomRatingResponseDTO> response = roomService.findAllRatingsByRoomId(existingId, pageable);
+
+        assertThat(response.getContent()).isNotEmpty();
+        assertThat(response.getContent().get(0).getId()).isEqualTo(1L);
+        assertThat(response.getContent().get(0).getRating()).isEqualTo(BigDecimal.valueOf(4.5));
+        assertThat(response.getContent().get(0).getDescription()).isEqualTo("description");
+    }
+
+    @Test
+    public void addRatingShouldThrowNoExceptionWhenDataIsValid() {
+        Booking booking = BookingFactory.createBooking();
+        booking.setRoom(room);
+        user.getBookings().add(booking);
+        when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
+        when(authService.getConnectedUser()).thenReturn(user);
+        when(roomRatingRepository.save(any(RoomRating.class))).thenReturn(roomRating);
+
+        assertThatCode(() -> roomService.addRating(existingId, roomRatingRequest)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void addRatingShouldThrowResourceNotFoundExceptionWhenRoomIdDoesNotExist() {
+        when(roomRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> roomService.addRating(nonExistingId, roomRatingRequest)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void addRatingShouldThrowForbiddenExceptionWhenUserIsNotAbleToRateRoom() {
+        Booking booking = BookingFactory.createBooking();
+        booking.setRoom(room);
+        user.getBookings().add(booking);
+        user.getRatings().add(roomRating);
+        when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
+        when(authService.getConnectedUser()).thenReturn(user);
+
+        assertThatThrownBy(() -> roomService.addRating(existingId, roomRatingRequest)).isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    public void updateRatingShouldThrowNoExceptionWhenDataIsValid() {
+        when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
+        when(authService.getConnectedUser()).thenReturn(user);
+        when(roomRatingRepository.save(any(RoomRating.class))).thenReturn(roomRating);
+
+        assertThatCode(() -> roomService.updateRating(existingId, roomRatingRequest)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void updateRatingShouldThrowNoExceptionWhenConnectedUserIsAdminOrOperator() {
+        user.addRole(RoleFactory.createOperatorRole());
+        user.addRole(RoleFactory.createAdminRole());
+        when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
+        when(authService.getConnectedUser()).thenReturn(user);
+        when(roomRatingRepository.save(any(RoomRating.class))).thenReturn(roomRating);
+
+        assertThatCode(() -> roomService.updateRating(existingId, roomRatingRequest)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void updateRatingShouldThrowResourceNotFoundExceptionWhenRoomRatingDoesNotExist() {
+        when(roomRatingRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> roomService.updateRating(nonExistingId, roomRatingRequest)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void updateRoomRatingShouldThrowForbiddenExceptionWhenConnectedUserIsNotTheOwner() {
+        user.setId(2L);
+        when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
+        when(authService.getConnectedUser()).thenReturn(user);
+
+        assertThatThrownBy(() -> roomService.updateRating(existingId, roomRatingRequest)).isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    public void deleteRoomRatingShouldThrowNoExceptionWhenRoomRatingExistsAndConnectedUserIsTheOwner() {
+        when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
+        when(authService.getConnectedUser()).thenReturn(user);
+        doNothing().when(roomRatingRepository).delete(any(RoomRating.class));
+
+        assertThatCode(() -> roomService.deleteRating(existingId)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void deleteRoomRatingShouldThrowNoExceptionWhenRoomRatingExistsAndConnectedUserHasAdminPermission() {
+        user.addRole(RoleFactory.createOperatorRole());
+        user.addRole(RoleFactory.createAdminRole());
+        when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
+        when(authService.getConnectedUser()).thenReturn(user);
+        doNothing().when(roomRatingRepository).delete(any(RoomRating.class));
+
+        assertThatCode(() -> roomService.deleteRating(existingId)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void deleteRatingShouldThrowResourceNotFoundExceptionWhenRoomRatingDoesNotExist() {
+        when(roomRatingRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> roomService.deleteRating(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void deleteteRoomRatingShouldThrowForbiddenExceptionWhenConnectedUserIsNotTheOwner() {
+        user.setId(2L);
+        when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
+        when(authService.getConnectedUser()).thenReturn(user);
+
+        assertThatThrownBy(() -> roomService.updateRating(existingId, roomRatingRequest)).isInstanceOf(ForbiddenException.class);
+    }
+
+    
 
 }
