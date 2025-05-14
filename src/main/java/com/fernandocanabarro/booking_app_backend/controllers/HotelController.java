@@ -62,7 +62,7 @@ public class HotelController {
         return ResponseEntity.status(201).build();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<Void> update(@PathVariable Long id, 
                                     @Valid @RequestPart("request") HotelRequestDTO request,

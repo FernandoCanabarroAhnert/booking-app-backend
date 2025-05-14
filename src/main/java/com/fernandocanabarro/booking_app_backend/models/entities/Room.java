@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.fernandocanabarro.booking_app_backend.models.enums.RoomTypeEnum;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -52,7 +53,7 @@ public class Room {
     @ManyToOne
     @JoinColumn(name = "hotel_id", foreignKey = @ForeignKey(name = "fk_room_hotel", value = ConstraintMode.CONSTRAINT))
     private Hotel hotel;
-    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     public List<Image> images;
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     private List<RoomRating> ratings;
