@@ -77,8 +77,16 @@ public class HotelControllerIT {
         this.existingId = 1L;
         this.nonExistingId = 1000L;
         this.request = new HotelRequestDTO("name", "description", 10, "street", "number", "city", "zipCode", "state", "(11) 99999-9999");
-        this.requestJsonPart = new MockMultipartFile("request", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(request));
-        this.imagePart = new MockMultipartFile("images", "image.jpg", MediaType.IMAGE_JPEG_VALUE, "image".getBytes());
+        this.requestJsonPart = new MockMultipartFile(
+            "request", 
+            "", 
+            MediaType.APPLICATION_JSON_VALUE, 
+            objectMapper.writeValueAsBytes(request));
+        this.imagePart = new MockMultipartFile(
+            "images", 
+            "image.jpg", 
+            MediaType.IMAGE_JPEG_VALUE, 
+            "image".getBytes());
     }
 
     @Test

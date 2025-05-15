@@ -17,9 +17,9 @@ INSERT INTO images (base64image, image_type, hotel_id) VALUES ('', 'HOTEL', 2);
 INSERT INTO images (base64image, image_type, hotel_id) VALUES ('', 'HOTEL', 3);
 
 INSERT INTO users (full_name, email, password, phone, cpf, birth_date, created_at, activated, hotel_id) 
-    VALUES ('Fernando', 'fernando@gmail.com', '$2a$10$vB8CKU3B8Arygzyb/nv/0Ol8YzL/YEATkB/O3pF9ltf1/B9hfhwc6', '(51) 99521-4017', '873.582.800-59', '2005-10-28', '2025-04-25 10:15:03.181656', true, 1);
+    VALUES ('Fernando', 'fernando@gmail.com', '$2a$10$vB8CKU3B8Arygzyb/nv/0Ol8YzL/YEATkB/O3pF9ltf1/B9hfhwc6', '(51) 1234-12345', '329.949.250-01', '2005-10-28', '2025-04-25 10:15:03.181656', true, 1);
 INSERT INTO users (full_name, email, password, phone, cpf, birth_date, created_at, activated) 
-    VALUES ('Anita', 'anita@gmail.com', '$2a$10$vB8CKU3B8Arygzyb/nv/0Ol8YzL/YEATkB/O3pF9ltf1/B9hfhwc6', '(51) 99521-4017', '123.456.789-10', '2005-10-28', '2025-04-25 10:15:03.181656', true);
+    VALUES ('Anita', 'anita@gmail.com', '$2a$10$vB8CKU3B8Arygzyb/nv/0Ol8YzL/YEATkB/O3pF9ltf1/B9hfhwc6', '(51) 1234-12345', '123.456.789-10', '2005-10-28', '2025-04-25 10:15:03.181656', true);
 
 INSERT INTO user_role (user_id, role_id) VALUES (1, 1);
 INSERT INTO user_role (user_id, role_id) VALUES (1, 2);
@@ -30,7 +30,24 @@ INSERT INTO rooms (number, floor, type, price_per_night, description, capacity, 
   VALUES ('101', 1, 'SINGLE', 150.00, 'Quarto standard com cama de casal e ar-condicionado.', 2, 1);
 INSERT INTO rooms (number, floor, type, price_per_night, description, capacity, hotel_id)
   VALUES ('202', 2, 'DOUBLE', 250.00, 'Quarto deluxe espaçoso com vista para o mar e varanda.', 3, 2);
+INSERT INTO rooms (number, floor, type, price_per_night, description, capacity, hotel_id)
+  VALUES ('303', 2, 'SUITE', 350.00, 'Quarto deluxe espaçoso com vista para o mar e varanda.', 3, 2);
 
 INSERT INTO images (base64image, image_type, room_id) VALUES ('', 'ROOM', 1);
 INSERT INTO images (base64image, image_type, room_id) VALUES ('', 'ROOM', 2);
+INSERT INTO images (base64image, image_type, room_id) VALUES ('', 'ROOM', 3);
 
+INSERT INTO room_ratings (room_id, user_id, rating, description, created_at)
+  VALUES (1, 1, 4.5, 'Quarto muito bom e confortável.', '2025-04-25 10:15:03.181656');
+INSERT INTO room_ratings (room_id, user_id, rating, description, created_at)
+  VALUES (2, 2, 4.5, 'Quarto muito bom e confortável.', '2025-04-25 10:15:03.181656');
+
+INSERT INTO payments (id, amount, is_online_payment, payment_type) VALUES (1, 750.00, false, 'DINHEIRO');
+
+INSERT INTO dinheiro_payments (id) VALUES (1);
+
+INSERT INTO bookings (check_in, check_out, created_at, is_finished, payment_id, room_id, user_id, guests_quantity) 
+  VALUES ('2025-05-02', '2025-05-07', '2025-05-02 09:20:10.886597', true, 1, 1, 2, 1);
+
+INSERT INTO credit_cards (brand, card_number, cvv, expiration_date, holder_name, user_id) VALUES ('VISA', '1234567812345678', '123', '2026-08-01', 'Fernando', 1);
+  

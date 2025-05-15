@@ -1,8 +1,11 @@
 package com.fernandocanabarro.booking_app_backend.tests;
 
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -27,6 +30,7 @@ import com.fernandocanabarro.booking_app_backend.models.entities.CreditCard;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
 import com.fernandocanabarro.booking_app_backend.repositories.CreditCardRepository;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.services.impl.CreditCardServiceImpl;
 
@@ -74,13 +78,21 @@ public class CreditCardServiceTests {
 
     @Test
     public void deleteCreditCardShouldThrowNoException() {
-        when(creditCardRepository.existsById(1L)).thenReturn(true);
+        when(creditCardRepository.findById(1L)).thenReturn(Optional.of(creditCard));
+        doNothing().when(authService).verifyIfConnectedUserHasAdminPermission(creditCard.getUser().getId());
         assertThatCode(() -> creditCardService.deleteCreditCard(1L)).doesNotThrowAnyException();
     }
 
     @Test
     public void deleteCreditCardShouldThrowResourceNotFoundException() {
-        when(creditCardRepository.existsById(1L)).thenReturn(false);
+        when(creditCardRepository.findById(1L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> creditCardService.deleteCreditCard(1L)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void deleteCreditCardShouldThrowForbiddenExceptionWhenConnectedUserIsNotAdmin() {
+        when(creditCardRepository.findById(1L)).thenReturn(Optional.of(creditCard));
+        doThrow(new ForbiddenException("User does not have permission to perform this action")).when(authService).verifyIfConnectedUserHasAdminPermission(creditCard.getUser().getId());
+        assertThatThrownBy(() -> creditCardService.deleteCreditCard(1L)).isInstanceOf(ForbiddenException.class);
     }
 }

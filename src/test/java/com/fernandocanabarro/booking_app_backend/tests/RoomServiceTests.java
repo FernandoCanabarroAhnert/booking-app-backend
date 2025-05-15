@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -260,7 +261,6 @@ public class RoomServiceTests {
     @Test
     public void updateRatingShouldThrowNoExceptionWhenDataIsValid() {
         when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
-        when(authService.getConnectedUser()).thenReturn(user);
         when(roomRatingRepository.save(any(RoomRating.class))).thenReturn(roomRating);
 
         assertThatCode(() -> roomService.updateRating(existingId, roomRatingRequest)).doesNotThrowAnyException();
@@ -271,7 +271,6 @@ public class RoomServiceTests {
         user.addRole(RoleFactory.createOperatorRole());
         user.addRole(RoleFactory.createAdminRole());
         when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
-        when(authService.getConnectedUser()).thenReturn(user);
         when(roomRatingRepository.save(any(RoomRating.class))).thenReturn(roomRating);
 
         assertThatCode(() -> roomService.updateRating(existingId, roomRatingRequest)).doesNotThrowAnyException();
@@ -288,7 +287,7 @@ public class RoomServiceTests {
     public void updateRoomRatingShouldThrowForbiddenExceptionWhenConnectedUserIsNotTheOwner() {
         user.setId(2L);
         when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
-        when(authService.getConnectedUser()).thenReturn(user);
+        doThrow(new ForbiddenException("User is not allowed to update this room rating")).when(authService).verifyIfConnectedUserHasAdminPermission(roomRating.getUser().getId());
 
         assertThatThrownBy(() -> roomService.updateRating(existingId, roomRatingRequest)).isInstanceOf(ForbiddenException.class);
     }
@@ -296,7 +295,6 @@ public class RoomServiceTests {
     @Test
     public void deleteRoomRatingShouldThrowNoExceptionWhenRoomRatingExistsAndConnectedUserIsTheOwner() {
         when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
-        when(authService.getConnectedUser()).thenReturn(user);
         doNothing().when(roomRatingRepository).delete(any(RoomRating.class));
 
         assertThatCode(() -> roomService.deleteRating(existingId)).doesNotThrowAnyException();
@@ -307,7 +305,6 @@ public class RoomServiceTests {
         user.addRole(RoleFactory.createOperatorRole());
         user.addRole(RoleFactory.createAdminRole());
         when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
-        when(authService.getConnectedUser()).thenReturn(user);
         doNothing().when(roomRatingRepository).delete(any(RoomRating.class));
 
         assertThatCode(() -> roomService.deleteRating(existingId)).doesNotThrowAnyException();
@@ -324,7 +321,7 @@ public class RoomServiceTests {
     public void deleteteRoomRatingShouldThrowForbiddenExceptionWhenConnectedUserIsNotTheOwner() {
         user.setId(2L);
         when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
-        when(authService.getConnectedUser()).thenReturn(user);
+        doThrow(new ForbiddenException("User is not allowed to update this room rating")).when(authService).verifyIfConnectedUserHasAdminPermission(roomRating.getUser().getId());
 
         assertThatThrownBy(() -> roomService.updateRating(existingId, roomRatingRequest)).isInstanceOf(ForbiddenException.class);
     }

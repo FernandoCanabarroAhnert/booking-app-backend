@@ -138,17 +138,9 @@ public class RoomServiceImpl implements RoomService {
     public void updateRating(Long roomRatingId, RoomRatingRequestDTO request) {
         RoomRating roomRating = this.roomRatingRepository.findById(roomRatingId)
             .orElseThrow(() -> new ResourceNotFoundException("RoomRating", roomRatingId));
-        this.verifyIfConnectedUserIsTheOwnerOfTheResourceOrHasAdminPermission(roomRating);
+        this.authService.verifyIfConnectedUserHasAdminPermission(roomRating.getUser().getId());
         RoomMapper.updateRoomRating(roomRating, request);
         this.roomRatingRepository.save(roomRating);
-    }
-
-    private void verifyIfConnectedUserIsTheOwnerOfTheResourceOrHasAdminPermission(RoomRating roomRating) {
-        User user = this.authService.getConnectedUser();
-        boolean isOwner = roomRating.getUser().getId().equals(user.getId());
-        boolean hasAdminPermission = user.hasRole("ROLE_ADMIN") || user.hasRole("ROLE_OPERATOR");
-        if (isOwner || hasAdminPermission) return;
-        throw new ForbiddenException("Only the owner or admins/operators can modify this rating");
     }
 
     @Override
@@ -156,7 +148,7 @@ public class RoomServiceImpl implements RoomService {
     public void deleteRating(Long roomRatingId) {
         RoomRating roomRating = this.roomRatingRepository.findById(roomRatingId)
             .orElseThrow(() -> new ResourceNotFoundException("RoomRating", roomRatingId));
-        this.verifyIfConnectedUserIsTheOwnerOfTheResourceOrHasAdminPermission(roomRating);
+        this.authService.verifyIfConnectedUserHasAdminPermission(roomRating.getUser().getId());
         this.roomRatingRepository.delete(roomRating);
     }
     

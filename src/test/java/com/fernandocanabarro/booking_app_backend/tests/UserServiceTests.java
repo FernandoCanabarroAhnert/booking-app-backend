@@ -74,6 +74,7 @@ public class UserServiceTests {
         request.setPhone("(11) 99999-9999");
         request.setBirthDate(LocalDate.of(2005,10, 28));
         request.setPassword("12345");
+        request.setActivated(true);
         request.setRolesIds(new ArrayList<>(Arrays.asList(1L)));
 
         this.updateRequest = new AdminUpdateUserRequestDTO();
@@ -82,6 +83,7 @@ public class UserServiceTests {
         updateRequest.setCpf("cpf2");
         updateRequest.setPhone("(11) 99999-9999");
         updateRequest.setBirthDate(LocalDate.of(2005,10, 28));
+        updateRequest.setActivated(true);
         updateRequest.setRolesIds(new ArrayList<>(Arrays.asList(1L)));
 
         existingId = 1L;

@@ -39,7 +39,7 @@ public class BookingMapper {
         response.setGuestsQuantity(entity.getGuestsQuantity());
         response.setCreatedAt(entity.getCreatedAt());
         response.setFinished(entity.isFinished());
-        response.setTotalPrice(entity.getTotalPrice());
+        response.setTotalPrice(entity.getPayment().getAmount());
         response.setUserId(entity.getUser().getId());
         response.setRoomId(entity.getRoom().getId());
         return response;

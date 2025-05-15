@@ -43,12 +43,11 @@ public class CreditCardServiceImpl implements CreditCardService {
     @Override
     @Transactional
     public void deleteCreditCard(Long id) {
-        if (!this.creditCardRepository.existsById(id)) {
-            throw new ResourceNotFoundException("CreditCard", id);
-        }
+        CreditCard creditCard = this.creditCardRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Credit card not found"));
+        this.authService.verifyIfConnectedUserHasAdminPermission(creditCard.getUser().getId());
         this.creditCardRepository.deleteById(id);
     }
-
 
 
 }

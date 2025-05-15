@@ -149,3 +149,15 @@ CREATE TABLE public.pix_payments (
     id BIGSERIAL PRIMARY KEY
 );
 
+ALTER TABLE ONLY cartao_payments
+    ADD CONSTRAINT fkgg3559g2sm981a95w47gxux9 FOREIGN KEY (id) REFERENCES payments(id);
+
+ALTER TABLE ONLY dinheiro_payments
+    ADD CONSTRAINT fkmi76d9acw0scxyxdodhn2wanb FOREIGN KEY (id) REFERENCES payments(id);
+
+ALTER TABLE ONLY public.boleto_payments
+    ADD CONSTRAINT fk337rel9sbese11af8u87nn5hv FOREIGN KEY (id) REFERENCES public.payments(id);
+
+ALTER TABLE ONLY public.pix_payments
+    ADD CONSTRAINT fk9krs9wtbw614oqrkwgu939xe2 FOREIGN KEY (id) REFERENCES public.payments(id);
+
