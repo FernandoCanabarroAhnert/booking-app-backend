@@ -49,7 +49,7 @@ public class AuthController {
     }
 
     @PutMapping("/activate-account")
-    public ResponseEntity<Void> activateAccoun(@RequestBody ActivateAccountRequestDTO request) {
+    public ResponseEntity<Void> activateAccount(@RequestBody ActivateAccountRequestDTO request) {
         this.authService.activateAccount(request);
         return ResponseEntity.ok().build();
     }
@@ -76,15 +76,15 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/password/reset-request")
-    public ResponseEntity<Void> sendPasswordRecoverRequestEmail(@RequestBody PasswordRecoverRequestDTO request) {
-        authService.sendPasswordRecoverRequestEmail(request);
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody PasswordRecoverRequestDTO request) {
+        authService.forgotPassword(request);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/password/reset")
-    public ResponseEntity<Void> setNewPasswordFromPasswordRecoverRequest(@RequestBody @Valid NewPasswordRequestoDTO request) {
-        authService.setNewPasswordFromPasswordRecoverRequest(request);
+    @PutMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody @Valid NewPasswordRequestoDTO request) {
+        authService.resetPassword(request);
         return ResponseEntity.ok().build();
     }
 

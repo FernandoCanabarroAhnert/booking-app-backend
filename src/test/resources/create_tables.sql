@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS bookings (
 
 CREATE TABLE IF NOT EXISTS boleto_payments (
     expiration_date date,
-    id BIGSERIAL PRIMARY KEY
+    id bigint
 );
 
 CREATE TABLE IF NOT EXISTS cartao_payments (
@@ -138,15 +138,15 @@ CREATE TABLE IF NOT EXISTS cartao_payments (
     expiration_date date,
     installment_quantity integer,
     last_four_digits character varying(255),
-    id BIGSERIAL PRIMARY KEY
+    id bigint
 );
 
 CREATE TABLE public.dinheiro_payments (
-    id BIGSERIAL PRIMARY KEY
+    id bigint
 );
 
 CREATE TABLE public.pix_payments (
-    id BIGSERIAL PRIMARY KEY
+    id bigint
 );
 
 ALTER TABLE ONLY cartao_payments

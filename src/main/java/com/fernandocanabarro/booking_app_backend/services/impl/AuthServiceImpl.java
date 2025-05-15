@@ -216,7 +216,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void sendPasswordRecoverRequestEmail(PasswordRecoverRequestDTO request) {
+    public void forgotPassword(PasswordRecoverRequestDTO request) {
         User user = this.userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User with " + request.getEmail() + "email not found"));
         String code = this.generateCode();
@@ -256,7 +256,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void setNewPasswordFromPasswordRecoverRequest(NewPasswordRequestoDTO request) {
+    public void resetPassword(NewPasswordRequestoDTO request) {
         Optional<PasswordRecover> passwordRecover = this.passwordRecoverRepository.findByCode(request.getCode());
         if (passwordRecover.isEmpty()) {
             throw new ResourceNotFoundException("Password recover  with code " + request.getCode() + " not found");

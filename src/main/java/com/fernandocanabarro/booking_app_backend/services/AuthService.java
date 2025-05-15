@@ -20,8 +20,8 @@ public interface AuthService {
     void validateJWTToken(String token);
     void userSelfUpdateInfos(UserSelfUpdateInfosRequestDTO request);
     void userSelfUpdatePassword(UserSelfUpdatePasswordRequestDTO request);
-    void sendPasswordRecoverRequestEmail(PasswordRecoverRequestDTO request);
-    void setNewPasswordFromPasswordRecoverRequest(NewPasswordRequestoDTO request);
+    void forgotPassword(PasswordRecoverRequestDTO request);
+    void resetPassword(NewPasswordRequestoDTO request);
     AlreadyExistsResponseDTO verifyIfUserExistsByEmail(String email);
     AlreadyExistsResponseDTO verifyIfUserExistsByCpf(String cpf);
     void verifyIfConnectedUserHasAdminPermission(Long id);

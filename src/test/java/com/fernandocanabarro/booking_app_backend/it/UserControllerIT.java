@@ -80,7 +80,7 @@ public class UserControllerIT {
         this.guestBearerToken = "Bearer " + AccessTokenUtils.obtainAccessToken(guestEmail, guestPassword, mockMvc, objectMapper);
         this.existingId = 1L;
         this.nonExistingId = 1000L;
-        this.createdUserId = 3L;
+        this.createdUserId = 5L;
 
         this.adminCreateUserRequest = new AdminCreateUserRequestDTO();
         adminCreateUserRequest.setFullName("name");

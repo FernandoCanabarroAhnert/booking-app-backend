@@ -339,14 +339,14 @@ public class AuthServiceTests {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(passwordRecoverRepository.save(any())).thenReturn(passwordRecover);
 
-        assertThatCode(() -> authService.sendPasswordRecoverRequestEmail(new PasswordRecoverRequestDTO(user.getEmail()))).doesNotThrowAnyException();
+        assertThatCode(() -> authService.forgotPassword(new PasswordRecoverRequestDTO(user.getEmail()))).doesNotThrowAnyException();
     }
 
     @Test
     public void sendPasswordRecoverRequestEmailShouldThrowResourceNotFoundExceptionWhenEmailDoesNotExist() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> authService.sendPasswordRecoverRequestEmail(new PasswordRecoverRequestDTO(user.getEmail())))
+        assertThatThrownBy(() -> authService.forgotPassword(new PasswordRecoverRequestDTO(user.getEmail())))
             .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -357,14 +357,14 @@ public class AuthServiceTests {
         when(passwordEncoder.encode(newPasswordRequest.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        assertThatCode(() -> authService.setNewPasswordFromPasswordRecoverRequest(newPasswordRequest)).doesNotThrowAnyException();
+        assertThatCode(() -> authService.resetPassword(newPasswordRequest)).doesNotThrowAnyException();
     }
 
     @Test
     public void setNewPasswordFromPasswordRecoverRequestShouldThrowResourceNotFoundExceptionWhenCodeDoesNotExist() {
         when(passwordRecoverRepository.findByCode(passwordRecover.getCode())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> authService.setNewPasswordFromPasswordRecoverRequest(newPasswordRequest)).isInstanceOf(ResourceNotFoundException.class);
+        assertThatThrownBy(() -> authService.resetPassword(newPasswordRequest)).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -372,7 +372,7 @@ public class AuthServiceTests {
         passwordRecover.setExpiresAt(LocalDateTime.now().minusMinutes(5L));
         when(passwordRecoverRepository.findByCode(passwordRecover.getCode())).thenReturn(Optional.of(passwordRecover));
 
-        assertThatThrownBy(() -> authService.setNewPasswordFromPasswordRecoverRequest(newPasswordRequest)).isInstanceOf(ExpiredCodeException.class);
+        assertThatThrownBy(() -> authService.resetPassword(newPasswordRequest)).isInstanceOf(ExpiredCodeException.class);
     }
 
     @Test

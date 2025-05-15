@@ -14,6 +14,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.exceptions.Validati
 import com.fernandocanabarro.booking_app_backend.services.exceptions.AlreadyExistingPropertyException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.BadRequestException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.EmailException;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.ExpiredCodeException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ImageGeneratingException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.InvalidCurrentPasswordException;
@@ -31,7 +32,8 @@ public class GlobalExceptionHandler {
         EmailException.class,
         ImageGeneratingException.class,
         RequiredWorkingHotelIdException.class,
-        BadRequestException.class
+        BadRequestException.class,
+        ExpiredCodeException.class
     })
     public ResponseEntity<StandardError> badRequest(RuntimeException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
