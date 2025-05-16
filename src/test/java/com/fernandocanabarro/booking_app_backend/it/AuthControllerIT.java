@@ -130,6 +130,126 @@ public class AuthControllerIT {
     }
 
     @Test
+    public void registerShouldReturnStatus422WhenFullNameIsBlank() throws Exception {
+        registrationRequest.setFullName("");
+        mockMvc.perform(post("/api/v1/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(registrationRequest)))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.errors[0].fieldName").value("fullName"))
+            .andExpect(jsonPath("$.errors[0].message").value("Required field"));
+    }
+
+    @Test
+    public void registerShouldReturnStatus422WhenEmailIsBlank() throws Exception {
+        registrationRequest.setEmail("");
+        mockMvc.perform(post("/api/v1/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(registrationRequest)))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.errors[0].fieldName").value("email"))
+            .andExpect(jsonPath("$.errors[0].message").value("Required field"));
+    }
+
+    @Test
+    public void registerShouldReturnStatus422WhenEmailIsInInvalidFormat() throws Exception {
+        registrationRequest.setEmail("aaaaa@--");
+        mockMvc.perform(post("/api/v1/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(registrationRequest)))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.errors[0].fieldName").value("email"))
+            .andExpect(jsonPath("$.errors[0].message").value("Invalid email format"));
+    }
+
+    @Test
+    public void registerShouldReturnStatus422WhenPhoneIsBlank() throws Exception {
+        registrationRequest.setPhone("");
+        mockMvc.perform(post("/api/v1/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(registrationRequest)))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.errors[0].fieldName").value("phone"))
+            .andExpect(jsonPath("$.errors[0].message").value("Required field"));
+    }
+
+    @Test
+    public void registerShouldReturnStatus422WhenCpfIsInInvalidFormat() throws Exception {
+        registrationRequest.setCpf("1251");
+        mockMvc.perform(post("/api/v1/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(registrationRequest)))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.errors[0].fieldName").value("cpf"))
+            .andExpect(jsonPath("$.errors[0].message").value("Invalid CPF format"));
+    }
+
+    @Test
+    public void registerShouldReturnStatus422WhenPasswordIsNot8CharactersLong() throws Exception {
+        registrationRequest.setPassword("1234Az@");
+        mockMvc.perform(post("/api/v1/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(registrationRequest)))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.errors[0].fieldName").value("password"))
+            .andExpect(jsonPath("$.errors[0].message").value("Password must be at least 8 characters long"));
+    }
+    
+    @Test
+    public void registerShouldReturnStatus422WhenPasswordDoesNotHaveAnUpperCaseLetter() throws Exception {
+        registrationRequest.setPassword("12345az@");
+        mockMvc.perform(post("/api/v1/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(registrationRequest)))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.errors[0].fieldName").value("password"))
+            .andExpect(jsonPath("$.errors[0].message").value("Password must contain at least one uppercase letter"));
+    }
+
+    @Test
+    public void registerShouldReturnStatus422WhenPasswordDoesNotHaveALowerCaseLetter() throws Exception {
+        registrationRequest.setPassword("12345AZ@");
+        mockMvc.perform(post("/api/v1/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(registrationRequest)))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.errors[0].fieldName").value("password"))
+            .andExpect(jsonPath("$.errors[0].message").value("Password must contain at least one lowercase letter"));
+    }
+
+    @Test
+    public void registerShouldReturnStatus422WhenPasswordDoesNotHaveANumber() throws Exception {
+        registrationRequest.setPassword("AAAAAAz@");
+        mockMvc.perform(post("/api/v1/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(registrationRequest)))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.errors[0].fieldName").value("password"))
+            .andExpect(jsonPath("$.errors[0].message").value("Password must contain at least one number"));
+    }
+
+    @Test
+    public void registerShouldReturnStatus422WhenPasswordDoesNotHaveASpecialCharacter() throws Exception {
+        registrationRequest.setPassword("12345AzA");
+        mockMvc.perform(post("/api/v1/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(registrationRequest)))
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.errors[0].fieldName").value("password"))
+            .andExpect(jsonPath("$.errors[0].message").value("Password must contain at least one special character"));
+    }
+
+    @Test
     public void loginShouldReturnStatus401WhenCredentialsAreInvalidInBothGuestAndAdminLogin() throws Exception {
         mockMvc.perform(post("/api/v1/auth/login")
             .contentType(MediaType.APPLICATION_JSON)

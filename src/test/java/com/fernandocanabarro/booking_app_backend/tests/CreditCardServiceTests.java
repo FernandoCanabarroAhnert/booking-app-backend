@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.fernandocanabarro.booking_app_backend.factories.CreditCardFactory;
 import com.fernandocanabarro.booking_app_backend.factories.UserFactory;
@@ -35,6 +36,7 @@ import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNot
 import com.fernandocanabarro.booking_app_backend.services.impl.CreditCardServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("it")
 public class CreditCardServiceTests {
 
     @InjectMocks

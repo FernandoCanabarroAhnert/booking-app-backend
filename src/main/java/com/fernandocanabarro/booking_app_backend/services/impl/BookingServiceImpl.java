@@ -227,6 +227,7 @@ public class BookingServiceImpl implements BookingService {
         this.validateBookingOwnership(entity, user, isSelfBooking);
         if (request.getRoomId() == entity.getRoom().getId()) {
             this.verifyIfBookingGuestsQuantityIsNotGreaterThanRoomCapacity(request, entity.getRoom());
+            this.validateRoomAvailability(request, entity.getRoom(), entity.getId());
         }
         BookingMapper.updateEntity(entity, request);
         this.updateBookingRoomIfNeeded(entity, request);

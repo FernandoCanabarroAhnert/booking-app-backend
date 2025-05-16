@@ -28,6 +28,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.JwtException;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.fernandocanabarro.booking_app_backend.factories.RoleFactory;
 import com.fernandocanabarro.booking_app_backend.factories.UserFactory;
@@ -59,6 +60,7 @@ import com.fernandocanabarro.booking_app_backend.utils.UserUtils;
 import com.sendgrid.helpers.mail.Mail;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("it")
 public class AuthServiceTests {
 
     @InjectMocks
@@ -335,15 +337,17 @@ public class AuthServiceTests {
     }
 
     @Test
-    public void sendPasswordRecoverRequestEmailShouldThrowNoExceptionWhenEmailExists() {
+    public void forgotPasswordShouldThrowNoExceptionWhenEmailExists() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(passwordRecoverRepository.save(any())).thenReturn(passwordRecover);
+        when(emailService.createEmail(anyString(), anyString(), anyMap(), anyString())).thenReturn(new Mail());
+        doNothing().when(emailService).sendEmail(any(Mail.class));
 
         assertThatCode(() -> authService.forgotPassword(new PasswordRecoverRequestDTO(user.getEmail()))).doesNotThrowAnyException();
     }
 
     @Test
-    public void sendPasswordRecoverRequestEmailShouldThrowResourceNotFoundExceptionWhenEmailDoesNotExist() {
+    public void forgotPasswordShouldThrowResourceNotFoundExceptionWhenEmailDoesNotExist() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.forgotPassword(new PasswordRecoverRequestDTO(user.getEmail())))
@@ -351,7 +355,7 @@ public class AuthServiceTests {
     }
 
     @Test
-    public void setNewPasswordFromPasswordRecoverRequestShouldThrowNoExceptionWhenCodeIsValid() {
+    public void resetPasswordShouldThrowNoExceptionWhenCodeIsValid() {
         when(passwordRecoverRepository.findByCode(passwordRecover.getCode())).thenReturn(Optional.of(passwordRecover));
         when(passwordRecoverRepository.save(any(PasswordRecover.class))).thenReturn(passwordRecover);
         when(passwordEncoder.encode(newPasswordRequest.getPassword())).thenReturn("encodedPassword");
@@ -361,14 +365,14 @@ public class AuthServiceTests {
     }
 
     @Test
-    public void setNewPasswordFromPasswordRecoverRequestShouldThrowResourceNotFoundExceptionWhenCodeDoesNotExist() {
+    public void resetPasswordShouldThrowResourceNotFoundExceptionWhenCodeDoesNotExist() {
         when(passwordRecoverRepository.findByCode(passwordRecover.getCode())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.resetPassword(newPasswordRequest)).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    public void setNewPasswordFromPasswordRecoverRequestShouldThrowExpiredCodeExceptionWhenCodeIsExpired() {
+    public void resetPasswordShouldThrowExpiredCodeExceptionWhenCodeIsExpired() {
         passwordRecover.setExpiresAt(LocalDateTime.now().minusMinutes(5L));
         when(passwordRecoverRepository.findByCode(passwordRecover.getCode())).thenReturn(Optional.of(passwordRecover));
 

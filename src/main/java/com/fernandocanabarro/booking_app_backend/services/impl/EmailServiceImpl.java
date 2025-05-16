@@ -3,6 +3,7 @@ package com.fernandocanabarro.booking_app_backend.services.impl;
 import java.io.IOException;
 import java.util.Map;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Profile("!it")
 public class EmailServiceImpl implements EmailService {
 
     private final SendGrid sendGrid;

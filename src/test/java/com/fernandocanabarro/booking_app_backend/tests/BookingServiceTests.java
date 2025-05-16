@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.fernandocanabarro.booking_app_backend.factories.BookingFactory;
 import com.fernandocanabarro.booking_app_backend.factories.CreditCardFactory;
@@ -56,6 +57,7 @@ import com.fernandocanabarro.booking_app_backend.services.impl.BookingServiceImp
 import com.sendgrid.helpers.mail.Mail;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("it")
 public class BookingServiceTests {
 
     @InjectMocks

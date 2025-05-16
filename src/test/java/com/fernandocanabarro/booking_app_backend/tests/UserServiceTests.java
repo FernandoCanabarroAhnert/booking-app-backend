@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.fernandocanabarro.booking_app_backend.factories.HotelFactory;
 import com.fernandocanabarro.booking_app_backend.factories.RoleFactory;
@@ -44,6 +45,7 @@ import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNot
 import com.fernandocanabarro.booking_app_backend.services.impl.UserServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("it")
 public class UserServiceTests {
 
     @InjectMocks

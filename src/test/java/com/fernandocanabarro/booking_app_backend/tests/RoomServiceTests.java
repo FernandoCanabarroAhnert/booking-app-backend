@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.fernandocanabarro.booking_app_backend.factories.BookingFactory;
 import com.fernandocanabarro.booking_app_backend.factories.HotelFactory;
@@ -49,6 +50,7 @@ import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNot
 import com.fernandocanabarro.booking_app_backend.services.impl.RoomServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("it")
 public class RoomServiceTests {
 
     @InjectMocks
