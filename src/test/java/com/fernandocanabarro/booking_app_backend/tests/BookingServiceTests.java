@@ -38,6 +38,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequ
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.BoletoPayment;
 import com.fernandocanabarro.booking_app_backend.models.entities.Booking;
+import com.fernandocanabarro.booking_app_backend.models.entities.CreditCard;
 import com.fernandocanabarro.booking_app_backend.models.entities.Payment;
 import com.fernandocanabarro.booking_app_backend.models.entities.Room;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
@@ -264,6 +265,25 @@ public class BookingServiceTests {
     }
 
     @Test
+    public void createBookingShouldThrowBadRequestExceptionWhenPaymentTypeIsCartaoAndIsOnlineButIsNotSelfBooking() {
+        bookingRequest.setPayment(PaymentFactory.createOnlineCartaoPaymentRequest());
+
+        assertThatThrownBy(() -> bookingService.createBooking(bookingRequest, false)).isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    public void createBookingShouldThrowForbiddenRequestExceptionWhenPaymentTypeIsCartaoAndIsOnlineAndIsSelfBookingButCreditCardDoesNotBelongToCurrentUser() {
+        CreditCard creditCard = CreditCardFactory.createCreditCard();
+        creditCard.getUser().setId(2L);
+        bookingRequest.setPayment(PaymentFactory.createOnlineCartaoPaymentRequest());
+        when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
+        when(authService.getConnectedUser()).thenReturn(user);
+        when(creditCardRepository.findById(bookingRequest.getPayment().getCreditCardId())).thenReturn(Optional.of(creditCard));
+
+        assertThatThrownBy(() -> bookingService.createBooking(bookingRequest, true)).isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
     public void createBookingShouldThrowBadRequestExceptionWhenGuestsQuantityIsGreaterThanRoomCapacity() {
         bookingRequest.setGuestsQuantity(100);
         when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
@@ -468,15 +488,16 @@ public class BookingServiceTests {
     }
 
     @Test
-    public void updateBookingPaymentShouldThrowNoExceptionWhenBookingPaymentRequestIsCartaoAndIsNotSelfBookingAndIsOnline() {
+    public void updateBookingPaymentShouldThrowNoExceptionWhenBookingPaymentRequestIsCartaoAndISelfBookingAndIsOnline() {
         this.bookingPaymentRequest = PaymentFactory.createOnlineCartaoPaymentRequest();
+        when(authService.getConnectedUser()).thenReturn(user);
         when(bookingRepository.findById(existingId)).thenReturn(Optional.of(booking));
         when(paymentRepository.findById(booking.getId())).thenReturn(Optional.of(booking.getPayment()));
         when(creditCardRepository.findById(bookingPaymentRequest.getCreditCardId())).thenReturn(Optional.of(CreditCardFactory.createCreditCard()));
         when(paymentRepository.save(any(Payment.class))).thenReturn(booking.getPayment());
         when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
 
-        assertThatCode(() -> bookingService.updateBookingPayment(existingId, bookingPaymentRequest, false)).doesNotThrowAnyException();
+        assertThatCode(() -> bookingService.updateBookingPayment(existingId, bookingPaymentRequest, true)).doesNotThrowAnyException();
     }
 
     @Test
@@ -505,6 +526,29 @@ public class BookingServiceTests {
         otherUser.setId(2L);
         when(bookingRepository.findById(existingId)).thenReturn(Optional.of(booking));
         when(authService.getConnectedUser()).thenReturn(otherUser);
+
+        assertThatThrownBy(() -> bookingService.updateBookingPayment(existingId, bookingPaymentRequest, true))
+            .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    public void updateBookingPaymentShouldThrowBadRequestExceptionWhenPaymentTypeIsCartaoAndIsOnlineButIsNotSelfBooking() {
+        bookingPaymentRequest = PaymentFactory.createOnlineCartaoPaymentRequest();
+        when(bookingRepository.findById(existingId)).thenReturn(Optional.of(booking));
+
+        assertThatThrownBy(() -> bookingService.updateBookingPayment(existingId, bookingPaymentRequest, false))
+            .isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    public void updateBookingPaymentShouldThrowBadRequestExceptionWhenPaymentTypeIsCartaoAndIsOnlineButCreditCardDoesNotBelongToCurrentUser() {
+        bookingPaymentRequest = PaymentFactory.createOnlineCartaoPaymentRequest();
+        CreditCard creditCard = CreditCardFactory.createCreditCard();
+        creditCard.getUser().setId(2L);
+        when(bookingRepository.findById(existingId)).thenReturn(Optional.of(booking));
+        when(authService.getConnectedUser()).thenReturn(user);
+        when(paymentRepository.findById(booking.getId())).thenReturn(Optional.of(booking.getPayment()));
+        when(creditCardRepository.findById(bookingPaymentRequest.getCreditCardId())).thenReturn(Optional.of(creditCard));
 
         assertThatThrownBy(() -> bookingService.updateBookingPayment(existingId, bookingPaymentRequest, true))
             .isInstanceOf(ForbiddenException.class);

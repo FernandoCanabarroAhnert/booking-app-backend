@@ -100,6 +100,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public void createBooking(BookingRequestDTO request, boolean isSelfBooking) {
         this.validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(request.getPayment());
+        this.validateIfBookingIsFromAdminRequestButPaymentTypeIsCartaoAndIsOnlinePayment(request.getPayment(), isSelfBooking);
         this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndInstallmentQuantityWhenPaymentIsWithCreditCard(request.getPayment());
         Room room = this.roomRepository.findById(request.getRoomId())
             .orElseThrow(() -> new ResourceNotFoundException("Room", request.getRoomId()));
@@ -109,7 +110,7 @@ public class BookingServiceImpl implements BookingService {
         Booking entity = BookingMapper.convertRequestToEntity(request, room, user);
         Payment payment = this.getBookingPayment(request.getPayment().getPaymentType(), entity.getTotalPrice(),
             request.getPayment().getInstallmentQuantity(), request.getPayment().getIsOnlinePayment());
-        this.setCartaoPaymentDataWhenPaymentIsOnlineAndWithCreditCard(payment, request.getPayment());
+        this.setCartaoPaymentDataWhenPaymentIsOnlineAndWithCreditCardAndIsSelfBooking(payment, request.getPayment(), user, isSelfBooking);
         payment = this.paymentRepository.save(payment);
         entity.setPayment(payment);
         this.bookingRepository.save(entity);
@@ -120,6 +121,12 @@ public class BookingServiceImpl implements BookingService {
     private void validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(BookingPaymentRequestDTO payment) {
         if (payment.getPaymentType() == 1 && payment.getIsOnlinePayment()) {
             throw new BadRequestException("Dinheiro payment cannot be online.");
+        }
+    }
+
+    private void validateIfBookingIsFromAdminRequestButPaymentTypeIsCartaoAndIsOnlinePayment(BookingPaymentRequestDTO payment, boolean isSelfBooking) {
+        if (!isSelfBooking && payment.getPaymentType() == 2 && payment.getIsOnlinePayment()) {
+            throw new BadRequestException("Credit Card payment cannot be online for admin booking requests.");
         }
     }
 
@@ -173,10 +180,14 @@ public class BookingServiceImpl implements BookingService {
         return paymentStrategyMap.get(paymentType).processBookingPayment(amount, installmentQuantity, isOnlinePayment);
     }
 
-    private void setCartaoPaymentDataWhenPaymentIsOnlineAndWithCreditCard(Payment payment, BookingPaymentRequestDTO paymentRequest) {
-        if (payment instanceof CartaoPayment && paymentRequest.getIsOnlinePayment()) {
+    private void setCartaoPaymentDataWhenPaymentIsOnlineAndWithCreditCardAndIsSelfBooking(Payment payment, BookingPaymentRequestDTO paymentRequest, User user, boolean isSelfBooking) {
+        if (payment instanceof CartaoPayment && paymentRequest.getIsOnlinePayment() && isSelfBooking) {
             CreditCard creditCard = this.creditCardRepository.findById(paymentRequest.getCreditCardId())
                 .orElseThrow(() -> new ResourceNotFoundException("Credit Card", paymentRequest.getCreditCardId()));
+            boolean isConnectedUserTheOwnerOfCreditCard = creditCard.getUser().getId().equals(user.getId());
+            if (!isConnectedUserTheOwnerOfCreditCard) {
+                throw new ForbiddenException("Credit card does not belong to current user.");
+            }
             ((CartaoPayment)payment).setCreditCardId(creditCard.getId());
             ((CartaoPayment)payment).setCardHolderName(creditCard.getHolderName());
             ((CartaoPayment)payment).setLastFourDigits(creditCard.getCardNumber().substring(creditCard.getCardNumber().length() - 4));
@@ -269,23 +280,24 @@ public class BookingServiceImpl implements BookingService {
     public void updateBookingPayment(Long id, BookingPaymentRequestDTO request, boolean isSelfBooking) {
         Booking entity = this.bookingRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Booking", id));
+        this.validateIfBookingIsFromAdminRequestButPaymentTypeIsCartaoAndIsOnlinePayment(request, isSelfBooking);
         if (isSelfBooking) {
             User user = this.authService.getConnectedUser();
             this.validateBookingOwnership(entity, user, isSelfBooking);
         }
         this.validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(request);
         this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndInstallmentQuantityWhenPaymentIsWithCreditCard(request);
-        this.updatePayment(entity, request);
+        this.updatePayment(entity, request, isSelfBooking);
     }
 
     @Transactional
-    private void updatePayment(Booking entity, BookingPaymentRequestDTO request) {
+    private void updatePayment(Booking entity, BookingPaymentRequestDTO request, boolean isSelfBooking) {
         Payment oldPayment = this.paymentRepository.findById(entity.getPayment().getId()).get();
         entity.setPayment(null);
         this.paymentRepository.delete(oldPayment);
         Payment newPayment = this.getBookingPayment(request.getPaymentType(), entity.getTotalPrice(), 
             request.getInstallmentQuantity(), request.getIsOnlinePayment());
-        this.setCartaoPaymentDataWhenPaymentIsOnlineAndWithCreditCard(newPayment, request);
+        this.setCartaoPaymentDataWhenPaymentIsOnlineAndWithCreditCardAndIsSelfBooking(newPayment, request, entity.getUser(), isSelfBooking);
         newPayment = this.paymentRepository.save(newPayment);
         entity.setPayment(newPayment);
         bookingRepository.save(entity);

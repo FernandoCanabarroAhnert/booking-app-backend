@@ -336,14 +336,14 @@ public class BookingControllerIT {
 
     @Test
     @Order(5)
-    public void adminCreateBookingShouldReturnStatus404WhenPaymentTypeIsCreditCardAndOnlinePaymenteIsSetToTrueButCreditCardDoesNotExist() throws Exception {
+    public void adminCreateBookingShouldReturnStatus400WhenPaymentTypeIsCreditCardAndOnlinePaymenteIsSetToTrue() throws Exception {
         adminBookingRequest.setPayment(PaymentFactory.createOnlineCartaoPaymentRequest());
         adminBookingRequest.getPayment().setCreditCardId(nonExistingId);
         mockMvc.perform(post("/api/v1/bookings")
             .header("Authorization", adminBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(adminBookingRequest)))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -448,6 +448,20 @@ public class BookingControllerIT {
     }
 
     @Test
+    @Order(12)
+    public void guestCreateBookingShouldReturnStatus403WhenPaymentTypeIsCreditCardAndOnlinePaymenteIsSetToTrueButCreditCardDoesNotBelongToConnectedUser() throws Exception {
+        selfBookingRequest.setCheckIn(LocalDate.of(2025, 7, 28));
+        selfBookingRequest.setCheckOut(LocalDate.of(2025, 7, 29));
+        selfBookingRequest.setPayment(PaymentFactory.createOnlineCartaoPaymentRequest());
+        selfBookingRequest.getPayment().setCreditCardId(1L);
+        mockMvc.perform(post("/api/v1/bookings/self")
+            .header("Authorization", guestBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(selfBookingRequest)))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
     public void adminUpdateBookingShouldReturnStatus401AuthTokenIsMissing() throws Exception {
         mockMvc.perform(put("/api/v1/bookings/{id}", 2L)
             .contentType(MediaType.APPLICATION_JSON)
@@ -465,7 +479,7 @@ public class BookingControllerIT {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     public void adminUpdateBookingShouldReturnStatus200WhenUserIsAdmin() throws Exception {
         mockMvc.perform(put("/api/v1/bookings/{id}", 2L)
             .header("Authorization", adminBearerToken)
@@ -475,7 +489,7 @@ public class BookingControllerIT {
     }
  
     @Test
-    @Order(13)
+    @Order(14)
     public void adminUpdateBookingShouldReturnStatus409WhenCheckInOrCheckOutDatesAreInvalid() throws Exception {
         selfBookingRequest.setCheckIn(LocalDate.of(2025, 8, 1));
         selfBookingRequest.setCheckOut(LocalDate.of(2025, 8, 7));
@@ -501,7 +515,7 @@ public class BookingControllerIT {
     }
 
     @Test
-    @Order(14)
+    @Order(15)
     public void adminUpdateBookingShouldReturnStatus400WhenGuestsQuantityIsGreaterThanRoomCapacity() throws Exception {
         adminUpdateBookingRequest.setGuestsQuantity(1000);
         mockMvc.perform(put("/api/v1/bookings/{id}", 2L)
@@ -550,7 +564,7 @@ public class BookingControllerIT {
     }
 
     @Test
-    @Order(15)
+    @Order(16)
     public void guestUpdateBookingShouldReturnStatus409WhenCheckInOrCheckOutDatesAreInvalid() throws Exception {
         selfBookingRequest.setCheckIn(LocalDate.of(2025, 8, 8));
         selfBookingRequest.setCheckOut(LocalDate.of(2025, 8, 15));
@@ -577,7 +591,7 @@ public class BookingControllerIT {
     }
 
     @Test
-    @Order(16)
+    @Order(17)
     public void guestUpdateBookingShouldReturnStatus200WhenUserIsLogged() throws Exception {
         long guestUserLastCreatedBookingId = 5L;
         mockMvc.perform(put("/api/v1/bookings/{id}/self", guestUserLastCreatedBookingId)
@@ -588,7 +602,7 @@ public class BookingControllerIT {
     }
 
     @Test
-    @Order(17)
+    @Order(18)
     public void guestUpdateBookingShouldReturnStatus400WhenGuestsQuantityIsGreaterThanRoomCapacity() throws Exception {
         long guestUserLastCreatedBookingId = 5L;
         selfUpdateBookingRequest.setGuestsQuantity(1000);
@@ -636,7 +650,7 @@ public class BookingControllerIT {
     }
 
     @Test
-    @Order(18)
+    @Order(19)
     public void adminUpdateBookingPaymentShouldReturnStatus200WhenUserIsAdmin() throws Exception {
         mockMvc.perform(put("/api/v1/bookings/{id}/payment", existingId)
             .header("Authorization", adminBearerToken)
@@ -657,18 +671,6 @@ public class BookingControllerIT {
     }
 
     @Test
-    public void adminUpdateBookingPaymentShouldReturnStatus400WhenPaymentTypeIsCartaoAndOnlinePaymentIsSetToTrueButCreditCardIdIsNull() throws Exception {
-        bookingPaymentRequest.setPaymentType(2);
-        bookingPaymentRequest.setIsOnlinePayment(true);
-        bookingPaymentRequest.setCreditCardId(null);
-        mockMvc.perform(put("/api/v1/bookings/{id}/payment", existingId)
-            .header("Authorization", adminBearerToken)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(bookingPaymentRequest)))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
     public void adminUpdateBookingPaymentShouldReturnStatus400WhenPaymentTypeIsCartaoButInstallmentQuantityIsNull() throws Exception {
         bookingPaymentRequest.setPaymentType(2);
         bookingPaymentRequest.setIsOnlinePayment(false);
@@ -681,16 +683,14 @@ public class BookingControllerIT {
     }
 
     @Test
-    public void adminUpdateBookingPaymentShouldReturnStatus404WhenPaymentTypeIsCartaoAndOnlinePaymentIsSetToTrueButCreditCardDoesNotExist() throws Exception {
+    public void adminUpdateBookingPaymentShouldReturnStatus400WhenPaymentTypeIsCartaoAndOnlinePaymentIsSetToTrue() throws Exception {
         bookingPaymentRequest.setPaymentType(2);
         bookingPaymentRequest.setIsOnlinePayment(true);
-        bookingPaymentRequest.setInstallmentQuantity(2);
-        bookingPaymentRequest.setCreditCardId(nonExistingId);
         mockMvc.perform(put("/api/v1/bookings/{id}/payment", existingId)
             .header("Authorization", adminBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(bookingPaymentRequest)))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -711,7 +711,7 @@ public class BookingControllerIT {
     }
 
     @Test
-    @Order(22)
+    @Order(23)
     public void guestUpdateBookingPaymentShouldReturnStatus403WhenBookingDoesNotBelongToConnectedUser() throws Exception {
         mockMvc.perform(put("/api/v1/bookings/{id}/payment/self", 2L)
             .header("Authorization", guestBearerToken)
@@ -721,7 +721,7 @@ public class BookingControllerIT {
     }
 
     @Test
-    @Order(19)
+    @Order(20)
     public void guestUpdateBookingPaymentShouldReturnStatus200WhenUserIsAdmin() throws Exception {
         mockMvc.perform(put("/api/v1/bookings/{id}/payment/self", existingId)
             .header("Authorization", guestBearerToken)
@@ -731,7 +731,7 @@ public class BookingControllerIT {
     }
 
     @Test
-    @Order(20)
+    @Order(21)
     public void guestUpdateBookingPaymentShouldReturnStatus400WhenPaymentTypeIsDinheiroButOnlinePaymentIsSetToTrue() throws Exception {
         bookingPaymentRequest.setPaymentType(1);
         bookingPaymentRequest.setIsOnlinePayment(true);
@@ -743,7 +743,7 @@ public class BookingControllerIT {
     }
 
     @Test
-    @Order(21)
+    @Order(22)
     public void guestUpdateBookingPaymentShouldReturnStatus400WhenPaymentTypeIsCartaoAndOnlinePaymentIsSetToTrueButCreditCardIdIsNull() throws Exception {
         bookingPaymentRequest.setPaymentType(2);
         bookingPaymentRequest.setIsOnlinePayment(true);
@@ -803,7 +803,7 @@ public class BookingControllerIT {
     }
 
     @Test
-    @Order(23)
+    @Order(24)
     public void deleteBookingShouldReturnStatus204WhenUserIsAdmin() throws Exception {
         mockMvc.perform(delete("/api/v1/bookings/{id}", 2L)
             .header("Authorization", adminBearerToken))
