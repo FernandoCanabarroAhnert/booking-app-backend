@@ -59,17 +59,18 @@ public class ProjectSecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(requests -> requests.anyRequest().permitAll())
-            .cors(cors -> cors.configurationSource(new CorsConfigurationSource() {
-                @Override
-                public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(Collections.singletonList("*"));
-                    config.setAllowedMethods(Collections.singletonList("*"));
-                    config.setAllowedHeaders(Collections.singletonList("*"));
-                    config.setAllowCredentials(true);
-                    return config;
-                }
-            }))
+            // .cors(cors -> cors.configurationSource(new CorsConfigurationSource() {
+            //     @Override
+            //     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+            //         CorsConfiguration config = new CorsConfiguration();
+            //         config.setAllowedOrigins(Collections.singletonList("*"));
+            //         config.setAllowedMethods(Collections.singletonList("*"));
+            //         config.setAllowedHeaders(Collections.singletonList("*"));
+            //         config.setAllowCredentials(true);
+            //         return config;
+            //     }
+            // }))
+            .cors(cors -> cors.disable())
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
         return http.build();
     }
