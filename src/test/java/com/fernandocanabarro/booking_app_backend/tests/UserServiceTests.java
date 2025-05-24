@@ -34,7 +34,9 @@ import com.fernandocanabarro.booking_app_backend.factories.UserFactory;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminUpdateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminCreateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSearchResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
+import com.fernandocanabarro.booking_app_backend.projections.UserSearchProjection;
 import com.fernandocanabarro.booking_app_backend.repositories.HotelRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.RoleRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.UserRepository;
@@ -62,6 +64,7 @@ public class UserServiceTests {
     private User user;
     private AdminCreateUserRequestDTO request;
     private AdminUpdateUserRequestDTO updateRequest;
+    private UserSearchProjection projection;
     private Long existingId;
     private Long nonExistingId;
 
@@ -88,8 +91,31 @@ public class UserServiceTests {
         updateRequest.setActivated(true);
         updateRequest.setRolesIds(new ArrayList<>(Arrays.asList(1L)));
 
+        this.projection = new UserSearchProjection() {
+            @Override
+            public Long getId() {
+                return 1L;
+            }
+
+            @Override
+            public String getCpf() {
+                return "cpf";
+            }
+        };
+
         existingId = 1L;
         nonExistingId = 99L;
+    }
+
+    @Test
+    public void adminFindAllByCpfShouldReturnListOfSearchUserResponseDTO() {
+        when(userRepository.findAllByCpfContainingIgnoreCase("name")).thenReturn(List.of(projection));
+
+        List<UserSearchResponseDTO> response = userService.findAllByCpf("name");
+
+        assertThat(response).isNotNull();
+        assertThat(response.get(0).getId()).isEqualTo(1L);
+        assertThat(response.get(0).getCpf()).isEqualTo("cpf");
     }
 
     @Test

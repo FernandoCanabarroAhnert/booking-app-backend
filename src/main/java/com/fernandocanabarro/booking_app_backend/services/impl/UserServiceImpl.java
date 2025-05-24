@@ -15,6 +15,7 @@ import com.fernandocanabarro.booking_app_backend.mappers.UserMapper;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminCreateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminUpdateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSearchResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseUserProperties;
 import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
 import com.fernandocanabarro.booking_app_backend.models.entities.Role;
@@ -38,6 +39,13 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final HotelRepository hotelRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserSearchResponseDTO> findAllByCpf(String cpf) {
+        return this.userRepository.findAllByCpfContainingIgnoreCase(cpf).stream()
+            .map(user -> new UserSearchResponseDTO(user.getId(), user.getCpf())).toList();
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -163,6 +171,8 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("User can not be deleted because it has bookings associated with");
         }
     }
+
+   
 
     
 

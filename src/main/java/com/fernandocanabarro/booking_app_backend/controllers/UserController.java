@@ -15,11 +15,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminCreateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminUpdateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSearchResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.UserService;
@@ -38,6 +40,12 @@ public class UserController {
     private final UserService userService;
     private final BookingService bookingService;
     private final JasperService jasperService;
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
+    public ResponseEntity<List<UserSearchResponseDTO>> findAllByCpf(@RequestParam(name = "cpf") String cpf) {
+        return ResponseEntity.ok(this.userService.findAllByCpf(cpf));
+    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
@@ -79,6 +87,7 @@ public class UserController {
     }
 
     @GetMapping("/pdf")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void exportToPdf(HttpServletResponse response) {
         response.setContentType("application/pdf");
         String headerKey = "Content-Disposition";
@@ -90,6 +99,7 @@ public class UserController {
     }
 
     @GetMapping("/excel")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void exportToExcel(HttpServletResponse response) {
         response.setContentType("application/octet-stream");
         String headerKey = "Content-Disposition";

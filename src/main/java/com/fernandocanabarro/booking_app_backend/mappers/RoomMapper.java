@@ -51,6 +51,7 @@ public class RoomMapper {
         response.setDescription(entity.getDescription());
         response.setCapacity(entity.getCapacity());
         response.setHotelId(entity.getHotel().getId());
+        response.setRatingsQuantity(entity.getRatings().size());
         response.setAverageRating(entity.getAverageRating());
         response.setHotelName(entity.getHotel().getName());
         response.setCardDisplayImage(ImageMapper.convertEntityResponseDTO(entity.getImages().get(0)));
@@ -66,6 +67,7 @@ public class RoomMapper {
         response.setPricePerNight(entity.getPricePerNight());
         response.setDescription(entity.getDescription());
         response.setCapacity(entity.getCapacity());
+        response.setRatingsQuantity(entity.getRatings().size());
         response.setAverageRating(entity.getAverageRating());
         response.setHotel(HotelMapper.convertEntityToResponse(entity.getHotel()));
         response.setUnavailableDates(entity.getUnavailableDates());

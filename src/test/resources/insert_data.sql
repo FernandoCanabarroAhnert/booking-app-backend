@@ -20,8 +20,8 @@ INSERT INTO users (full_name, email, password, phone, cpf, birth_date, created_a
     VALUES ('Fernando', 'fernando@gmail.com', '$2a$10$vB8CKU3B8Arygzyb/nv/0Ol8YzL/YEATkB/O3pF9ltf1/B9hfhwc6', '(51) 1234-12345', '329.949.250-01', '2005-10-28', '2025-04-25 10:15:03.181656', true, 1);
 INSERT INTO users (full_name, email, password, phone, cpf, birth_date, created_at, activated) 
     VALUES ('Anita', 'anita@gmail.com', '$2a$10$vB8CKU3B8Arygzyb/nv/0Ol8YzL/YEATkB/O3pF9ltf1/B9hfhwc6', '(51) 1234-12345', '123.456.789-10', '2005-10-28', '2025-04-25 10:15:03.181656', true);
-INSERT INTO users (full_name, email, password, phone, cpf, birth_date, created_at, activated) 
-    VALUES ('William', 'william@gmail.com', '$2a$10$vB8CKU3B8Arygzyb/nv/0Ol8YzL/YEATkB/O3pF9ltf1/B9hfhwc6', '(51) 1234-12345', '062.083.260-60', '2005-06-28', '2025-04-25 10:15:03.181656', false);
+INSERT INTO users (full_name, email, password, phone, cpf, birth_date, created_at, activated, hotel_id) 
+    VALUES ('William', 'william@gmail.com', '$2a$10$vB8CKU3B8Arygzyb/nv/0Ol8YzL/YEATkB/O3pF9ltf1/B9hfhwc6', '(51) 1234-12345', '062.083.260-60', '2005-06-28', '2025-04-25 10:15:03.181656', false, 1);
 INSERT INTO users (full_name, email, password, phone, cpf, birth_date, created_at, activated) 
     VALUES ('Pereira', 'pereira@gmail.com', '$2a$10$vB8CKU3B8Arygzyb/nv/0Ol8YzL/YEATkB/O3pF9ltf1/B9hfhwc6', '(51) 1234-12345', '786.857.060-17', '2005-06-28', '2025-04-25 10:15:03.181656', true);
 
@@ -30,6 +30,7 @@ INSERT INTO user_role (user_id, role_id) VALUES (1, 2);
 INSERT INTO user_role (user_id, role_id) VALUES (1, 3);
 INSERT INTO user_role (user_id, role_id) VALUES (2, 1);
 INSERT INTO user_role (user_id, role_id) VALUES (3, 1);
+INSERT INTO user_role (user_id, role_id) VALUES (3, 2);
 INSERT INTO user_role (user_id, role_id) VALUES (4, 1);
 
 INSERT INTO rooms (number, floor, type, price_per_night, description, capacity, hotel_id)

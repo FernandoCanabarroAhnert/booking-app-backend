@@ -81,7 +81,7 @@ public class Room {
         return this.ratings.stream()
             .map(RoomRating::getRating)
             .reduce(BigDecimal.ZERO, BigDecimal::add)
-            .divide(new BigDecimal(this.ratings.size())).setScale(2, RoundingMode.HALF_UP);
+            .divide(new BigDecimal(this.ratings.size()), 1, RoundingMode.HALF_UP);
     }
 
 }

@@ -39,6 +39,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.ActivateA
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AlreadyExistsResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.LoginRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.RegistrationRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdateInfosRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdatePasswordRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.ActivationCode;
@@ -248,6 +249,19 @@ public class AuthServiceTests {
         when(userRepository.findByEmail("email")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.getConnectedUser()).isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    public void getMeShouldReturnUserResponseDTO() {
+        when(userUtils.getConnectedUserEmail()).thenReturn("email");
+        when(userRepository.findByEmail("email")).thenReturn(Optional.of(user));
+
+        UserResponseDTO response = authService.getMe();
+
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getEmail()).isEqualTo("email");
+        assertThat(response.getCpf()).isEqualTo("cpf");
     }
 
     @Test

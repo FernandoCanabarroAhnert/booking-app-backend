@@ -48,6 +48,7 @@ import com.fernandocanabarro.booking_app_backend.services.AuthService;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.services.impl.RoomServiceImpl;
+import com.fernandocanabarro.booking_app_backend.utils.DateUtils;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("it")
@@ -108,6 +109,26 @@ public class RoomServiceTests {
     }
 
     @Test
+    public void findAllRoomsPageableWithQueryPageableShouldReturnPageOfRooms() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Room> page = new PageImpl<>(List.of(this.room));
+
+        String checkIn = "2026-10-01";
+        String checkOut = "2026-10-05";
+
+        when(this.roomRepository.findByTypeOrCapacityOrPricePerNightOrByHotelCity(null, null, null, null, null, pageable)).thenReturn(page);
+
+        Page<RoomResponseDTO> response = this.roomService.findAllPageable(null, null, null, null, null, 
+            DateUtils.convertStringParamToLocalDate(checkIn), DateUtils.convertStringParamToLocalDate(checkOut), pageable);
+
+        assertThat(response).isNotEmpty();
+        assertThat(response.getContent().get(0).getId()).isEqualTo(1L);
+        assertThat(response.getContent().get(0).getNumber()).isEqualTo("101");
+        assertThat(response.getContent().get(0).getPricePerNight()).isEqualTo(BigDecimal.valueOf(100));
+        assertThat(response.getContent().get(0).getType()).isEqualTo(1);
+    }
+
+    @Test
     public void findAllRoomsPageableShouldReturnPageOfRooms() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Room> page = new PageImpl<>(List.of(this.room));
@@ -145,9 +166,36 @@ public class RoomServiceTests {
     }
 
     @Test
-    public void createShouldThrowNoExceptionWhenHotelExists() {
+    public void createShouldThrowNoExceptionWhenOperatorWorkingHotelIsEqualToHotelRequest() {
+        user.getRoles().clear();
+        user.addRole(RoleFactory.createOperatorRole());
+        user.setWorkingHotel(hotel);
         when(hotelRepository.findById(existingId)).thenReturn(Optional.of(hotel));
+        when(authService.getConnectedUser()).thenReturn(user);
         when(roomRepository.save(any(Room.class))).thenReturn(room);
+
+        assertThatCode(() -> roomService.create(request, List.of(mockImage))).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void createShouldThrowNoExceptionWhenAdminIsCreatingRoom() {
+        user.getRoles().clear();
+        user.addRole(RoleFactory.createAdminRole());
+        when(hotelRepository.findById(existingId)).thenReturn(Optional.of(hotel));
+        when(authService.getConnectedUser()).thenReturn(user);
+        when(roomRepository.save(any(Room.class))).thenReturn(room);
+
+        assertThatCode(() -> roomService.create(request, List.of(mockImage))).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void createShouldThrowForbiddenExceptionWhenOperatorWorkingHotelIsDifferentFromHotelRequest() {
+        user.getRoles().clear();
+        user.addRole(RoleFactory.createOperatorRole());
+        user.setWorkingHotel(hotel);
+        request.setHotelId(2L);
+        when(hotelRepository.findById(2L)).thenReturn(Optional.of(hotel));
+        when(authService.getConnectedUser()).thenReturn(user);
 
         assertThatCode(() -> roomService.create(request, List.of(mockImage))).doesNotThrowAnyException();
     }
@@ -161,7 +209,11 @@ public class RoomServiceTests {
 
     @Test
     public void updateShouldThrowNoExceptionWhenRoomIdExists() {
+        user.getRoles().clear();
+        user.addRole(RoleFactory.createOperatorRole());
+        user.setWorkingHotel(hotel);
         when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
+        when(authService.getConnectedUser()).thenReturn(user);
         when(roomRepository.save(any(Room.class))).thenReturn(room);
 
         assertThatCode(() -> roomService.update(existingId, request, List.of(mockImage))).doesNotThrowAnyException();
@@ -177,6 +229,9 @@ public class RoomServiceTests {
     @Test
     public void updateShouldThrowNoExceptionWhenHotelIdIsChangedAndHotelExists() {
         request.setHotelId(2L);
+        user.getRoles().clear();
+        user.addRole(RoleFactory.createAdminRole());
+        when(authService.getConnectedUser()).thenReturn(user);
         when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
         when(hotelRepository.findById(2L)).thenReturn(Optional.of(hotel));
         when(roomRepository.save(any(Room.class))).thenReturn(room);
@@ -186,16 +241,25 @@ public class RoomServiceTests {
 
     @Test
     public void updateShouldThrowNoExceptionWhenHotelIdIsChangedButHotelDoesNotExist() {
-        request.setHotelId(2L);
+        request.setHotelId(nonExistingId);
+        user.getRoles().clear();
+        user.addRole(RoleFactory.createAdminRole());
+        hotel.setId(2L);
+        user.setWorkingHotel(hotel);
+        when(authService.getConnectedUser()).thenReturn(user);
         when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
-        when(hotelRepository.findById(2L)).thenReturn(Optional.empty());
+        when(hotelRepository.findById(nonExistingId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> roomService.update(existingId, request, List.of(mockImage))).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
     public void updateShouldThrowNoExceptionWhenImagesAreNull() {
+        user.getRoles().clear();
+        user.addRole(RoleFactory.createOperatorRole());
+        user.setWorkingHotel(hotel);
         when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
+        when(authService.getConnectedUser()).thenReturn(user);
         when(roomRepository.save(any(Room.class))).thenReturn(room);
 
         assertThatCode(() -> roomService.update(existingId, request, null)).doesNotThrowAnyException();
@@ -213,6 +277,20 @@ public class RoomServiceTests {
         when(roomRepository.existsById(nonExistingId)).thenReturn(false);
         
         assertThatThrownBy(() -> roomService.delete(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void deleteImageShouldThrowNoExceptionWhenImageIdExists() {
+        when(imageRepository.existsById(existingId)).thenReturn(true);
+
+        assertThatCode(() -> roomService.deleteImage(existingId)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void deleteImageShouldThrowResourceNotFoundExceptionWhenImageIdDoesNotExist() {
+        when(imageRepository.existsById(nonExistingId)).thenReturn(false);
+
+        assertThatThrownBy(() -> roomService.deleteImage(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test

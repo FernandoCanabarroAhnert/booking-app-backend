@@ -71,10 +71,12 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public BookingDetailResponseDTO findById(Long id) {
+    public BookingDetailResponseDTO findById(Long id, boolean verifyPermission) {
         Booking booking = this.bookingRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Booking", id));
-        authService.verifyIfConnectedUserHasAdminPermission(booking.getUser().getId());
+        if (verifyPermission) {
+            this.authService.verifyIfConnectedUserHasAdminPermission(booking.getUser().getId());
+        }
         return BookingMapper.convertEntityToDetailResponse(booking);
     }
 

@@ -142,7 +142,7 @@ public class BookingServiceTests {
         when(bookingRepository.findById(existingId)).thenReturn(Optional.of(booking));
         doNothing().when(authService).verifyIfConnectedUserHasAdminPermission(booking.getId());
 
-        BookingDetailResponseDTO response = bookingService.findById(existingId);
+        BookingDetailResponseDTO response = bookingService.findById(existingId, true);
 
         assertThat(response).isNotNull();
         assertThat(response.getId()).isEqualTo(booking.getId());
@@ -156,7 +156,7 @@ public class BookingServiceTests {
     public void findByIdShouldThrowResourceNotFoundExceptionWhenBookingDoesNotExist() {
         when(bookingRepository.findById(nonExistingId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> bookingService.findById(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
+        assertThatThrownBy(() -> bookingService.findById(nonExistingId, true)).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test

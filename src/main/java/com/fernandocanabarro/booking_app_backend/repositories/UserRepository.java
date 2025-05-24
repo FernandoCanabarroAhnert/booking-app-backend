@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
 import com.fernandocanabarro.booking_app_backend.projections.UserDetailsProjection;
+import com.fernandocanabarro.booking_app_backend.projections.UserSearchProjection;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -24,5 +25,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
         WHERE u.email = :email
     """)
     List<UserDetailsProjection> searchUserAndRolesByEmail(String email);
+
+    List<UserSearchProjection> findAllByCpfContainingIgnoreCase(String cpf);
 
 }

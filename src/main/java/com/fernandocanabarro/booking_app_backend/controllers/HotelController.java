@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelSearchResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.HotelService;
 import com.fernandocanabarro.booking_app_backend.services.excel.HotelExcelExporter;
@@ -39,9 +41,15 @@ public class HotelController {
     private final HotelService hotelService;
     private final JasperService jasperService;
 
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    public ResponseEntity<List<HotelSearchResponseDTO>> findAllByName(@RequestParam(name = "name") String name) {
+        return ResponseEntity.ok(this.hotelService.findAllByName(name));
+    }
+
     @GetMapping
-    public ResponseEntity<Page<HotelResponseDTO>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(this.hotelService.findAllPageable(pageable));
+    public ResponseEntity<Page<HotelResponseDTO>> findAll(Pageable pageable, @RequestParam(defaultValue = "", name = "name") String name) {
+        return ResponseEntity.ok(this.hotelService.findAllPageable(pageable, name));
     }
 
     @GetMapping("/{id}/rooms")
@@ -78,7 +86,15 @@ public class HotelController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}/images")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteImage(@PathVariable Long id) {
+        this.hotelService.deleteImage(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/pdf")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void exportToPdf(HttpServletResponse response) {
         response.setContentType("application/pdf");
         String headerKey = "Content-Disposition";
@@ -90,6 +106,7 @@ public class HotelController {
     }
 
     @GetMapping("/excel")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void exportToExcel(HttpServletResponse response) {
         response.setContentType("application/octet-stream");
         String headerKey = "Content-Disposition";

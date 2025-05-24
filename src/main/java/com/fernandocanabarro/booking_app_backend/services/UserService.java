@@ -8,9 +8,11 @@ import org.springframework.data.domain.Pageable;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminCreateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminUpdateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSearchResponseDTO;
 
 public interface UserService {
 
+    List<UserSearchResponseDTO> findAllByCpf(String cpf);
     List<UserResponseDTO> adminFindAllUsers();
     Page<UserResponseDTO> adminFindAllUsersPageable(Pageable pageable);
     UserResponseDTO adminFindUserById(Long id);

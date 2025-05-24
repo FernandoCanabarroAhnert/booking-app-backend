@@ -55,10 +55,16 @@ public class Hotel {
         if (this.rooms.isEmpty()) {
             return BigDecimal.ZERO;
         }
+        Integer ratings = this.rooms.stream()
+            .filter(room -> !room.getRatings().isEmpty())
+            .toList().size();
+        if (ratings == 0) {
+            return BigDecimal.ZERO;
+        }
         return this.rooms.stream()
             .map(Room::getAverageRating)
             .reduce(BigDecimal.ZERO, (a, b) -> a.add(b))
-            .divide(BigDecimal.valueOf(this.rooms.size())).setScale(2, RoundingMode.HALF_UP);
+            .divide(new BigDecimal(ratings), 1, RoundingMode.HALF_UP);
     }
 
 }

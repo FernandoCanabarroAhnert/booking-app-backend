@@ -99,6 +99,23 @@ public class RoomControllerIT {
 
     @Test
     @Order(1)
+    public void findAllWithQueryShouldReturnStatus200AndPageOfRoomResponseDTO() throws Exception {
+        mockMvc.perform(get("/api/v1/rooms/query?checkIn=2025-08-01&checkOut=2025-08-07")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].id").value(1))
+            .andExpect(jsonPath("$.content[0].number").value("101"))
+            .andExpect(jsonPath("$.content[0].floor").value(1))
+            .andExpect(jsonPath("$.content[0].type").value(1))
+            .andExpect(jsonPath("$.content[0].pricePerNight").value(150.00))
+            .andExpect(jsonPath("$.content[0].description").value("Quarto standard com cama de casal e ar-condicionado."))
+            .andExpect(jsonPath("$.content[0].hotelId").value(1))
+            .andExpect(jsonPath("$.content[0].hotelName").value("Hotel Mar Azul"));
+    }
+
+    @Test
+    @Order(2)
     public void findAllShouldReturnStatus200AndPageOfRoomResponseDTO() throws Exception {
         mockMvc.perform(get("/api/v1/rooms")
             .contentType(MediaType.APPLICATION_JSON)
@@ -115,7 +132,7 @@ public class RoomControllerIT {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     public void findByIdShouldReturnStatus200WhenRoomExists() throws Exception {
         mockMvc.perform(get("/api/v1/rooms/{id}", existingId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -178,7 +195,7 @@ public class RoomControllerIT {
             .andExpect(status().isForbidden());
     }
 
-     @Test
+    @Test
     public void createShouldReturnStatus201WhenDataIsValid() throws Exception {
         mockMvc.perform(multipart("/api/v1/rooms")
             .file(roomRequestPart)
@@ -282,6 +299,33 @@ public class RoomControllerIT {
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void deleteImageShouldReturnStatus401WhenAuthTokenIsMissing() throws Exception {
+        mockMvc.perform(delete("/api/v1/rooms/{id}/images", 5L)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void deleteImageShouldReturnStatus403WhenConnectedUserDoesNotHavePermission() throws Exception {
+        mockMvc.perform(delete("/api/v1/rooms/{id}/images", 5L)
+            .header("Authorization", guestBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Order(6)
+    public void deleteImageShouldReturnStatus204WhenImageExists() throws Exception {
+        mockMvc.perform(delete("/api/v1/rooms/{id}/images", 5L)
+            .header("Authorization", adminBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
     }
 
     @Test

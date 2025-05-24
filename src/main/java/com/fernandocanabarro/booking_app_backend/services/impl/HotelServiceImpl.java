@@ -15,6 +15,7 @@ import com.fernandocanabarro.booking_app_backend.mappers.RoomMapper;
 import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelSearchResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
 import com.fernandocanabarro.booking_app_backend.models.entities.Image;
@@ -39,14 +40,22 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<HotelSearchResponseDTO> findAllByName(String name) {
+        return this.hotelRepository.findAllByNameContainingIgnoreCase(name).stream()
+            .map(hotel -> new HotelSearchResponseDTO(hotel.getId(), hotel.getName()))
+            .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<HotelResponseDTO> findAll() {
         return this.hotelRepository.findAll().stream().map(HotelMapper::convertEntityToResponse).toList();
     }
     
     @Override
     @Transactional(readOnly = true)
-    public Page<HotelResponseDTO> findAllPageable(Pageable pageable) {
-        return this.hotelRepository.findAll(pageable).map(HotelMapper::convertEntityToResponse);
+    public Page<HotelResponseDTO> findAllPageable(Pageable pageable, String name) {
+        return this.hotelRepository.findAllByNameContainingIgnoreCase(name, pageable).map(HotelMapper::convertEntityToResponse);
     }
 
     @Override
@@ -73,14 +82,16 @@ public class HotelServiceImpl implements HotelService {
 
     private void addImagesToHotel(Hotel hotel, List<MultipartFile> images) {
         for (MultipartFile file : images) {
-            String base64Image = FileUtils.generateBase64Image(file);
-            Image image = Image.builder()
-                .base64Image(base64Image)
-                .imageType(ImageTypeEnum.HOTEL)
-                .hotel(hotel)
-                .build();
-            image = this.imageRepository.save(image);
-            hotel.getImages().add(image);
+            if (file != null) {
+                String base64Image = FileUtils.generateBase64Image(file);
+                Image image = Image.builder()
+                    .base64Image(base64Image)
+                    .imageType(ImageTypeEnum.HOTEL)
+                    .hotel(hotel)
+                    .build();
+                image = this.imageRepository.save(image);
+                hotel.getImages().add(image);
+            }
         }
     }
 
@@ -108,6 +119,15 @@ public class HotelServiceImpl implements HotelService {
         catch (DataIntegrityViolationException e) {
             throw new BadRequestException("Hotel cannot be deleted because it has rooms associated with it.");
         }
+    }
+
+    @Override
+    @Transactional
+    public void deleteImage(Long imageId) {
+        if (!this.imageRepository.existsById(imageId)) {
+            throw new ResourceNotFoundException("Image", imageId);
+        }
+        this.imageRepository.deleteById(imageId);
     }
 
 }

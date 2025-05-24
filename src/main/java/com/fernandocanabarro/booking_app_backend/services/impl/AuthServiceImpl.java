@@ -25,6 +25,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.LoginResp
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.NewPasswordRequestoDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.PasswordRecoverRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.RegistrationRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdateInfosRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdatePasswordRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.ActivateAccountRequestDTO;
@@ -163,11 +164,18 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public User getConnectedUser() {
         String email = this.userUtils.getConnectedUserEmail();
         User user = this.userRepository.findByEmail(email)
                 .orElseThrow(() -> new UnauthorizedException("User is not logged in"));
         return user;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponseDTO getMe() {
+        return UserMapper.convertEntityToResponse(this.getConnectedUser());
     }
 
     @Override

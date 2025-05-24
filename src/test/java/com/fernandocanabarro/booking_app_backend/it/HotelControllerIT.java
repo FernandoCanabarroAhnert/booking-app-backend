@@ -107,7 +107,36 @@ public class HotelControllerIT {
     }
 
     @Test
+    public void findAllHotelsByNameShouldReturnStatus401WhenAuthTokenIsMissing() throws Exception {
+        mockMvc.perform(get("/api/v1/hotels/search?name={name}", "Hotel Mar Azul")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void findAllHotelsByNameShouldReturnStatus403WhenUserDoesNotHavePermission() throws Exception {
+        mockMvc.perform(get("/api/v1/hotels/search?name={name}", "Hotel Mar Azul")
+            .header("Authorization", guestBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
     @Order(2)
+    public void findAllHotelsByNameShouldReturnStatus200AndListOfHotelSearchResponseDTOWhenAdminIsLogged() throws Exception {
+        mockMvc.perform(get("/api/v1/hotels/search?name={name}", "Hotel Mar Azul")
+            .header("Authorization", adminBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(1))
+            .andExpect(jsonPath("$[0].name").value("Hotel Mar Azul"));
+    }
+
+    @Test
+    @Order(3)
     public void findRoomsByHotelIdShouldReturnStatus200AndPageOfRoomResponseDTO() throws Exception {
         mockMvc.perform(get("/api/v1/hotels/{id}/rooms", existingId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -124,7 +153,7 @@ public class HotelControllerIT {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     public void findHotelByIdShouldReturnStatus200AndHotelDetailResponseDTO() throws Exception {
         mockMvc.perform(get("/api/v1/hotels/{id}", existingId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -179,7 +208,7 @@ public class HotelControllerIT {
             .andExpect(status().isCreated());
     }
 
-     @Test
+    @Test
     public void updateHotelShouldReturnStatus401WhenAuthTokenIsMissing() throws Exception {
         mockMvc.perform(multipart("/api/v1/hotels/{id}", existingId)
             .file(this.requestJsonPart)
@@ -256,7 +285,7 @@ public class HotelControllerIT {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     public void deleteHotelShouldReturnStatus204WhenHotelExists() throws Exception {
         mockMvc.perform(delete("/api/v1/hotels/{id}", 3)
             .header("Authorization", adminBearerToken)
@@ -266,7 +295,7 @@ public class HotelControllerIT {
     }
 
     @Test
-    @Order(4)
+    @Order(6)
     public void deleteHotelShouldReturnStatus404WhenHotelDoesNotExist() throws Exception {
         mockMvc.perform(delete("/api/v1/hotels/{id}", nonExistingId)
             .header("Authorization", adminBearerToken)
@@ -275,6 +304,31 @@ public class HotelControllerIT {
             .andExpect(status().isNotFound());
     }
     
+    @Test
+    public void deleteImageShouldReturnStatus401WhenAuthTokenIsMissing() throws Exception {
+        mockMvc.perform(delete("/api/v1/hotels/{id}/images", 2L)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isUnauthorized());
+    }
 
+    @Test
+    public void deleteImageShouldReturnStatus403WhenConnectedUserDoesNotHavePermission() throws Exception {
+        mockMvc.perform(delete("/api/v1/hotels/{id}/images", 2L)
+            .header("Authorization", guestBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Order(7)
+    public void deleteImageShouldReturnStatus204WhenImageExists() throws Exception {
+        mockMvc.perform(delete("/api/v1/hotels/{id}/images", 2L)
+            .header("Authorization", adminBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+    }
 
 }

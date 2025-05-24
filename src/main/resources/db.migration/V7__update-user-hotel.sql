@@ -1,0 +1,1 @@
+UPDATE users SET hotel_id = 1 WHERE id = 1;

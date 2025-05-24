@@ -287,6 +287,27 @@ public class AuthControllerIT {
     }
 
     @Test
+    public void getMeShouldReturnStatus401WhenAuthTokenIsMissing() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/me")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void getMeShouldReturnStatus200WhenAuthTokenIsValid() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/me")
+            .header("Authorization", adminBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(1L))
+            .andExpect(jsonPath("$.fullName").value("Fernando"))
+            .andExpect(jsonPath("$.email").value("fernando@gmail.com"))
+            .andExpect(jsonPath("$.cpf").value("329.949.250-01"));
+    }
+
+    @Test
     @Order(1)
     public void loginShouldReturnStatus403WhenUserAccountIsNotActivated() throws Exception {
         mockMvc.perform(post("/api/v1/auth/login")

@@ -30,9 +30,11 @@ import com.fernandocanabarro.booking_app_backend.factories.RoomFactory;
 import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.hotel.HotelSearchResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.room.RoomResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.entities.Hotel;
 import com.fernandocanabarro.booking_app_backend.models.entities.Room;
+import com.fernandocanabarro.booking_app_backend.projections.HotelSearchProjection;
 import com.fernandocanabarro.booking_app_backend.repositories.HotelRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.ImageRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
@@ -57,6 +59,7 @@ public class HotelServiceTests {
     private Room room;
     private MockMultipartFile mockImage;
     private HotelRequestDTO request;
+    private HotelSearchProjection projection;
     private Long existingId;
     private Long nonExistingId;
 
@@ -71,8 +74,28 @@ public class HotelServiceTests {
             "image".getBytes()
         );
         this.request = new HotelRequestDTO("name", "description", 10, "street", "number", "city", "zipCode", "state", "(11) 99999-9999");
+        this.projection = new HotelSearchProjection() {
+            @Override
+            public Long getId() {
+                return hotel.getId();
+            }
+
+            @Override
+            public String getName() {
+                return hotel.getName();
+            }
+        };
         this.existingId = 1L;
         this.nonExistingId = 1000L;
+    }
+
+    @Test
+    public void findAllByNameShouldReturnListOfSearchHotelResponseDTO() {
+        when(this.hotelRepository.findAllByNameContainingIgnoreCase("name")).thenReturn(List.of(projection));
+        List<HotelSearchResponseDTO> response = this.hotelService.findAllByName("name");
+        assertThat(response).isNotEmpty();
+        assertThat(response.get(0).getId()).isEqualTo(1L);
+        assertThat(response.get(0).getName()).isEqualTo("name");
     }
 
     @Test
@@ -90,10 +113,11 @@ public class HotelServiceTests {
     public void findAllPageableShouldReturnPageOfHotels() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Hotel> page = new PageImpl<>(List.of(this.hotel));
+        String name = "name";
 
-        when(this.hotelRepository.findAll(pageable)).thenReturn(page);
+        when(this.hotelRepository.findAllByNameContainingIgnoreCase(name, pageable)).thenReturn(page);
 
-        Page<HotelResponseDTO> response = this.hotelService.findAllPageable(pageable);
+        Page<HotelResponseDTO> response = this.hotelService.findAllPageable(pageable, name);
 
         assertThat(response).isNotEmpty();
         assertThat(response.getContent().get(0).getId()).isEqualTo(1L);
@@ -188,5 +212,19 @@ public class HotelServiceTests {
         doThrow(DataIntegrityViolationException.class).when(this.hotelRepository).deleteById(existingId);
 
         assertThatThrownBy(() -> hotelService.delete(existingId)).isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    public void deleteImageShouldThrowNoExceptionWhenImageIdExists() {
+        when(imageRepository.existsById(existingId)).thenReturn(true);
+
+        assertThatCode(() -> hotelService.deleteImage(existingId)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void deleteImageShouldThrowResourceNotFoundExceptionWhenImageIdDoesNotExist() {
+        when(imageRepository.existsById(nonExistingId)).thenReturn(false);
+
+        assertThatThrownBy(() -> hotelService.deleteImage(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
     }
 }

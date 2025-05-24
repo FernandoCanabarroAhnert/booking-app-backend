@@ -20,6 +20,7 @@ public abstract class BaseRoomResponse {
     private BigDecimal pricePerNight;
     private String description;
     private Integer capacity;
+    private Integer ratingsQuantity;
     private BigDecimal averageRating;
     
 }

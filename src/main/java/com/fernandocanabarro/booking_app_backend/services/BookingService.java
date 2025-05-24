@@ -15,7 +15,7 @@ public interface BookingService {
 
     List<BookingDetailResponseDTO> findAllBookingsDetailed();
     Page<BookingResponseDTO> findAllPageable(Pageable pageable);
-    BookingDetailResponseDTO findById(Long id);
+    BookingDetailResponseDTO findById(Long id, boolean verifyPermission);
     void createBooking(BookingRequestDTO request, boolean isSelfBooking);
     void updateBooking(Long id, BaseBookingRequestDTO request, boolean isSelfBooking);
     void updateBookingPayment(Long id, BookingPaymentRequestDTO request, boolean isSelfBooking);

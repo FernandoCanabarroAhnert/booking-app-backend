@@ -15,6 +15,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.LoginResp
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.NewPasswordRequestoDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.PasswordRecoverRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.RegistrationRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdateInfosRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSelfUpdatePasswordRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.ActivateAccountRequestDTO;
@@ -86,6 +87,12 @@ public class AuthController {
     public ResponseEntity<Void> resetPassword(@RequestBody @Valid NewPasswordRequestoDTO request) {
         authService.resetPassword(request);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<UserResponseDTO> getUserSelfInfos() {
+        return ResponseEntity.ok(this.authService.getMe());
     }
 
     @GetMapping("/verify-email")

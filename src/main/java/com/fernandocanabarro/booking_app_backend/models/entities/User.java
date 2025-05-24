@@ -102,4 +102,11 @@ public class User implements UserDetails, Principal {
         return bookingsInRoom > ratingsInRoom;
     }
 
+    public boolean isAbleToCreateOrUpdateRoom(Long hotelId) {
+        if (this.hasRole("ROLE_ADMIN")) {
+            return true;
+        }
+        return this.workingHotel != null && this.workingHotel.getId().equals(hotelId);
+    }
+
 }

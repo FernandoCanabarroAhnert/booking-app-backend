@@ -21,6 +21,7 @@ public class BookingMapper {
                 .checkIn(request.getCheckIn())
                 .checkOut(request.getCheckOut())
                 .createdAt(LocalDateTime.now())
+                .guestsQuantity(request.getGuestsQuantity())
                 .isFinished(false)
                 .build();
     }
@@ -28,6 +29,7 @@ public class BookingMapper {
     public static void updateEntity(Booking entity, BaseBookingRequestDTO request) {
         entity.setCheckIn(request.getCheckIn());
         entity.setCheckOut(request.getCheckOut());
+        entity.setGuestsQuantity(request.getGuestsQuantity());
         entity.getPayment().setAmount(entity.getTotalPrice());
     }
 

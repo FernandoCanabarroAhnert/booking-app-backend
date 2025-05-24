@@ -131,6 +131,34 @@ public class UserControllerIT {
     }
 
     @Test
+    public void findAllByCpfShouldReturnStatus401WhenAuthTokenIsMissing() throws Exception {
+        mockMvc.perform(get("/api/v1/users/search?cpf={cpf}", "329.949.250-01")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void findAllByCpfShouldReturnStatus403WhenUserDoesNotHavePermission() throws Exception {
+        mockMvc.perform(get("/api/v1/users/search?cpf={cpf}", "329.949.250-01")
+            .header("Authorization", guestBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void findAllByCpfShouldReturnStatus200AndListOfUserSearchResponseDTOWhenAdminOrOperatorIsLogged() throws Exception {
+        mockMvc.perform(get("/api/v1/users/search?cpf={cpf}", "329.949.250-01")
+            .header("Authorization", adminBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(1L))
+            .andExpect(jsonPath("$[0].cpf").value("329.949.250-01"));
+    }
+
+    @Test
     public void findByIdShouldReturnStatus401WhenAuthTokenIsMissing() throws Exception {
         mockMvc.perform(get("/api/v1/users/{id}", existingId))
             .andExpect(status().isUnauthorized());

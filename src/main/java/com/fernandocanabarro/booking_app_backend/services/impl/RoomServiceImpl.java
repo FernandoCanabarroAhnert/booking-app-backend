@@ -1,8 +1,11 @@
 package com.fernandocanabarro.booking_app_backend.services.impl;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,8 +53,23 @@ public class RoomServiceImpl implements RoomService {
     
     @Override
     @Transactional(readOnly = true)
+    public Page<RoomResponseDTO> findAllPageable(List<String> types, Integer capacity, BigDecimal minPrice, BigDecimal maxPrice, 
+                                                String city, LocalDate checkIn, LocalDate checkOut, Pageable pageable) {
+        minPrice = minPrice != null ? minPrice : roomRepository.findMinPricePerNight();
+        maxPrice = maxPrice != null ? maxPrice : roomRepository.findMaxPricePerNight();                                        
+        Page<Room> page = this.roomRepository.findByTypeOrCapacityOrPricePerNightOrByHotelCity(types, capacity, minPrice, maxPrice, city, pageable);
+        List<RoomResponseDTO> roomResponseDTOs = page.getContent().stream()
+            .filter(room -> room.isAvalableToBook(checkIn, checkOut, null))
+            .map(RoomMapper::convertEntityToResponse)
+            .toList();
+        return new PageImpl<RoomResponseDTO>(roomResponseDTOs, pageable, roomResponseDTOs.size());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<RoomResponseDTO> findAllPageable(Pageable pageable) {
-        return this.roomRepository.findAll(pageable).map(RoomMapper::convertEntityToResponse);
+        return this.roomRepository.findAll(pageable)
+            .map(RoomMapper::convertEntityToResponse);
     }
 
     @Override
@@ -67,6 +85,10 @@ public class RoomServiceImpl implements RoomService {
     public void create(RoomRequestDTO request, List<MultipartFile> images) {
         Hotel hotel = this.hotelRepository.findById(request.getHotelId())
             .orElseThrow(() -> new ResourceNotFoundException("Hotel", request.getHotelId()));
+        User user = this.authService.getConnectedUser();
+        if (!user.isAbleToCreateOrUpdateRoom(hotel.getId())) {
+            throw new ForbiddenException("Operator is not allowed to create a room in this hotel. The operator can only create a room in the hotel he works at");
+        }
         Room entity = RoomMapper.convertRequestToEntity(request, hotel);
         this.addImagesToRoom(entity, images);
         this.roomRepository.save(entity);
@@ -92,6 +114,10 @@ public class RoomServiceImpl implements RoomService {
     public void update(Long id, RoomRequestDTO request, List<MultipartFile> images) {
         Room room = this.roomRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Room", id));
+        User user = this.authService.getConnectedUser();
+        if (!user.isAbleToCreateOrUpdateRoom(room.getHotel().getId())) {
+            throw new ForbiddenException("Operator is not allowed to update this room. The operator can only update a room in the hotel he works at");
+        }
         RoomMapper.updateRoom(room, request);
         if (!request.getHotelId().equals(room.getHotel().getId())) {
             Hotel hotel = this.hotelRepository.findById(request.getHotelId())
@@ -111,6 +137,15 @@ public class RoomServiceImpl implements RoomService {
             throw new ResourceNotFoundException("Room", id);
         }
         this.roomRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteImage(Long imageId) {
+        if (!this.imageRepository.existsById(imageId)) {
+            throw new ResourceNotFoundException("Image", imageId);
+        }
+        this.imageRepository.deleteById(imageId);
     }
 
     @Override

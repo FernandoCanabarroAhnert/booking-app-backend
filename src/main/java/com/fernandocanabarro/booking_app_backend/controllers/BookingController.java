@@ -26,6 +26,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDeta
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingPaymentRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
+import com.fernandocanabarro.booking_app_backend.services.AuthService;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.excel.BookingsExcelExporter;
 import com.fernandocanabarro.booking_app_backend.services.jasper.JasperService;
@@ -41,6 +42,7 @@ import lombok.RequiredArgsConstructor;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final AuthService authService;
     private final JasperService jasperService;
 
     @GetMapping
@@ -52,7 +54,7 @@ public class BookingController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
     public ResponseEntity<BookingDetailResponseDTO> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(this.bookingService.findById(id));
+        return ResponseEntity.ok(this.bookingService.findById(id, true));
     }
 
     @PostMapping
@@ -111,6 +113,7 @@ public class BookingController {
     }
 
     @GetMapping("/pdf")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void exportToPdf(HttpServletResponse response,
                         @RequestParam(required = false) BigDecimal minAmount,
                         @RequestParam(required = false) BigDecimal maxAmount,
@@ -157,18 +160,35 @@ public class BookingController {
     }
 
     @GetMapping("/{id}/boleto/pdf")
-    public void exportBoletoToPdf(HttpServletResponse response, @PathVariable Long id) {
+    public void exportBoletoToPdfFromEmail(HttpServletResponse response, @PathVariable Long id) {
         response.setContentType("application/pdf");
         String headerKey = "Content-Disposition";
         String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
         String fileName = "boleto_" + id + currentDateTime + ".pdf";
         String headerValue = "inline; filename=" + fileName;
         response.setHeader(headerKey, headerValue);
-        jasperService.addParams("BOOKING_ID", id);
+        BookingDetailResponseDTO booking = this.bookingService.findById(id, false);
+        jasperService.addParams("USER_ID", booking.getUser().getId());
+        jasperService.addParams("AMOUNT", booking.getTotalPrice());
+        jasperService.exportToPdf(response, JasperService.BOLETO);
+    }
+
+    @GetMapping("/boleto/pdf")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
+    public void exportBoletoToPdfFromAmount(HttpServletResponse response, @RequestParam BigDecimal amount) {
+        response.setContentType("application/pdf");
+        String headerKey = "Content-Disposition";
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
+        String fileName = "boleto" + currentDateTime + ".pdf";
+        String headerValue = "inline; filename=" + fileName;
+        response.setHeader(headerKey, headerValue);
+        jasperService.addParams("USER_ID", authService.getMe().getId());
+        jasperService.addParams("AMOUNT", amount);
         jasperService.exportToPdf(response, JasperService.BOLETO);
     }
 
     @GetMapping("/excel")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void exportToExcel(HttpServletResponse response) {
         response.setContentType("application/octet-stream");
         String headerKey = "Content-Disposition";

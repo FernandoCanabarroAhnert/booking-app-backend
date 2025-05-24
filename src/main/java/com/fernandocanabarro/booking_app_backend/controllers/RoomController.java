@@ -1,5 +1,6 @@
 package com.fernandocanabarro.booking_app_backend.controllers;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +32,7 @@ import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.RoomService;
 import com.fernandocanabarro.booking_app_backend.services.excel.RoomsExcelExporter;
 import com.fernandocanabarro.booking_app_backend.services.jasper.JasperService;
+import com.fernandocanabarro.booking_app_backend.utils.DateUtils;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -43,6 +46,19 @@ public class RoomController {
     private final RoomService roomService;
     private final BookingService bookingService;
     private final JasperService jasperService;
+
+    @GetMapping("/query")
+    public ResponseEntity<Page<RoomResponseDTO>> findAllQuery(@RequestParam(required = false) List<String> types,
+                                                        @RequestParam(required = false) Integer capacity,
+                                                        @RequestParam(required = false) BigDecimal minPrice,
+                                                        @RequestParam(required = false) BigDecimal maxPrice,
+                                                        @RequestParam(required = false) String city,
+                                                        @RequestParam String checkIn,
+                                                        @RequestParam String checkOut,
+                                                        Pageable pageable) {
+        return ResponseEntity.ok(this.roomService.findAllPageable(types, capacity, minPrice, maxPrice,
+            city, DateUtils.convertStringParamToLocalDate(checkIn), DateUtils.convertStringParamToLocalDate(checkOut), pageable));
+    }
 
     @GetMapping
     public ResponseEntity<Page<RoomResponseDTO>> findAll(Pageable pageable) {
@@ -85,6 +101,7 @@ public class RoomController {
     }
 
     @GetMapping("/pdf")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void exportToPdf(HttpServletResponse response) {
         response.setContentType("application/pdf");
         String headerKey = "Content-Disposition";
@@ -96,6 +113,7 @@ public class RoomController {
     }
 
     @GetMapping("/pdf/group-by-hotel")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void exportToPdfGroupByHotel(HttpServletResponse response) {
         response.setContentType("application/pdf");
         String headerKey = "Content-Disposition";
@@ -107,6 +125,7 @@ public class RoomController {
     }
 
     @GetMapping("/excel")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void exportToExcel(HttpServletResponse response) {
         response.setContentType("application/octet-stream");
         String headerKey = "Content-Disposition";
@@ -117,6 +136,13 @@ public class RoomController {
         List<RoomResponseDTO> rooms = roomService.findAll();
         RoomsExcelExporter roomsExcelExporter = new RoomsExcelExporter(rooms);
         roomsExcelExporter.export(response);
+    }
+
+    @DeleteMapping("/{id}/images")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteImage(@PathVariable Long id) {
+        this.roomService.deleteImage(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/ratings")
