@@ -72,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
         checkOut = checkOut == null ? this.bookingRepository.findMaxCheckOutDate() : checkOut;
         minPrice = minPrice == null ? this.bookingRepository.findMinPaymentAmount() : minPrice;
         maxPrice = maxPrice == null ? this.bookingRepository.findMaxPaymentAmount() : maxPrice;
-        paymentType = paymentType.isEmpty() ? null : paymentType;
+        paymentType = paymentType == null ? null : paymentType.isEmpty() ? null : paymentType;
         return this.bookingRepository.findAllBookingsWithQuery(pageable, checkIn, checkOut, hotelId, minPrice, maxPrice, paymentType).map(BookingMapper::convertEntityToResponse);
     }
 
