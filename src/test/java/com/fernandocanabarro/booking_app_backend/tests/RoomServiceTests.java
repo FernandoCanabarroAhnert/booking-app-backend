@@ -116,10 +116,10 @@ public class RoomServiceTests {
         String checkIn = "2026-10-01";
         String checkOut = "2026-10-05";
 
-        when(this.roomRepository.findByTypeOrCapacityOrPricePerNightOrByHotelCity(null, null, null, null, null, pageable)).thenReturn(page);
+        when(this.roomRepository.findByTypeOrCapacityOrPricePerNightOrByHotelCity(null, null, null, null, null, null, pageable)).thenReturn(page);
 
         Page<RoomResponseDTO> response = this.roomService.findAllPageable(null, null, null, null, null, 
-            DateUtils.convertStringParamToLocalDate(checkIn), DateUtils.convertStringParamToLocalDate(checkOut), pageable);
+            DateUtils.convertStringParamToLocalDate(checkIn), DateUtils.convertStringParamToLocalDate(checkOut), null, pageable);
 
         assertThat(response).isNotEmpty();
         assertThat(response.getContent().get(0).getId()).isEqualTo(1L);

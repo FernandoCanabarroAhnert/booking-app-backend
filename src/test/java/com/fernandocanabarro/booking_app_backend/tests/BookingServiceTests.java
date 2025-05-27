@@ -124,10 +124,10 @@ public class BookingServiceTests {
 
     @Test
     public void findAllPageableShouldReturnPageOfBookingResponseDTO() {
-        
-        when(bookingRepository.findAll(pageable)).thenReturn(page);
+        when(bookingRepository.findAllBookingsWithQuery(pageable, null, null, null, null, null, List.of(""))).thenReturn(page);
 
-        Page<BookingResponseDTO> response = bookingService.findAllPageable(pageable);
+        Page<BookingResponseDTO> response = bookingService.findAllPageable(pageable, null, null, null, 
+        null, null, List.of(""));
 
         assertThat(response.getContent()).isNotEmpty();
         assertThat(response.getContent().get(0).getId()).isEqualTo(booking.getId());

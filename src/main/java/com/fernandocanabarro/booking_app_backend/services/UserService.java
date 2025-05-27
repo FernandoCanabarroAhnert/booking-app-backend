@@ -14,7 +14,7 @@ public interface UserService {
 
     List<UserSearchResponseDTO> findAllByCpf(String cpf);
     List<UserResponseDTO> adminFindAllUsers();
-    Page<UserResponseDTO> adminFindAllUsersPageable(Pageable pageable);
+    Page<UserResponseDTO> adminFindAllUsersPageable(Pageable pageable, String fullName);
     UserResponseDTO adminFindUserById(Long id);
     void adminCreateUser(AdminCreateUserRequestDTO request);
     void adminUpdateUser(Long id, AdminUpdateUserRequestDTO request);

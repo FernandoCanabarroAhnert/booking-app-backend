@@ -1,6 +1,7 @@
 package com.fernandocanabarro.booking_app_backend.services.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -65,8 +66,14 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BookingResponseDTO> findAllPageable(Pageable pageable) {
-        return this.bookingRepository.findAll(pageable).map(BookingMapper::convertEntityToResponse);
+    public Page<BookingResponseDTO> findAllPageable(Pageable pageable, LocalDate checkIn, LocalDate checkOut, 
+        Long hotelId, BigDecimal minPrice, BigDecimal maxPrice, List<String> paymentType) {
+        checkIn = checkIn == null ? this.bookingRepository.findMinCheckInDate() : checkIn;
+        checkOut = checkOut == null ? this.bookingRepository.findMaxCheckOutDate() : checkOut;
+        minPrice = minPrice == null ? this.bookingRepository.findMinPaymentAmount() : minPrice;
+        maxPrice = maxPrice == null ? this.bookingRepository.findMaxPaymentAmount() : maxPrice;
+        paymentType = paymentType.isEmpty() ? null : paymentType;
+        return this.bookingRepository.findAllBookingsWithQuery(pageable, checkIn, checkOut, hotelId, minPrice, maxPrice, paymentType).map(BookingMapper::convertEntityToResponse);
     }
 
     @Override

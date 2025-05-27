@@ -49,8 +49,8 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
-    public ResponseEntity<Page<UserResponseDTO>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(this.userService.adminFindAllUsersPageable(pageable));
+    public ResponseEntity<Page<UserResponseDTO>> findAll(Pageable pageable, @RequestParam(name = "fullName", defaultValue = "") String fullName) {
+        return ResponseEntity.ok(this.userService.adminFindAllUsersPageable(pageable, fullName));
     }
 
     @GetMapping("/{id}")

@@ -54,10 +54,11 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional(readOnly = true)
     public Page<RoomResponseDTO> findAllPageable(List<String> types, Integer capacity, BigDecimal minPrice, BigDecimal maxPrice, 
-                                                String city, LocalDate checkIn, LocalDate checkOut, Pageable pageable) {
+                                                String city, LocalDate checkIn, LocalDate checkOut, Long hotelId, Pageable pageable) {
         minPrice = minPrice != null ? minPrice : roomRepository.findMinPricePerNight();
-        maxPrice = maxPrice != null ? maxPrice : roomRepository.findMaxPricePerNight();                                        
-        Page<Room> page = this.roomRepository.findByTypeOrCapacityOrPricePerNightOrByHotelCity(types, capacity, minPrice, maxPrice, city, pageable);
+        maxPrice = maxPrice != null ? maxPrice : roomRepository.findMaxPricePerNight();
+        types = types == null || types.isEmpty() ? null : types;                                       
+        Page<Room> page = this.roomRepository.findByTypeOrCapacityOrPricePerNightOrByHotelCity(types, capacity, minPrice, maxPrice, city, hotelId, pageable);
         List<RoomResponseDTO> roomResponseDTOs = page.getContent().stream()
             .filter(room -> room.isAvalableToBook(checkIn, checkOut, null))
             .map(RoomMapper::convertEntityToResponse)

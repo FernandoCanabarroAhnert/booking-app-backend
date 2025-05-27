@@ -18,7 +18,7 @@ public interface RoomService {
 
     List<RoomResponseDTO> findAll();
     Page<RoomResponseDTO> findAllPageable(List<String> types, Integer capacity, BigDecimal minPrice, BigDecimal maxPrice, 
-        String city, LocalDate checkIn, LocalDate checkOut, Pageable pageable);
+        String city, LocalDate checkIn, LocalDate checkOut, Long hotelId, Pageable pageable);
     Page<RoomResponseDTO> findAllPageable(Pageable pageable);
     RoomDetailResponseDTO findById(Long id);
     void create(RoomRequestDTO request, List<MultipartFile> images);

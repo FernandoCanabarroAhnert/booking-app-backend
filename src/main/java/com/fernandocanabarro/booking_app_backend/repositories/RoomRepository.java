@@ -27,6 +27,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
         "WHERE (:types IS NULL OR obj.type IN :types) " + 
         "AND (:capacity IS NULL OR obj.capacity = :capacity) " + 
         "AND obj.pricePerNight BETWEEN :minPrice AND :maxPrice " + 
-        "AND (:city IS NULL OR h.city = :city)")
-    Page<Room> findByTypeOrCapacityOrPricePerNightOrByHotelCity(List<String> types, Integer capacity, BigDecimal minPrice, BigDecimal maxPrice, String city, Pageable pageable);
+        "AND (:city IS NULL OR LOWER(h.city) LIKE LOWER(CONCAT('%', :city, '%'))) " +
+        "AND (:hotelId IS NULL OR h.id = :hotelId)")
+    Page<Room> findByTypeOrCapacityOrPricePerNightOrByHotelCity(List<String> types, Integer capacity, BigDecimal minPrice, BigDecimal maxPrice, String city, Long hotelId, Pageable pageable);
 }

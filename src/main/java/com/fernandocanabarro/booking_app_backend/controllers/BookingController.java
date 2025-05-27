@@ -47,8 +47,15 @@ public class BookingController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<Page<BookingResponseDTO>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(this.bookingService.findAllPageable(pageable));
+    public ResponseEntity<Page<BookingResponseDTO>> findAll(Pageable pageable,
+                                                        @RequestParam(required = false) List<String> paymentType,
+                                                        @RequestParam(required = false) String checkIn,
+                                                        @RequestParam(required = false) String checkOut,
+                                                        @RequestParam(required = false) Long hotelId,
+                                                        @RequestParam(required = false) BigDecimal minPrice,
+                                                        @RequestParam(required = false) BigDecimal maxPrice) {
+        return ResponseEntity.ok(this.bookingService.findAllPageable(pageable, 
+            DateUtils.convertStringParamToLocalDate(checkIn), DateUtils.convertStringParamToLocalDate(checkOut), hotelId, minPrice, maxPrice, paymentType));
     }
 
     @GetMapping("/{id}")
@@ -125,8 +132,7 @@ public class BookingController {
                         @RequestParam(required = false) String dinheiro,
                         @RequestParam(required = false) String cartao,
                         @RequestParam(required = false) String pix,
-                        @RequestParam(required = false) String boleto
-                        ){
+                        @RequestParam(required = false) String boleto){
         response.setContentType("application/pdf");
         String headerKey = "Content-Disposition";
         String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm:ss"));
@@ -140,10 +146,10 @@ public class BookingController {
         jasperService.addParams("USER_ID", userId);
         jasperService.addParams("MIN_CHECK_IN_DATE", DateUtils.convertStringParamToDate(minCheckInDate));
         jasperService.addParams("MAX_CHECK_OUT_DATE", DateUtils.convertStringParamToDate(maxCheckOutDate));
-        jasperService.addParams("DINHEIRO_PAYMENT", dinheiro);
-        jasperService.addParams("CARTAO_PAYMENT", cartao);
-        jasperService.addParams("PIX_PAYMENT", pix);
-        jasperService.addParams("BOLETO_PAYMENT", boleto);
+        jasperService.addParams("DINHEIRO_PAYMENT", dinheiro == null ? null : dinheiro.isBlank() ? null : dinheiro);
+        jasperService.addParams("CARTAO_PAYMENT", cartao == null ? null : cartao.isBlank() ? null : cartao);
+        jasperService.addParams("PIX_PAYMENT", pix == null ? null : pix.isBlank() ? null : pix);
+        jasperService.addParams("BOLETO_PAYMENT", boleto == null ? null : boleto.isBlank() ? null : boleto);
         jasperService.exportToPdf(response, JasperService.BOOKINGS);
     }
 

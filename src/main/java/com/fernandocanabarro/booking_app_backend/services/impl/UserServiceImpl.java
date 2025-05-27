@@ -55,8 +55,8 @@ public class UserServiceImpl implements UserService {
     
     @Override
     @Transactional(readOnly = true)
-    public Page<UserResponseDTO> adminFindAllUsersPageable(Pageable pageable) {
-        return this.userRepository.findAll(pageable).map(UserMapper::convertEntityToResponse);
+    public Page<UserResponseDTO> adminFindAllUsersPageable(Pageable pageable, String fullName) {
+        return this.userRepository.findAllByFullNameContainingIgnoreCase(fullName, pageable).map(UserMapper::convertEntityToResponse);
     }
 
     @Override

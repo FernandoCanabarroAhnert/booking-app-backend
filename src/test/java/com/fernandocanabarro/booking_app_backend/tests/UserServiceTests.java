@@ -135,9 +135,10 @@ public class UserServiceTests {
     public void adminFindAllUsersPageableShouldReturnPageOfUserResponseDTO() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<User> page = new PageImpl<>(List.of(user));
-        when(userRepository.findAll(pageable)).thenReturn(page);
+        String name = "name";
+        when(userRepository.findAllByFullNameContainingIgnoreCase(name, pageable)).thenReturn(page);
 
-        Page<UserResponseDTO> response = userService.adminFindAllUsersPageable(pageable);
+        Page<UserResponseDTO> response = userService.adminFindAllUsersPageable(pageable, name);
 
         assertThat(response).isNotNull();
         assertThat(response.getContent().get(0).getFullName()).isEqualTo("name");

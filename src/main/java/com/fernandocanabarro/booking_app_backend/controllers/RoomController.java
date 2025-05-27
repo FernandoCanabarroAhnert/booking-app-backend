@@ -52,12 +52,13 @@ public class RoomController {
                                                         @RequestParam(required = false) Integer capacity,
                                                         @RequestParam(required = false) BigDecimal minPrice,
                                                         @RequestParam(required = false) BigDecimal maxPrice,
-                                                        @RequestParam(required = false) String city,
+                                                        @RequestParam(required = false, defaultValue = "") String city,
+                                                        @RequestParam(required = false) Long hotelId,
                                                         @RequestParam String checkIn,
                                                         @RequestParam String checkOut,
                                                         Pageable pageable) {
         return ResponseEntity.ok(this.roomService.findAllPageable(types, capacity, minPrice, maxPrice,
-            city, DateUtils.convertStringParamToLocalDate(checkIn), DateUtils.convertStringParamToLocalDate(checkOut), pageable));
+            city, DateUtils.convertStringParamToLocalDate(checkIn), DateUtils.convertStringParamToLocalDate(checkOut), hotelId, pageable));
     }
 
     @GetMapping

@@ -1,5 +1,7 @@
 package com.fernandocanabarro.booking_app_backend.services;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -14,7 +16,8 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResp
 public interface BookingService {
 
     List<BookingDetailResponseDTO> findAllBookingsDetailed();
-    Page<BookingResponseDTO> findAllPageable(Pageable pageable);
+    Page<BookingResponseDTO> findAllPageable(Pageable pageable, LocalDate checkIn, LocalDate checkOut, Long hotelId, 
+        BigDecimal minPrice, BigDecimal maxPrice, List<String> paymentType);
     BookingDetailResponseDTO findById(Long id, boolean verifyPermission);
     void createBooking(BookingRequestDTO request, boolean isSelfBooking);
     void updateBooking(Long id, BaseBookingRequestDTO request, boolean isSelfBooking);
