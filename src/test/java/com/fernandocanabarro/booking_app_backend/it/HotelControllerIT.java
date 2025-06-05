@@ -306,7 +306,7 @@ public class HotelControllerIT {
     
     @Test
     public void deleteImageShouldReturnStatus401WhenAuthTokenIsMissing() throws Exception {
-        mockMvc.perform(delete("/api/v1/hotels/{id}/images", 2L)
+        mockMvc.perform(delete("/api/v1/hotels/images?imagesIds={id}", 2L)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isUnauthorized());
@@ -314,7 +314,7 @@ public class HotelControllerIT {
 
     @Test
     public void deleteImageShouldReturnStatus403WhenConnectedUserDoesNotHavePermission() throws Exception {
-        mockMvc.perform(delete("/api/v1/hotels/{id}/images", 2L)
+        mockMvc.perform(delete("/api/v1/hotels/images?imagesIds={id}", 2L)
             .header("Authorization", guestBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
@@ -324,7 +324,7 @@ public class HotelControllerIT {
     @Test
     @Order(7)
     public void deleteImageShouldReturnStatus204WhenImageExists() throws Exception {
-        mockMvc.perform(delete("/api/v1/hotels/{id}/images", 2L)
+        mockMvc.perform(delete("/api/v1/hotels/images?imagesIds={id}", 2L)
             .header("Authorization", adminBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))

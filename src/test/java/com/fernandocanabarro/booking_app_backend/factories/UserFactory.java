@@ -46,8 +46,6 @@ public class UserFactory {
         request.setFullName("name");
         request.setEmail("email");
         request.setPhone("(11) 99999-9999");
-        request.setCpf("cpf");
-        request.setBirthDate(LocalDate.of(2005, 10, 28));
         return request;
     }
 

@@ -24,10 +24,13 @@ public interface RoomService {
     void create(RoomRequestDTO request, List<MultipartFile> images);
     void update(Long id, RoomRequestDTO request, List<MultipartFile> images);
     void delete(Long id);
-    void deleteImage(Long imageId);
+    void deleteImages(List<Long> imagesIds);
+    Page<RoomRatingResponseDTO> findAllRatingsByRoomId(Long roomId, Pageable pageable);
+    Page<RoomRatingResponseDTO> findAllRatingsByUserId(Long roomId, Pageable pageable, boolean isSelfUser);
+    RoomRatingResponseDTO findRatingById(Long roomRatingId);
     void addRating(Long roomRatingId, RoomRatingRequestDTO request);
     void updateRating(Long roomRatingId, RoomRatingRequestDTO request);
     void deleteRating(Long roomRatingId);
-    Page<RoomRatingResponseDTO> findAllRatingsByRoomId(Long roomId, Pageable pageable);
+    
 
 }

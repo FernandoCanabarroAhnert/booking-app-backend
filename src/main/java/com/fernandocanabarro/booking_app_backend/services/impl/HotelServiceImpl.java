@@ -123,11 +123,13 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional
-    public void deleteImage(Long imageId) {
-        if (!this.imageRepository.existsById(imageId)) {
-            throw new ResourceNotFoundException("Image", imageId);
-        }
-        this.imageRepository.deleteById(imageId);
+    public void deleteImages(List<Long> imagesIds) {
+        imagesIds.forEach(id -> {
+            if (!this.imageRepository.existsById(id)) {
+                throw new ResourceNotFoundException("Image", id);
+            }
+            this.imageRepository.deleteById(id);
+        });
     }
 
 }

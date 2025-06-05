@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -45,7 +46,7 @@ public class Booking {
     private Integer guestsQuantity;
     private LocalDateTime createdAt;
     private boolean isFinished;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JoinColumn(name = "payment_id", foreignKey = @ForeignKey(name = "fk_booking_payment", value = ConstraintMode.CONSTRAINT))
     private Payment payment;
 

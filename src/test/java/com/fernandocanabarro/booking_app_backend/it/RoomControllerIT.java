@@ -303,7 +303,7 @@ public class RoomControllerIT {
 
     @Test
     public void deleteImageShouldReturnStatus401WhenAuthTokenIsMissing() throws Exception {
-        mockMvc.perform(delete("/api/v1/rooms/{id}/images", 5L)
+        mockMvc.perform(delete("/api/v1/rooms/images?imagesIds={id}", 5L)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isUnauthorized());
@@ -311,7 +311,7 @@ public class RoomControllerIT {
 
     @Test
     public void deleteImageShouldReturnStatus403WhenConnectedUserDoesNotHavePermission() throws Exception {
-        mockMvc.perform(delete("/api/v1/rooms/{id}/images", 5L)
+        mockMvc.perform(delete("/api/v1/rooms/images?imagesIds={id}", 5L)
             .header("Authorization", guestBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
@@ -321,7 +321,7 @@ public class RoomControllerIT {
     @Test
     @Order(6)
     public void deleteImageShouldReturnStatus204WhenImageExists() throws Exception {
-        mockMvc.perform(delete("/api/v1/rooms/{id}/images", 5L)
+        mockMvc.perform(delete("/api/v1/rooms/images?imagesIds={id}", 5L)
             .header("Authorization", adminBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
@@ -354,7 +354,7 @@ public class RoomControllerIT {
 
     @Test
     @Order(5)
-    public void addAndUpdateAndDeleteRatingShouldAllReturnSuccessStatusWhenDataIsValid() throws Exception {
+    public void addAndUpdateAndDeleteAndFindMyRatingsShouldAllReturnSuccessStatusWhenDataIsValid() throws Exception {
         mockMvc.perform(post("/api/v1/rooms/{id}/ratings", existingId)
             .header("Authorization", guestBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
@@ -374,6 +374,43 @@ public class RoomControllerIT {
             .content(objectMapper.writeValueAsString(roomRatingRequest))
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @Order(6)
+    public void findMyRoomRatingsShouldReturnStatus200AndPageOfRoomRatingResponseDTO() throws Exception {
+        mockMvc.perform(get("/api/v1/rooms/my-ratings")
+            .header("Authorization", guestBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].id").value(2L))
+            .andExpect(jsonPath("$.content[0].rating").value(4.5))
+            .andExpect(jsonPath("$.content[0].description").value("Quarto muito bom e confortável."))
+            .andExpect(jsonPath("$.content[0].roomId").value(2L));
+    }
+
+    @Test
+    @Order(7)
+    public void findRoomRatingByIdShouldReturnStatus200AndRoomRatingResponseDTO() throws Exception {
+        mockMvc.perform(get("/api/v1/rooms/ratings/{id}", 2L)
+            .header("Authorization", guestBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(2L))
+            .andExpect(jsonPath("$.rating").value(4.5))
+            .andExpect(jsonPath("$.description").value("Quarto muito bom e confortável."))
+            .andExpect(jsonPath("$.roomId").value(2L));
+    }
+
+    @Test
+    public void findRoomRatingByIdShouldReturnStatus404WhenRatingDoesNotExist() throws Exception {
+        mockMvc.perform(get("/api/v1/rooms/ratings/{id}", nonExistingId)
+            .header("Authorization", guestBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
     }
 
     @Test

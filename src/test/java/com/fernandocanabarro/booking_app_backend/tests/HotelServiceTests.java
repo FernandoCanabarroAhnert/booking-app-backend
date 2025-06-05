@@ -217,14 +217,16 @@ public class HotelServiceTests {
     @Test
     public void deleteImageShouldThrowNoExceptionWhenImageIdExists() {
         when(imageRepository.existsById(existingId)).thenReturn(true);
+        List<Long> imageIds = List.of(existingId);
 
-        assertThatCode(() -> hotelService.deleteImage(existingId)).doesNotThrowAnyException();
+        assertThatCode(() -> hotelService.deleteImages(imageIds)).doesNotThrowAnyException();
     }
 
     @Test
     public void deleteImageShouldThrowResourceNotFoundExceptionWhenImageIdDoesNotExist() {
         when(imageRepository.existsById(nonExistingId)).thenReturn(false);
+        List<Long> imageIds = List.of(nonExistingId);
 
-        assertThatThrownBy(() -> hotelService.deleteImage(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
+        assertThatThrownBy(() -> hotelService.deleteImages(imageIds)).isInstanceOf(ResourceNotFoundException.class);
     }
 }

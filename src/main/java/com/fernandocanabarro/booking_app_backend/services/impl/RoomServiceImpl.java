@@ -4,10 +4,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +31,7 @@ import com.fernandocanabarro.booking_app_backend.repositories.RoomRatingReposito
 import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
 import com.fernandocanabarro.booking_app_backend.services.RoomService;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.BadRequestException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.utils.FileUtils;
@@ -132,21 +135,28 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Long id) {
-        if (!this.roomRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Room", id);
+        try {
+            if (!this.roomRepository.existsById(id)) {
+                throw new ResourceNotFoundException("Room", id);
+            }
+            this.roomRepository.deleteById(id);
         }
-        this.roomRepository.deleteById(id);
+        catch (DataIntegrityViolationException e) {
+            throw new BadRequestException("Room cannot be deleted because it has bookings associated with it.");
+        }
     }
 
     @Override
     @Transactional
-    public void deleteImage(Long imageId) {
-        if (!this.imageRepository.existsById(imageId)) {
-            throw new ResourceNotFoundException("Image", imageId);
-        }
-        this.imageRepository.deleteById(imageId);
+    public void deleteImages(List<Long> imagesIds) {
+        imagesIds.forEach(id -> {
+            if (!this.imageRepository.existsById(id)) {
+                throw new ResourceNotFoundException("Image", id);
+            }
+            this.imageRepository.deleteById(id);
+        });
     }
 
     @Override
@@ -154,6 +164,22 @@ public class RoomServiceImpl implements RoomService {
     public Page<RoomRatingResponseDTO> findAllRatingsByRoomId(Long roomId, Pageable pageable) {
         return this.roomRatingRepository.findAllByRoomId(roomId, pageable)
             .map(RoomMapper::convertRoomRatingEntityToResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<RoomRatingResponseDTO> findAllRatingsByUserId(Long userId, Pageable pageable, boolean isSelfUser) {
+        userId = isSelfUser ? this.authService.getConnectedUser().getId() : userId;
+        return this.roomRatingRepository.findAllByUserId(userId, pageable)
+            .map(RoomMapper::convertRoomRatingEntityToResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RoomRatingResponseDTO findRatingById(Long roomRatingId) {
+        return this.roomRatingRepository.findById(roomRatingId)
+            .map(RoomMapper::convertRoomRatingEntityToResponse)
+            .orElseThrow(() -> new ResourceNotFoundException("RoomRating", roomRatingId));
     }
 
     @Override

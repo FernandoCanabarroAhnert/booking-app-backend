@@ -14,6 +14,7 @@ import com.fernandocanabarro.booking_app_backend.mappers.BookingMapper;
 import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseBookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.AdminBookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.AdminUpdateBookingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDashboardSummaryDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingPaymentRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
@@ -23,12 +24,15 @@ import com.fernandocanabarro.booking_app_backend.models.entities.Booking;
 import com.fernandocanabarro.booking_app_backend.models.entities.CartaoPayment;
 import com.fernandocanabarro.booking_app_backend.models.entities.CreditCard;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
+import com.fernandocanabarro.booking_app_backend.projections.BookingStatsSummaryProjection;
 import com.fernandocanabarro.booking_app_backend.models.entities.Payment;
 import com.fernandocanabarro.booking_app_backend.models.entities.Room;
 import com.fernandocanabarro.booking_app_backend.repositories.BookingRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.CreditCardRepository;
+import com.fernandocanabarro.booking_app_backend.repositories.HotelRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.UserRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.PaymentRepository;
+import com.fernandocanabarro.booking_app_backend.repositories.RoomRatingRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
@@ -57,6 +61,8 @@ public class BookingServiceImpl implements BookingService {
     private final CreditCardRepository creditCardRepository;
     private final AuthService authService;
     private final EmailService emailService;
+    private final HotelRepository hotelRepository;
+    private final RoomRatingRepository roomRatingRepository;
     
     @Override
     @Transactional(readOnly = true)
@@ -89,11 +95,11 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BookingResponseDTO> findAllBookingsByUser(Long userId, Pageable pageable, boolean isSelfUser) {
+    public Page<BookingDetailResponseDTO> findAllBookingsByUser(Long userId, Pageable pageable, boolean isSelfUser) {
         Page<Booking> response = isSelfUser
             ? this.bookingRepository.findByUserId(authService.getConnectedUser().getId(), pageable)
             : this.bookingRepository.findByUserId(userId, pageable);
-        return response.map(BookingMapper::convertEntityToResponse);
+        return response.map(BookingMapper::convertEntityToDetailResponse);
     }
 
     @Override
@@ -108,6 +114,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public void createBooking(BookingRequestDTO request, boolean isSelfBooking) {
+        this.validateIfCheckInAndCheckOutDatesAreValid(request.getCheckIn(), request.getCheckOut(), true);
         this.validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(request.getPayment());
         this.validateIfBookingIsFromAdminRequestButPaymentTypeIsCartaoAndIsOnlinePayment(request.getPayment(), isSelfBooking);
         this.validateIfCreditCardIdHasBeenProvidedWhenPaymentIsOnlineAndInstallmentQuantityWhenPaymentIsWithCreditCard(request.getPayment());
@@ -125,6 +132,20 @@ public class BookingServiceImpl implements BookingService {
         this.bookingRepository.save(entity);
         this.sendBookingSummaryEmail(entity, user);
         this.sendBookingBoletoEmailWhenPaymentIsBoleto(entity, user, payment instanceof BoletoPayment);
+    }
+
+    private void validateIfCheckInAndCheckOutDatesAreValid(LocalDate checkIn, LocalDate checkOut, boolean isCreateBooking) {
+        if (checkOut.isBefore(checkIn)) {
+            throw new BadRequestException("Check-out date cannot be before check-in date.");
+        }
+        if (isCreateBooking) {
+            if (checkIn.isBefore(LocalDate.now())) {
+                throw new BadRequestException("Check-in date must be today or in the future.");
+            }
+            if (checkOut.isBefore(LocalDate.now().plusDays(1L))) {
+                throw new BadRequestException("Check-out must be in the future.");
+            }
+        }
     }
 
     private void validateIfPaymentIsNotOnlineWhenPaymentTypeIsDinheiro(BookingPaymentRequestDTO payment) {
@@ -159,9 +180,6 @@ public class BookingServiceImpl implements BookingService {
     private void validateRoomAvailability(BaseBookingRequestDTO request, Room room, Long bookingIdToIgnore) {
         if (!room.isAvalableToBook(request.getCheckIn(), request.getCheckOut(), bookingIdToIgnore)) {
             throw new RoomIsUnavailableForBookingException(room.getId(), request.getCheckIn(), request.getCheckOut());
-        }
-        if (request.getCheckOut().isBefore(request.getCheckIn())) {
-            throw new RoomIsUnavailableForBookingException("Check-out date cannot be before check-in date.");
         }
     }
 
@@ -210,7 +228,7 @@ public class BookingServiceImpl implements BookingService {
             "Resumo da Reserva #" + booking.getId(),
             user.getFullName(),
             "Sua reserva foi aprovada! Clique no botão abaixo para visualizar/imprimir o resumo da sua reserva:",
-            "http://localhost:8080/api/v1/bookings/"  + booking.getId() + "/pdf"
+            "https://booking-api.fernandocanabarrodev.tech/api/v1/bookings/"  + booking.getId() + "/pdf"
         );
         Mail mail = this.emailService.createEmail(user.getEmail(), "Resumo da Reserva", variables, "booking-email");
         this.emailService.sendEmail(mail);
@@ -222,7 +240,7 @@ public class BookingServiceImpl implements BookingService {
                 "Boleto da Reserva #" + booking.getId(),
                 user.getFullName(),
                 "O seu pagamento foi aprovado! Clique no botão abaixo para visualizar/imprimir o boleto da sua reserva:",
-                "http://localhost:8080/api/v1/bookings/"  + booking.getId() + "/boleto/pdf"
+                "https://booking-api.fernandocanabarrodev.tech/api/v1/bookings/"  + booking.getId() + "/boleto/pdf"
             );
             Mail mail = this.emailService.createEmail(user.getEmail(), "Boleto da Reserva", variables, "booking-email");
             this.emailService.sendEmail(mail);
@@ -241,6 +259,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public void updateBooking(Long id, BaseBookingRequestDTO request, boolean isSelfBooking) {
+        this.validateIfCheckInAndCheckOutDatesAreValid(request.getCheckIn(), request.getCheckOut(), false);
         User user = this.getUserForBookingLogic(isSelfBooking, request);
         Booking entity = this.bookingRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Booking", id));
@@ -320,6 +339,27 @@ public class BookingServiceImpl implements BookingService {
             .orElseThrow(() -> new ResourceNotFoundException("Booking", id));
         this.authService.verifyIfConnectedUserHasAdminPermission(entity.getUser().getId());
         this.bookingRepository.delete(entity);
+    }
+
+    @Override
+    @Transactional
+    public BookingDashboardSummaryDTO getDashboardSummary(Long hotelId) {
+        if (hotelId != null) {
+            if (!this.hotelRepository.existsById(hotelId)) {
+                throw new ResourceNotFoundException("Hotel", hotelId);
+            }
+        }
+        BigDecimal occupationBigDecimal = this.bookingRepository.getRoomOccupationPercentage(hotelId);
+        BigDecimal totalAmount = this.bookingRepository.getTotalPaymentsAmount(hotelId);
+        BigDecimal averageStayDays = this.bookingRepository.getAverageStayDays(hotelId);
+        BigDecimal averageRating = this.getAverageRating(hotelId);
+        List<BookingStatsSummaryProjection> bookingStats = this.bookingRepository.getBookingStatsSummary(hotelId);
+        return BookingMapper.convertToDashboardSummary(occupationBigDecimal, totalAmount, averageStayDays, averageRating, bookingStats);
+    } 
+
+    private BigDecimal getAverageRating(Long hotelId) {
+        if (hotelId == null) return this.roomRatingRepository.findAverageRating();
+        return this.hotelRepository.findById(hotelId).get().getAverageRating();
     }
 
    

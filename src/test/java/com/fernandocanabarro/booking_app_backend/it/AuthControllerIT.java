@@ -91,9 +91,7 @@ public class AuthControllerIT {
         this.userSelfUpdateInfosRequest = new UserSelfUpdateInfosRequestDTO();
         userSelfUpdateInfosRequest.setFullName("Lucas Pereira");
         userSelfUpdateInfosRequest.setEmail("lucaspereira@gmail.com");
-        userSelfUpdateInfosRequest.setCpf("786.857.060-17");
         userSelfUpdateInfosRequest.setPhone("(11) 99999-9999");
-        userSelfUpdateInfosRequest.setBirthDate(LocalDate.of(2006,8, 24));
 
         this.userSelfUpdatePasswordRequest = new UserSelfUpdatePasswordRequestDTO();
         userSelfUpdatePasswordRequest.setCurrentPassword("12345Az@");
@@ -396,19 +394,6 @@ public class AuthControllerIT {
 
     @Test
     @Order(5)
-    public void userSelfUpdateInfosShouldReturnStatus409WhenCpfIsAlreadyInUseByAnotherUser() throws Exception {
-        userSelfUpdateInfosRequest.setCpf("329.949.250-01");
-        String userSelfUpdateToken = "Bearer " + AccessTokenUtils.obtainAccessToken("pereira@gmail.com", "12345Az@", mockMvc, objectMapper);
-        mockMvc.perform(put("/api/v1/auth/profile")
-            .header("Authorization", userSelfUpdateToken)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(userSelfUpdateInfosRequest)))
-            .andExpect(status().isConflict());
-    }
-
-    @Test
-    @Order(6)
     public void userSelfUpdateInfosShouldReturnStatus200WhenDataIsValid() throws Exception {
         String userSelfUpdateToken = "Bearer " + AccessTokenUtils.obtainAccessToken("pereira@gmail.com", "12345Az@", mockMvc, objectMapper);
         mockMvc.perform(put("/api/v1/auth/profile")
@@ -429,7 +414,7 @@ public class AuthControllerIT {
     }
 
     @Test
-    @Order(7)
+    @Order(6)
     public void userSelfUpdatePasswordShouldReturnStatus409WhenCurrentPasswordIsInvalid() throws Exception {
         String userSelfUpdatePasswordToken = "Bearer " + AccessTokenUtils.obtainAccessToken("lucaspereira@gmail.com", "12345Az@", mockMvc, objectMapper);
         userSelfUpdatePasswordRequest.setCurrentPassword("invalid");
@@ -442,7 +427,7 @@ public class AuthControllerIT {
     }
 
     @Test
-    @Order(8)
+    @Order(7)
     public void userSelfUpdatePasswordShouldReturnStatus200WhenDataIsValid() throws Exception {
         String userSelfUpdatePasswordToken = "Bearer " + AccessTokenUtils.obtainAccessToken("lucaspereira@gmail.com", "12345Az@", mockMvc, objectMapper);
         mockMvc.perform(put("/api/v1/auth/profile/password")
@@ -454,7 +439,7 @@ public class AuthControllerIT {
     }
 
     @Test
-    @Order(9)
+    @Order(8)
     public void sendPasswordRecoverRequestEmailShouldReturnStatus200WhenEmailExists() throws Exception {
         mockMvc.perform(post("/api/v1/auth/forgot-password")
             .contentType(MediaType.APPLICATION_JSON)
@@ -473,7 +458,7 @@ public class AuthControllerIT {
     }
 
     @Test
-    @Order(10)
+    @Order(9)
     public void resetPasswordShouldReturnStatus200WhenCodeExistsAndIsValid() throws Exception {
         NewPasswordRequestoDTO newPasswordRequest = new NewPasswordRequestoDTO();
         newPasswordRequest.setCode("123456");

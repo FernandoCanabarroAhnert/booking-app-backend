@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseBookingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDashboardSummaryDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingPaymentRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
@@ -24,7 +25,9 @@ public interface BookingService {
     void updateBookingPayment(Long id, BookingPaymentRequestDTO request, boolean isSelfBooking);
     void deleteBooking(Long id);
 
-    Page<BookingResponseDTO> findAllBookingsByUser(Long userId, Pageable pageable, boolean isSelfUser);
+    Page<BookingDetailResponseDTO> findAllBookingsByUser(Long userId, Pageable pageable, boolean isSelfUser);
     Page<BookingResponseDTO> findAllBookingsByRoom(Long roomId, Pageable pageable);
+
+    BookingDashboardSummaryDTO getDashboardSummary(Long hotelId);
 
 }

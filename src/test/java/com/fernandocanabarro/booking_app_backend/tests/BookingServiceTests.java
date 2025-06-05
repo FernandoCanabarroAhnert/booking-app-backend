@@ -9,6 +9,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,12 +28,14 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.fernandocanabarro.booking_app_backend.factories.BookingFactory;
 import com.fernandocanabarro.booking_app_backend.factories.CreditCardFactory;
+import com.fernandocanabarro.booking_app_backend.factories.HotelFactory;
 import com.fernandocanabarro.booking_app_backend.factories.PaymentFactory;
 import com.fernandocanabarro.booking_app_backend.factories.RoomFactory;
 import com.fernandocanabarro.booking_app_backend.factories.UserFactory;
 import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseBookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.AdminBookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.AdminUpdateBookingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDashboardSummaryDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingPaymentRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
@@ -43,9 +47,12 @@ import com.fernandocanabarro.booking_app_backend.models.entities.Payment;
 import com.fernandocanabarro.booking_app_backend.models.entities.Room;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
 import com.fernandocanabarro.booking_app_backend.models.enums.PaymentTypeEnum;
+import com.fernandocanabarro.booking_app_backend.projections.BookingStatsSummaryProjection;
 import com.fernandocanabarro.booking_app_backend.repositories.BookingRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.CreditCardRepository;
+import com.fernandocanabarro.booking_app_backend.repositories.HotelRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.PaymentRepository;
+import com.fernandocanabarro.booking_app_backend.repositories.RoomRatingRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.RoomRepository;
 import com.fernandocanabarro.booking_app_backend.repositories.UserRepository;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
@@ -77,6 +84,10 @@ public class BookingServiceTests {
     private AuthService authService;
     @Mock
     private EmailService emailService;
+    @Mock
+    private HotelRepository hotelRepository;
+    @Mock
+    private RoomRatingRepository roomRatingRepository;
 
     private Booking booking;
     private User user;
@@ -90,6 +101,7 @@ public class BookingServiceTests {
     private Long nonExistingId;
     private Pageable pageable;
     private Page<Booking> page;
+    private BookingStatsSummaryProjection bookingStatsSummaryProjection;
 
     @BeforeEach
     public void setup() {
@@ -106,6 +118,27 @@ public class BookingServiceTests {
         this.nonExistingId = 99L;
         this.pageable = PageRequest.of(0, 10);
         this.page = new PageImpl<>(List.of(booking));
+        this.bookingStatsSummaryProjection = new BookingStatsSummaryProjection() {
+            @Override
+            public Integer getMonth() {
+                return 1;
+            }
+
+            @Override
+            public BigDecimal getAmount() {
+                return BigDecimal.valueOf(5000);
+            }
+
+            @Override
+            public Long getBookingQuantity() {
+                return 10L;
+            }
+
+            @Override
+            public Long getGuests() {
+                return 20L;
+            }
+        };
     }
 
     @Test
@@ -164,28 +197,28 @@ public class BookingServiceTests {
         when(authService.getConnectedUser()).thenReturn(user);
         when(bookingRepository.findByUserId(user.getId(), pageable)).thenReturn(page);
 
-        Page<BookingResponseDTO> response = bookingService.findAllBookingsByUser(null, pageable, true);
+        Page<BookingDetailResponseDTO> response = bookingService.findAllBookingsByUser(null, pageable, true);
 
         assertThat(response.getContent()).isNotEmpty();
         assertThat(response.getContent().get(0).getId()).isEqualTo(booking.getId());
         assertThat(response.getContent().get(0).getCheckIn()).isEqualTo(booking.getCheckIn());
         assertThat(response.getContent().get(0).getCheckOut()).isEqualTo(booking.getCheckOut());
-        assertThat(response.getContent().get(0).getRoomId()).isEqualTo(booking.getRoom().getId());
-        assertThat(response.getContent().get(0).getUserId()).isEqualTo(booking.getUser().getId());
+        assertThat(response.getContent().get(0).getRoom().getId()).isEqualTo(booking.getRoom().getId());
+        assertThat(response.getContent().get(0).getUser().getId()).isEqualTo(booking.getUser().getId());
     }
 
     @Test
     public void findAllBookingsByUserShouldReturnPageOfBookingResponseDTOWhenIsNotSelfUser() {
         when(bookingRepository.findByUserId(user.getId(), pageable)).thenReturn(page);
 
-        Page<BookingResponseDTO> response = bookingService.findAllBookingsByUser(user.getId(), pageable, false);
+        Page<BookingDetailResponseDTO> response = bookingService.findAllBookingsByUser(user.getId(), pageable, false);
 
         assertThat(response.getContent()).isNotEmpty();
         assertThat(response.getContent().get(0).getId()).isEqualTo(booking.getId());
         assertThat(response.getContent().get(0).getCheckIn()).isEqualTo(booking.getCheckIn());
         assertThat(response.getContent().get(0).getCheckOut()).isEqualTo(booking.getCheckOut());
-        assertThat(response.getContent().get(0).getRoomId()).isEqualTo(booking.getRoom().getId());
-        assertThat(response.getContent().get(0).getUserId()).isEqualTo(booking.getUser().getId());
+        assertThat(response.getContent().get(0).getRoom().getId()).isEqualTo(booking.getRoom().getId());
+        assertThat(response.getContent().get(0).getUser().getId()).isEqualTo(booking.getUser().getId());
     }
 
     @Test
@@ -331,11 +364,24 @@ public class BookingServiceTests {
     }
 
     @Test
-    public void createBookingShouldThrowRoomIsUnavailableForBookingExceptionWhenCheckInDateIsAfterCheckOutDate() {
+    public void createBookingShouldThrowBadRequestExceptionWhenCheckInDateIsAfterCheckOutDate() {
         bookingRequest.setCheckIn(bookingRequest.getCheckOut().plusDays(1));
-        when(roomRepository.findById(existingId)).thenReturn(Optional.of(room));
 
-        assertThatThrownBy(() -> bookingService.createBooking(bookingRequest, true)).isInstanceOf(RoomIsUnavailableForBookingException.class);
+        assertThatThrownBy(() -> bookingService.createBooking(bookingRequest, true)).isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    public void createBookingShouldThrowBadRequestExceptionWhenCheckInDateIsInThePast() {
+        bookingRequest.setCheckIn(LocalDate.now().minusDays(1L));
+
+        assertThatThrownBy(() -> bookingService.createBooking(bookingRequest, true)).isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    public void createBookingShouldThrowBadRequestExceptionWhenCheckOutDateIsInThePast() {
+        bookingRequest.setCheckOut(LocalDate.now().minusDays(1L));
+
+        assertThatThrownBy(() -> bookingService.createBooking(bookingRequest, true)).isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -599,6 +645,51 @@ public class BookingServiceTests {
         when(bookingRepository.findById(nonExistingId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> bookingService.deleteBooking(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void getDashboardSummaryShouldThrowNotFoundExceptionWhenHotelIdIsNotNullButDoesNotExist() {
+        when(hotelRepository.existsById(nonExistingId)).thenReturn(false);
+
+        assertThatThrownBy(() -> bookingService.getDashboardSummary(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    public void getDashboardSummaryShouldReturnBookingStatsSummaryProjectionWhenHotelIdIsNull() {
+        when(bookingRepository.getRoomOccupationPercentage(null)).thenReturn(BigDecimal.valueOf(75));
+        when(bookingRepository.getTotalPaymentsAmount(null)).thenReturn(BigDecimal.valueOf(10000));
+        when(bookingRepository.getAverageStayDays(null)).thenReturn(BigDecimal.valueOf(3));
+        when(roomRatingRepository.findAverageRating()).thenReturn(BigDecimal.valueOf(4.5));
+        when(bookingRepository.getBookingStatsSummary(null)).thenReturn(List.of(bookingStatsSummaryProjection));
+
+        BookingDashboardSummaryDTO response = bookingService.getDashboardSummary(null);
+        assertThat(response).isNotNull();
+        assertThat(response.getOccupationPercentage()).isEqualTo(BigDecimal.valueOf(75));
+        assertThat(response.getTotalAmount()).isEqualTo(BigDecimal.valueOf(10000));
+        assertThat(response.getAverageStayDays()).isEqualTo(BigDecimal.valueOf(3));
+        assertThat(response.getAverageRating()).isEqualTo(BigDecimal.valueOf(4.5));
+        assertThat(response.getBookingStatsSummaries()).isNotEmpty();
+        assertThat(response.getBookingStatsSummaries().get(0).getMonth()).isEqualTo(1);
+    }
+
+    @Test
+    public void getDashboardSummaryShouldReturnBookingStatsSummaryProjectionWhenHotelExists() {
+        when(hotelRepository.existsById(existingId)).thenReturn(true);
+        when(bookingRepository.getRoomOccupationPercentage(existingId)).thenReturn(BigDecimal.valueOf(75));
+        when(hotelRepository.findById(existingId)).thenReturn(Optional.of(HotelFactory.createHotel()));
+        when(bookingRepository.getTotalPaymentsAmount(existingId)).thenReturn(BigDecimal.valueOf(10000));
+        when(bookingRepository.getAverageStayDays(existingId)).thenReturn(BigDecimal.valueOf(3));
+        when(bookingRepository.getBookingStatsSummary(existingId)).thenReturn(List.of(bookingStatsSummaryProjection));
+
+        BookingDashboardSummaryDTO response = bookingService.getDashboardSummary(existingId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getOccupationPercentage()).isEqualTo(BigDecimal.valueOf(75));
+        assertThat(response.getTotalAmount()).isEqualTo(BigDecimal.valueOf(10000));
+        assertThat(response.getAverageStayDays()).isEqualTo(BigDecimal.valueOf(3));
+        assertThat(response.getAverageRating()).isEqualTo(BigDecimal.valueOf(0));
+        assertThat(response.getBookingStatsSummaries()).isNotEmpty();
+        assertThat(response.getBookingStatsSummaries().get(0).getMonth()).isEqualTo(1);
     }
 
 }

@@ -63,9 +63,10 @@ public class ProjectSecurityConfig {
                 @Override
                 public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(Collections.singletonList("*"));
+                    config.setAllowedOrigins(Collections.singletonList("https://booking-ui.fernandocanabarrodev.tech"));
                     config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowedHeaders(Collections.singletonList("*"));
+                    config.setAllowCredentials(true);
                    return config;
                 }
             }))

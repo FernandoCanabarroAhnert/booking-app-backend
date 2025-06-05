@@ -449,8 +449,8 @@ public class UserControllerIT {
             .andExpect(jsonPath("$.content[0].finished").value(true))
             .andExpect(jsonPath("$.content[0].guestsQuantity").value(1))
             .andExpect(jsonPath("$.content[0].totalPrice").value(750.00))
-            .andExpect(jsonPath("$.content[0].userId").value(2))
-            .andExpect(jsonPath("$.content[0].roomId").value(1));
+            .andExpect(jsonPath("$.content[0].user.id").value(2))
+            .andExpect(jsonPath("$.content[0].room.id").value(1));
     }
 
     @Test

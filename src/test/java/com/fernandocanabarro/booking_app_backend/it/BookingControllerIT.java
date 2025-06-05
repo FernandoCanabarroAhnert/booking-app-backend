@@ -167,8 +167,8 @@ public class BookingControllerIT {
             .andExpect(jsonPath("$.content[0].finished").value(true))
             .andExpect(jsonPath("$.content[0].guestsQuantity").value(1))
             .andExpect(jsonPath("$.content[0].totalPrice").value(750.00))
-            .andExpect(jsonPath("$.content[0].userId").value(2))
-            .andExpect(jsonPath("$.content[0].roomId").value(1));
+            .andExpect(jsonPath("$.content[0].user.id").value(2))
+            .andExpect(jsonPath("$.content[0].room.id").value(1));
     }
 
     @Test
@@ -256,7 +256,7 @@ public class BookingControllerIT {
  
     @Test
     @Order(7)
-    public void adminCreateBookingShouldReturnStatus409WhenCheckInOrCheckOutDatesAreInvalid() throws Exception {
+    public void adminCreateBookingShouldReturnStatus409WhenRoomIsOccupiedAndStatus400WhenCheckInOrCheckOutDatesAreInvalid() throws Exception {
         mockMvc.perform(post("/api/v1/bookings")
             .header("Authorization", adminBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
@@ -268,7 +268,13 @@ public class BookingControllerIT {
             .header("Authorization", adminBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(adminBookingRequest)))
-            .andExpect(status().isConflict());
+            .andExpect(status().isBadRequest());
+        adminBookingRequest.setCheckIn(LocalDate.now().minusDays(1L));
+        mockMvc.perform(post("/api/v1/bookings")
+            .header("Authorization", adminBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(adminBookingRequest)))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -366,7 +372,7 @@ public class BookingControllerIT {
  
     @Test
     @Order(10)
-    public void guestCreateBookingShouldReturnStatus409WhenCheckInOrCheckOutDatesAreInvalid() throws Exception {
+    public void guestCreateBookingShouldReturnStatus409WhenRoomIsOccupiedAndStatus400CheckInOrCheckOutDatesAreInvalid() throws Exception {
         mockMvc.perform(post("/api/v1/bookings/self")
             .header("Authorization", guestBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
@@ -378,7 +384,13 @@ public class BookingControllerIT {
             .header("Authorization", guestBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(selfBookingRequest)))
-            .andExpect(status().isConflict());
+            .andExpect(status().isBadRequest());
+        selfBookingRequest.setCheckIn(LocalDate.now().minusDays(1L));
+        mockMvc.perform(post("/api/v1/bookings/self")
+            .header("Authorization", guestBearerToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(selfBookingRequest)))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -490,7 +502,7 @@ public class BookingControllerIT {
  
     @Test
     @Order(14)
-    public void adminUpdateBookingShouldReturnStatus409WhenCheckInOrCheckOutDatesAreInvalid() throws Exception {
+    public void adminUpdateBookingShouldReturnStatus409WhenRoomIsOccupiedAndStatus400WhenCheckInOrCheckOutDatesAreInvalid() throws Exception {
         selfBookingRequest.setCheckIn(LocalDate.of(2025, 8, 1));
         selfBookingRequest.setCheckOut(LocalDate.of(2025, 8, 7));
         mockMvc.perform(post("/api/v1/bookings/self")
@@ -511,7 +523,7 @@ public class BookingControllerIT {
             .header("Authorization", adminBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(adminUpdateBookingRequest)))
-            .andExpect(status().isConflict());
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -565,7 +577,7 @@ public class BookingControllerIT {
 
     @Test
     @Order(16)
-    public void guestUpdateBookingShouldReturnStatus409WhenCheckInOrCheckOutDatesAreInvalid() throws Exception {
+    public void guestUpdateBookingShouldReturnStatus409WhenRoomIsOccupiedAndStatus400WhenCheckInOrCheckOutDatesAreInvalid() throws Exception {
         selfBookingRequest.setCheckIn(LocalDate.of(2025, 8, 8));
         selfBookingRequest.setCheckOut(LocalDate.of(2025, 8, 15));
         mockMvc.perform(post("/api/v1/bookings/self")
@@ -587,7 +599,7 @@ public class BookingControllerIT {
             .header("Authorization", guestBearerToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(selfUpdateBookingRequest)))
-            .andExpect(status().isConflict());
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -803,11 +815,39 @@ public class BookingControllerIT {
     }
 
     @Test
-    @Order(24)
+    @Order(25)
     public void deleteBookingShouldReturnStatus204WhenUserIsAdmin() throws Exception {
         mockMvc.perform(delete("/api/v1/bookings/{id}", 2L)
             .header("Authorization", adminBearerToken))
             .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void getDashboardSummaryShouldReturnStatus401AuthTokenIsMissing() throws Exception {
+        mockMvc.perform(get("/api/v1/bookings/stats"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void getDashboardSummaryShouldReturnStatus403WhenUserIsGuest() throws Exception {
+        mockMvc.perform(get("/api/v1/bookings/stats")
+            .header("Authorization", guestBearerToken))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void getDashboardSummaryShouldReturnStatus404WhenHotelDoesNotExist() throws Exception {
+        mockMvc.perform(get("/api/v1/bookings/dashboard/stats?hotelId={id}", nonExistingId)
+            .header("Authorization", adminBearerToken))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Order(24)
+    public void getDashboardSummaryShouldReturnStatus200WhenUserIsAdmin() throws Exception {
+        mockMvc.perform(get("/api/v1/bookings/stats")
+            .header("Authorization", adminBearerToken))
+            .andExpect(status().isOk());
     }
 
 

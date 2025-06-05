@@ -31,6 +31,7 @@ import com.fernandocanabarro.booking_app_backend.models.entities.CreditCard;
 import com.fernandocanabarro.booking_app_backend.models.entities.User;
 import com.fernandocanabarro.booking_app_backend.repositories.CreditCardRepository;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.BadRequestException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ForbiddenException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 import com.fernandocanabarro.booking_app_backend.services.impl.CreditCardServiceImpl;
@@ -76,6 +77,12 @@ public class CreditCardServiceTests {
     public void addCreditCardShouldThrowNoException() {
         CreditCardRequestDTO request = new CreditCardRequestDTO("name", "1234567812345678", "321", "2025-12", 1);
         assertThatCode(() -> creditCardService.addCreditCard(request)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void addCreditCardShouldThrowBadRequestExceptionWhenMonthIsGreaterThen12() {
+        CreditCardRequestDTO request = new CreditCardRequestDTO("name", "1234567812345678", "321", "2025-15", 1);
+        assertThatThrownBy(() -> creditCardService.addCreditCard(request)).isInstanceOf(BadRequestException.class);
     }
 
     @Test

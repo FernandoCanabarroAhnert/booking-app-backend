@@ -291,7 +291,6 @@ public class AuthServiceTests {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(spy.getConnectedUser()).thenReturn(user);
         when(userRepository.findByEmail(userSelfUpdateInfosRequest.getEmail())).thenReturn(Optional.empty());
-        when(userRepository.findByCpf(userSelfUpdateInfosRequest.getCpf())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         assertThatCode(() -> spy.userSelfUpdateInfos(userSelfUpdateInfosRequest)).doesNotThrowAnyException();
@@ -307,21 +306,6 @@ public class AuthServiceTests {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(spy.getConnectedUser()).thenReturn(user);
         when(userRepository.findByEmail(userSelfUpdateInfosRequest.getEmail())).thenReturn(Optional.of(otherUser));
-
-        assertThatThrownBy(() -> spy.userSelfUpdateInfos(userSelfUpdateInfosRequest)).isInstanceOf(AlreadyExistingPropertyException.class);
-    }
-
-    @Test
-    public void userSelfUpdateInfosShouldThrowAlreadyExistingPropertyExceptionWhenCpfIsAlreadyInUse() {
-        User otherUser = new User();
-        otherUser.setId(2L);
-        otherUser.setCpf("cpf");
-        AuthServiceImpl spy = spy(authService);
-        when(userUtils.getConnectedUserEmail()).thenReturn(user.getEmail());
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(spy.getConnectedUser()).thenReturn(user);
-        when(userRepository.findByEmail(userSelfUpdateInfosRequest.getEmail())).thenReturn(Optional.empty());
-        when(userRepository.findByCpf(userSelfUpdateInfosRequest.getCpf())).thenReturn(Optional.of(otherUser));
 
         assertThatThrownBy(() -> spy.userSelfUpdateInfos(userSelfUpdateInfosRequest)).isInstanceOf(AlreadyExistingPropertyException.class);
     }

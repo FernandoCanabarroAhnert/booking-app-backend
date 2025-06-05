@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.fernandocanabarro.booking_app_backend.models.entities.Booking;
+import com.fernandocanabarro.booking_app_backend.projections.BookingStatsSummaryProjection;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -42,5 +43,53 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("SELECT obj FROM Booking obj WHERE obj.room.id = :roomId")
     Page<Booking> findByRoomId(Long roomId, Pageable pageable);
+
+    @Query(nativeQuery = true, value = """
+        SELECT EXTRACT(MONTH FROM b.check_in) "month", SUM(p.amount) "amount", COUNT(b.id) "booking_quantity", SUM(guests_quantity) "guests"
+        FROM payments p
+        INNER JOIN bookings b ON b.payment_id = p.id
+        INNER JOIN rooms r ON b.room_id = r.id
+        WHERE (:hotelId IS NULL OR r.hotel_id = :hotelId)
+        GROUP BY 1
+        ORDER BY 1        
+    """)
+    List<BookingStatsSummaryProjection> getBookingStatsSummary(Long hotelId);
+
+    @Query(nativeQuery = true, value = """
+        SELECT
+            ROUND(
+                (
+                    SELECT COUNT(r.id) "occupied_rooms"
+                    FROM rooms r
+                    INNER JOIN bookings b ON b.room_id = r.id
+                    WHERE (:hotelId IS NULL OR hotel_id = :hotelId)
+                    AND CURRENT_DATE BETWEEN b.check_in AND b.check_out
+                )::numeric
+                /
+                (
+                    SELECT COUNT(*) FROM rooms
+                    WHERE (:hotelId IS NULL OR hotel_id = :hotelId)
+                )::numeric * 100,
+                2
+            ) "occupation_percentage"        
+    """)
+    BigDecimal getRoomOccupationPercentage(Long hotelId);
+
+    @Query(nativeQuery = true, value = """
+        SELECT SUM(p.amount)
+        FROM payments p
+        INNER JOIN bookings b ON b.payment_id = p.id
+        INNER JOIN rooms r ON b.room_id = r.id
+        WHERE (:hotelId IS NULL OR r.hotel_id = :hotelId)        
+    """)
+    BigDecimal getTotalPaymentsAmount(Long hotelId);
+
+    @Query(nativeQuery = true, value = """
+        SELECT ROUND(AVG(b.check_out - b.check_in), 2)
+        FROM bookings b
+        INNER JOIN rooms r ON b.room_id = r.id
+        WHERE (:hotelId IS NULL OR r.hotel_id = :hotelId)     
+    """)
+    BigDecimal getAverageStayDays(Long hotelId);
 
 }

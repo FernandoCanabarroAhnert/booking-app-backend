@@ -22,7 +22,7 @@ import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminCrea
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.AdminUpdateUserRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.user_auth.UserSearchResponseDTO;
-import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingResponseDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.services.BookingService;
 import com.fernandocanabarro.booking_app_backend.services.UserService;
 import com.fernandocanabarro.booking_app_backend.services.excel.UsersExcelExporter;
@@ -82,7 +82,7 @@ public class UserController {
 
     @GetMapping("/{id}/bookings")
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
-    public Page<BookingResponseDTO> findUserBookings(@PathVariable Long id, Pageable pageable) {
+    public Page<BookingDetailResponseDTO> findUserBookings(@PathVariable Long id, Pageable pageable) {
         return this.bookingService.findAllBookingsByUser(id, pageable, false);
     }
 

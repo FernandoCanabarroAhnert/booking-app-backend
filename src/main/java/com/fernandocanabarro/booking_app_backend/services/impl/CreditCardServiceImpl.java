@@ -13,6 +13,7 @@ import com.fernandocanabarro.booking_app_backend.models.entities.User;
 import com.fernandocanabarro.booking_app_backend.repositories.CreditCardRepository;
 import com.fernandocanabarro.booking_app_backend.services.AuthService;
 import com.fernandocanabarro.booking_app_backend.services.CreditCardService;
+import com.fernandocanabarro.booking_app_backend.services.exceptions.BadRequestException;
 import com.fernandocanabarro.booking_app_backend.services.exceptions.ResourceNotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,8 @@ public class CreditCardServiceImpl implements CreditCardService {
     @Override
     @Transactional
     public void addCreditCard(CreditCardRequestDTO request) {
+        int month = Integer.parseInt(request.getExpirationDate().substring(5));
+        if (month > 12) throw new BadRequestException("Invalid expiration month"); 
         User user = this.authService.getConnectedUser();
         CreditCard creditCard = CreditCardMapper.convertRequestToEntity(request, user);
         this.creditCardRepository.save(creditCard);

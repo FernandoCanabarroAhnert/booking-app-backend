@@ -22,6 +22,6 @@ public interface HotelService {
     void create(HotelRequestDTO request, List<MultipartFile> images);
     void update(Long id, HotelRequestDTO request, List<MultipartFile> images);
     void delete(Long id);
-    void deleteImage(Long imageId);
+    void deleteImages(List<Long> imagesIds);
 
 }

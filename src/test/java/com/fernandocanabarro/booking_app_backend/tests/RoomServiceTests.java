@@ -283,14 +283,14 @@ public class RoomServiceTests {
     public void deleteImageShouldThrowNoExceptionWhenImageIdExists() {
         when(imageRepository.existsById(existingId)).thenReturn(true);
 
-        assertThatCode(() -> roomService.deleteImage(existingId)).doesNotThrowAnyException();
+        assertThatCode(() -> roomService.deleteImages(List.of(existingId))).doesNotThrowAnyException();
     }
 
     @Test
     public void deleteImageShouldThrowResourceNotFoundExceptionWhenImageIdDoesNotExist() {
         when(imageRepository.existsById(nonExistingId)).thenReturn(false);
 
-        assertThatThrownBy(() -> roomService.deleteImage(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
+        assertThatThrownBy(() -> roomService.deleteImages(List.of(nonExistingId))).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -305,6 +305,53 @@ public class RoomServiceTests {
         assertThat(response.getContent().get(0).getId()).isEqualTo(1L);
         assertThat(response.getContent().get(0).getRating()).isEqualTo(BigDecimal.valueOf(4.5));
         assertThat(response.getContent().get(0).getDescription()).isEqualTo("description");
+    }
+
+    @Test
+    public void findRatingsByUserIdShouldReturnPageOfRoomRatingsWhenIsNotSelfUser() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<RoomRating> page = new PageImpl<>(List.of(this.roomRating));
+        when(roomRatingRepository.findAllByUserId(existingId, pageable)).thenReturn(page);
+
+        Page<RoomRatingResponseDTO> response = roomService.findAllRatingsByUserId(existingId, pageable, false);
+
+        assertThat(response.getContent()).isNotEmpty();
+        assertThat(response.getContent().get(0).getId()).isEqualTo(1L);
+        assertThat(response.getContent().get(0).getRating()).isEqualTo(BigDecimal.valueOf(4.5));
+        assertThat(response.getContent().get(0).getDescription()).isEqualTo("description");
+    }
+
+    @Test
+    public void findRatingsByUserIdShouldReturnPageOfRoomRatingsWhenIsSelfUser() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<RoomRating> page = new PageImpl<>(List.of(this.roomRating));
+        when(authService.getConnectedUser()).thenReturn(user);
+        when(roomRatingRepository.findAllByUserId(user.getId(), pageable)).thenReturn(page);
+
+        Page<RoomRatingResponseDTO> response = roomService.findAllRatingsByUserId(null, pageable, true);
+
+        assertThat(response.getContent()).isNotEmpty();
+        assertThat(response.getContent().get(0).getId()).isEqualTo(1L);
+        assertThat(response.getContent().get(0).getRating()).isEqualTo(BigDecimal.valueOf(4.5));
+        assertThat(response.getContent().get(0).getDescription()).isEqualTo("description");
+    }
+
+    @Test
+    public void findRatingByIdShouldReturnRoomRatingResponseDTOWhenIdExists() {
+        when(roomRatingRepository.findById(existingId)).thenReturn(Optional.of(roomRating));
+
+        RoomRatingResponseDTO response = roomService.findRatingById(existingId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getRating()).isEqualTo(BigDecimal.valueOf(4.5));
+        assertThat(response.getDescription()).isEqualTo("description");
+    }
+
+    @Test
+    public void findRatingByIdShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist() {
+        when(roomRatingRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> roomService.findRatingById(nonExistingId)).isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test

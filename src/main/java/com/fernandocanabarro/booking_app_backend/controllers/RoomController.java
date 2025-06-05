@@ -139,16 +139,28 @@ public class RoomController {
         roomsExcelExporter.export(response);
     }
 
-    @DeleteMapping("/{id}/images")
+    @DeleteMapping("/images")
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<Void> deleteImage(@PathVariable Long id) {
-        this.roomService.deleteImage(id);
+    public ResponseEntity<Void> deleteImage(@RequestParam List<Long> imagesIds) {
+        this.roomService.deleteImages(imagesIds);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/ratings")
     public ResponseEntity<Page<RoomRatingResponseDTO>> findAllRatingsByRoomId(@PathVariable Long id, Pageable pageable) {
         return ResponseEntity.ok(this.roomService.findAllRatingsByRoomId(id, pageable));
+    }
+
+    @GetMapping("/my-ratings")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<Page<RoomRatingResponseDTO>> findMyRoomRatings(Pageable pageable) {
+        return ResponseEntity.ok(this.roomService.findAllRatingsByUserId(null, pageable, true));
+    }
+
+    @GetMapping("/ratings/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<RoomRatingResponseDTO> findRatingById(@PathVariable Long id) {
+        return ResponseEntity.ok(this.roomService.findRatingById(id));
     }
 
     @PostMapping("/{id}/ratings")

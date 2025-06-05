@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fernandocanabarro.booking_app_backend.models.dtos.base.BaseBookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.AdminBookingRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.AdminUpdateBookingRequestDTO;
+import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDashboardSummaryDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingDetailResponseDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingPaymentRequestDTO;
 import com.fernandocanabarro.booking_app_backend.models.dtos.booking.BookingRequestDTO;
@@ -115,8 +116,14 @@ public class BookingController {
 
     @GetMapping("/my-bookings")
     @PreAuthorize("hasAnyRole('ROLE_GUEST','ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<Page<BookingResponseDTO>> findMyBookings(Pageable pageable) {
+    public ResponseEntity<Page<BookingDetailResponseDTO>> findMyBookings(Pageable pageable) {
         return ResponseEntity.ok(this.bookingService.findAllBookingsByUser(null, pageable, true));
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+    public ResponseEntity<BookingDashboardSummaryDTO> getDashboardSummary(@RequestParam(required = false) Long hotelId) {
+        return ResponseEntity.ok(this.bookingService.getDashboardSummary(hotelId));
     }
 
     @GetMapping("/pdf")

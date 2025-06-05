@@ -86,10 +86,10 @@ public class HotelController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{id}/images")
+    @DeleteMapping("/images")
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
-    public ResponseEntity<Void> deleteImage(@PathVariable Long id) {
-        this.hotelService.deleteImage(id);
+    public ResponseEntity<Void> deleteImage(@RequestParam List<Long> imagesIds) {
+        this.hotelService.deleteImages(imagesIds);
         return ResponseEntity.noContent().build();
     }
 

@@ -123,7 +123,7 @@ public class AuthServiceImpl implements AuthService {
             "username", user.getFullName(),
             "bodyText", "Para ativar sua conta, utilize o código abaixo:",
             "code", code,
-            "link", "http://localhost:4200/activate-account",
+            "link", "https://booking-ui.fernandocanabarrodev.tech/activate-account",
             "buttonText", "Ativar Conta"
         );
         Mail mail = this.emailService.createEmail(user.getEmail(), 
@@ -201,13 +201,9 @@ public class AuthServiceImpl implements AuthService {
                 throw new AlreadyExistingPropertyException("E-mail");
             }
         }
-        Optional<User> UserByCpf = this.userRepository.findByCpf(request.getCpf());
-        if (UserByCpf.isPresent()) {
-            if (!UserByCpf.get().getId().equals(user.getId())) {
-                throw new AlreadyExistingPropertyException("CPF");
-            }
-        }
-        UserMapper.updateUser(user, request);
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
         userRepository.save(user);
     }
 
@@ -242,7 +238,7 @@ public class AuthServiceImpl implements AuthService {
             "username", user.getFullName(),
             "bodyText", "Para recuperar sua senha, utilize o código abaixo:",
             "code", code,
-            "link", "http://localhost:4200/new-password",
+            "link", "https://booking-ui.fernandocanabarrodev.tech/reset-password",
             "buttonText", "Recuperar Senha"
         );
         Mail mail = this.emailService.createEmail(user.getEmail(), 
@@ -267,7 +263,7 @@ public class AuthServiceImpl implements AuthService {
     public void resetPassword(NewPasswordRequestoDTO request) {
         Optional<PasswordRecover> passwordRecover = this.passwordRecoverRepository.findByCode(request.getCode());
         if (passwordRecover.isEmpty()) {
-            throw new ResourceNotFoundException("Password recover  with code " + request.getCode() + " not found");
+            throw new ResourceNotFoundException("Password recover with code " + request.getCode() + " not found");
         }
         if (!passwordRecover.get().isValid()) {
             throw new ExpiredCodeException("The reset password code is expired.");
