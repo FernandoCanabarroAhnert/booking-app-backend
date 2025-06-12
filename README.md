@@ -121,8 +121,8 @@ $ http GET http://localhost:8080/api/v1/bookings
             "totalPrice": 945.00,
             "paymentType": 2,
             "userId": 1,
-            "userFullName": "Fernando Canabarro Ahnert",
-            "userCpf": "873.582.800-59",
+            "userFullName": "Fernando Canabarro",
+            "userCpf": "371.561.860-91",
             "roomId": 1,
             "hotelName": "Hotel Copacabana Palace",
             "finished": false
@@ -136,8 +136,8 @@ $ http GET http://localhost:8080/api/v1/bookings
             "totalPrice": 1800.00,
             "paymentType": 1,
             "userId": 1,
-            "userFullName": "Fernando Canabarro Ahnert",
-            "userCpf": "873.582.800-59",
+            "userFullName": "Fernando Canabarro",
+            "userCpf": "371.561.860-91",
             "roomId": 2,
             "hotelName": "Hotel Copacabana Palace",
             "finished": false
