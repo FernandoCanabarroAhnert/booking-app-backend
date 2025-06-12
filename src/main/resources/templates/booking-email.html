@@ -1,78 +1,372 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            max-width: 600px;
-            margin: 10px auto;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .container__header {
-            background-color: #a89172;
-            padding: 2rem;
-        }
-        .container__body {
-            padding: 1.5rem;
-        }
-        .container__title {
-            font-size: 2rem;
-            text-align: center;
-            font-weight: 700;
-        }
-        .container__text {
-            font-size: 1.25rem;
-            text-align: center;
-        }
-        .link {
-            position: relative;
-            text-align: center;
-            margin-top: 20px;
-            display: inline-block;
-            padding: 16px 24px;
-            background-color: #698167;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 5px;
-            cursor: pointer;
-            border: none;
-        }
-        .link:active {
-            bottom: -2px;
-        }
-        .link a {
-            font-size: 1.25rem;
-            color: #fff;
-            text-decoration: none;
-        }
-        .greeting {
-            font-size: 1.375rem;
-            text-align: center;
-            font-weight: 600;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="container__header"></div>
-    <div class="container__body">
-        <h1 class="container__title" th:text="${titleText}"></h1>
-        <p class="greeting" th:text="'Olá ' + ${username} + ','"></p>
-        <p class="container__text" th:text="${bodyText}"></p>
-        <button class="link">
-            <a th:href="${link}" target="_blank">Abrir PDF</a>
-        </button>
-    </div>
-</div>
-</body>
-</html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+      <!--[if !mso]><!-->
+      <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+      <!--<![endif]-->
+      <!--[if (gte mso 9)|(IE)]>
+      <xml>
+        <o:OfficeDocumentSettings>
+          <o:AllowPNG/>
+          <o:PixelsPerInch>96</o:PixelsPerInch>
+        </o:OfficeDocumentSettings>
+      </xml>
+      <![endif]-->
+      <!--[if (gte mso 9)|(IE)]>
+  <style type="text/css">
+    body {width: 600px;margin: 0 auto;}
+    table {border-collapse: collapse;}
+    table, td {mso-table-lspace: 0pt;mso-table-rspace: 0pt;}
+    img {-ms-interpolation-mode: bicubic;}
+  </style>
+<![endif]-->
+      <style type="text/css">
+    body, p, div {
+      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+      font-size: 18px;
+    }
+    body {
+      color: #000000;
+    }
+    body a {
+      color: #0D312D;
+      text-decoration: none;
+    }
+    p { margin: 0; padding: 0; }
+    table.wrapper {
+      width:100% !important;
+      table-layout: fixed;
+      -webkit-font-smoothing: antialiased;
+      -webkit-text-size-adjust: 100%;
+      -moz-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+    img.max-width {
+      max-width: 100% !important;
+    }
+    .column.of-2 {
+      width: 50%;
+    }
+    .column.of-3 {
+      width: 33.333%;
+    }
+    .column.of-4 {
+      width: 25%;
+    }
+    ul ul ul ul  {
+      list-style-type: disc !important;
+    }
+    ol ol {
+      list-style-type: lower-roman !important;
+    }
+    ol ol ol {
+      list-style-type: lower-latin !important;
+    }
+    ol ol ol ol {
+      list-style-type: decimal !important;
+    }
+    @media screen and (max-width:480px) {
+      .preheader .rightColumnContent,
+      .footer .rightColumnContent {
+        text-align: left !important;
+      }
+      .preheader .rightColumnContent div,
+      .preheader .rightColumnContent span,
+      .footer .rightColumnContent div,
+      .footer .rightColumnContent span {
+        text-align: left !important;
+      }
+      .preheader .rightColumnContent,
+      .preheader .leftColumnContent {
+        font-size: 80% !important;
+        padding: 5px 0;
+      }
+      table.wrapper-mobile {
+        width: 100% !important;
+        table-layout: fixed;
+      }
+      img.max-width {
+        height: auto !important;
+        max-width: 100% !important;
+      }
+      a.bulletproof-button {
+        display: block !important;
+        width: auto !important;
+        font-size: 80%;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+      .columns {
+        width: 100% !important;
+      }
+      .column {
+        display: block !important;
+        width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+      .social-icon-column {
+        display: inline-block !important;
+      }
+    }
+  </style>
+      <!--user entered Head Start--><!--End Head user entered-->
+    </head>
+    <body>
+      <center class="wrapper" data-link-color="#0D312D" data-body-style="font-size:14px; font-family:courier new,courier,monospace; color:#000000; background-color:#FFFFFF;">
+        <div class="webkit">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%" class="wrapper" bgcolor="#FFFFFF">
+            <tr>
+              <td valign="top" bgcolor="#FFFFFF" width="100%">
+                <table width="100%" role="content-container" class="outer" align="center" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td width="100%">
+                      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td>
+                            <!--[if mso]>
+    <center>
+    <table><tr><td width="600">
+  <![endif]-->
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px;" align="center">
+                                      <tr>
+                                        <td role="modules-container" style="padding:0px 0px 0px 0px; color:#000000; text-align:left;" bgcolor="#FFFFFF" width="100%" align="left"><table class="module preheader preheader-hide" role="module" data-type="preheader" border="0" cellpadding="0" cellspacing="0" width="100%" style="display: none !important; mso-hide: all; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0;">
+    <tr>
+      <td role="module-content">
+        <p>A arte de gerir hotéis, agora online.</p>
+      </td>
+    </tr>
+  </table><table border="0" cellpadding="0" cellspacing="0" align="center" width="100%" role="module" data-type="columns" bgcolor="#FFFFFF" data-distribution="1">
+    <tbody>
+      <tr role="module-content">
+        <td height="100%" valign="top"><table width="320" style="width:320px; border-spacing:0; border-collapse:collapse; margin:0px 140px 0px 140px;" cellpadding="0" cellspacing="0" align="left" border="0" bgcolor="" class="column column-0">
+      <tbody>
+        <tr>
+          <td style="padding:0px;margin:0px;border-spacing:0;"><table class="wrapper" role="module" data-type="image" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="a0e2a04b-3070-4aca-b1a8-8eb844fe3fbf">
+    <tbody>
+      <tr>
+        <td style="font-size:6px; line-height:10px; padding:0px 0px 15px 0px;" valign="top" align="center">
+          <img class="max-width" border="0" style="display:block; color:#000000; text-decoration:none; font-family:Helvetica, arial, sans-serif; font-size:16px; max-width:100% !important; width:100%; height:auto !important;" width="320" alt="asd" data-proportionally-constrained="true" data-responsive="true" src="http://cdn.mcauto-images-production.sendgrid.net/dd21bd6a6991a09c/6f7ca620-34d2-43b3-a78e-c0bafd71e1cc/3200x3200.png">
+        </td>
+      </tr>
+    </tbody>
+  </table></td>
+        </tr>
+      </tbody>
+    </table></td>
+      </tr>
+    </tbody>
+  </table><table class="wrapper" role="module" data-type="image" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="5575660a-66c1-4173-a8c7-b1ee2e400211">
+    <tbody>
+      <tr>
+        <td style="font-size:6px; line-height:10px; padding:0px 0px 0px 0px;" valign="top" align="center">
+          <img class="max-width" border="0" style="display:block; color:#000000; text-decoration:none; font-family:Helvetica, arial, sans-serif; font-size:16px; max-width:100% !important; width:100%; height:auto !important;" width="600" alt="" data-proportionally-constrained="true" data-responsive="true" src="http://cdn.mcauto-images-production.sendgrid.net/e1c0ee681c97bb8a/08fe3b10-f5e5-44e7-a185-b7c1b6434a6e/640x360.png">
+        </td>
+      </tr>
+    </tbody>
+  </table><table border="0" cellpadding="0" cellspacing="0" align="center" width="100%" role="module" data-type="columns" style="padding:40px 10px 40px 10px;" bgcolor="#2d2109" data-distribution="1">
+    <tbody>
+      <tr role="module-content">
+        <td height="100%" valign="top"><table width="380" style="width:380px; border-spacing:0; border-collapse:collapse; margin:0px 100px 0px 100px;" cellpadding="0" cellspacing="0" align="left" border="0" bgcolor="" class="column column-0">
+      <tbody>
+        <tr>
+          <td style="padding:0px;margin:0px;border-spacing:0;"><table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="3bd8c7a5-b422-4115-979a-ad4ba6950d7f" data-mc-module-version="2019-10-22">
+    <tbody>
+      <tr>
+        <td style="padding:0px 0px 15px 0px; line-height:26px; text-align:inherit;" height="100%" valign="top" bgcolor="" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="color: #a89172; font-size: 24px;" th:text="${titleText}"></span></div><div></div></div></td>
+      </tr>
+    </tbody>
+  </table><table border="0" cellpadding="0" cellspacing="0" class="module" data-role="module-button" data-type="button" role="module" style="table-layout:fixed;" width="100%" data-muid="5c0d4d68-ab49-4c48-9d85-855e6921101e.1">
+      <tbody>
+        <tr>
+          <td align="center" bgcolor="" class="outer-td" style="padding:0px 0px 0px 0px;">
+            <table border="0" cellpadding="0" cellspacing="0" class="wrapper-mobile" style="text-align:center;">
+              <tbody>
+                <tr>
+                  <td style="padding:0px 0px 15px 0px; line-height:26px; text-align:inherit;" height="100%" valign="top" bgcolor="" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="color: #ffffff; font-size: 20px; font-size: 600;" th:text="'Olá ' + ${username} + ','"></span></div><div></div></div></td>
+                </tr>
+                <tr>
+                  <td style="padding:0px 0px 15px 0px; line-height:26px; text-align:inherit;" height="100%" valign="top" bgcolor="" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="color: #ffffff; font-size: 16px;" th:text="${bodyText}"></span></div><div></div></div></td>
+                </tr>
+                <tr>
+                <td align="center" bgcolor="#a89172" class="inner-td" style="border-radius:6px; font-size:16px; text-align:center; background-color:inherit;">
+                  <a th:href="${link}" style="cursor: pointer; background-color:#a89172; border:0px solid #333333; border-color:#333333; border-radius:0px; border-width:0px; color:#0D312D; display:inline-block; font-size:20px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:15px 35px 15px 35px; text-align:center; text-decoration:none; border-style:solid;" target="_blank">Abrir PDF</a>
+                </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table></td>
+        </tr>
+      </tbody>
+    </table></td>
+      </tr>
+    </tbody>
+  </table><table border="0" cellpadding="0" cellspacing="0" align="center" width="100%" role="module" data-type="columns" style="padding:20px 50px 0px 50px;" bgcolor="#0D312D" data-distribution="1,1">
+    <tbody>
+      <tr role="module-content">
+        <td height="100%" valign="top"><table width="225" style="width:225px; border-spacing:0; border-collapse:collapse; margin:0px 25px 0px 0px;" cellpadding="0" cellspacing="0" align="left" border="0" bgcolor="" class="column column-0">
+      <tbody>
+        <tr>
+          <td style="padding:0px;margin:0px;border-spacing:0;"><table class="module" role="module" data-type="spacer" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="520c2eae-a4c7-4d2c-b4dd-75a73569495c.1.1">
+    <tbody>
+      <tr>
+        <td style="padding:0px 0px 40px 0px;" role="module-content" bgcolor="">
+        </td>
+      </tr>
+    </tbody>
+  </table><table class="wrapper" role="module" data-type="image" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="498c97cd-aabb-42c1-b57f-c3e83c964649">
+    <tbody>
+      <tr>
+        <td style="font-size:6px; line-height:10px; padding:0px 0px 10px 0px;" valign="top" align="center">
+          
+        <a href="https://www.google.com/url?sa=i&url=https%3A%2F%2Fblog.viajarfazbem.com%2Fhoteis-queridinhos%2F&psig=AOvVaw0duncKfN824L6EyM3X0htL&ust=1749816418740000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCPC_qaLs640DFQAAAAAdAAAAABAE"><img class="max-width" border="0" style="display:block; color:#000000; text-decoration:none; font-family:Helvetica, arial, sans-serif; font-size:16px; max-width:100% !important; width:100%; height:auto !important;" width="225" alt="" data-proportionally-constrained="true" data-responsive="true" src="http://cdn.mcauto-images-production.sendgrid.net/e1c0ee681c97bb8a/31d4c5b4-1d46-4c68-a34a-bb7e837c5e44/1024x683.jpg"></a></td>
+      </tr>
+    </tbody>
+  </table><table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="da4fac7a-00e5-4818-8ae3-d7fcc561373d.2.1" data-mc-module-version="2019-10-22">
+    <tbody>
+      <tr>
+        <td style="padding:0px 0px 0px 0px; line-height:22px; text-align:inherit;" height="100%" valign="top" bgcolor="" role="module-content"><div><div style="font-family: inherit; text-align: inherit"><span style="color: #bac5a7">Experiências autênticas</span></div><div></div></div></td>
+      </tr>
+    </tbody>
+  </table><table border="0" cellpadding="0" cellspacing="0" class="module" data-role="module-button" data-type="button" role="module" style="table-layout:fixed;" width="100%" data-muid="5c0d4d68-ab49-4c48-9d85-855e6921101e.3">
+      <tbody>
+        <tr>
+          <td align="left" bgcolor="" class="outer-td" style="padding:10px 0px 10px 0px;">
+            <table border="0" cellpadding="0" cellspacing="0" class="wrapper-mobile" style="text-align:center;">
+              <tbody>
+                <tr>
+                <td align="center" bgcolor="#a89172" class="inner-td" style="border-radius:6px; font-size:16px; text-align:left; background-color:inherit;">
+                  <a href="https://booking-ui.fernandocanabarrodev.tech/hotels" style="background-color:#a89172; border:1px solid #a89172; border-color:#a89172; border-radius:0px; border-width:1px; color:#2d2109; display:inline-block; font-size:18px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 25px 12px 25px; text-align:center; text-decoration:none; border-style:solid;" target="_blank">VER HOTÉIS</a>
+                </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table></td>
+        </tr>
+      </tbody>
+    </table><table width="225" style="width:225px; border-spacing:0; border-collapse:collapse; margin:0px 0px 0px 25px;" cellpadding="0" cellspacing="0" align="left" border="0" bgcolor="" class="column column-1">
+      <tbody>
+        <tr>
+          <td style="padding:0px;margin:0px;border-spacing:0;"><table class="module" role="module" data-type="spacer" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="520c2eae-a4c7-4d2c-b4dd-75a73569495c">
+    <tbody>
+      <tr>
+        <td style="padding:0px 0px 40px 0px;" role="module-content" bgcolor="">
+        </td>
+      </tr>
+    </tbody>
+  </table><table class="wrapper" role="module" data-type="image" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="ded61a4e-b7cc-46f7-a04f-bb3f99b3fc25">
+    <tbody>
+      <tr>
+        <td style="font-size:6px; line-height:10px; padding:0px 0px 10px 0px;" valign="top" align="center">
+          <img class="max-width" border="0" style="display:block; color:#000000; text-decoration:none; font-family:Helvetica, arial, sans-serif; font-size:16px; max-width:100% !important; width:100%; height:auto !important;" width="225" alt="" data-proportionally-constrained="true" data-responsive="true" src="http://cdn.mcauto-images-production.sendgrid.net/e1c0ee681c97bb8a/76d1a9bd-92af-4536-98ea-94f11e677088/1024x683.jpg">
+        </td>
+      </tr>
+    </tbody>
+  </table><table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="da4fac7a-00e5-4818-8ae3-d7fcc561373d.2" data-mc-module-version="2019-10-22">
+    <tbody>
+      <tr>
+        <td style="padding:0px 0px 0px 0px; line-height:22px; text-align:inherit;" height="100%" valign="top" bgcolor="" role="module-content"><div><div style="font-family: inherit; text-align: inherit"><span style="color: #bac5a7">Conforto que inspira</span></div><div></div></div></td>
+      </tr>
+    </tbody>
+  </table>
+  <table border="0" cellpadding="0" cellspacing="0" class="module" data-role="module-button" data-type="button" role="module" style="table-layout:fixed;" width="100%" data-muid="5c0d4d68-ab49-4c48-9d85-855e6921101e">
+      <tbody>
+        <tr>
+          <td align="left" bgcolor="" class="outer-td" style="padding:10px 0px 10px 0px;">
+            <table border="0" cellpadding="0" cellspacing="0" class="wrapper-mobile" style="text-align:center;">
+              <tbody>
+                <tr>
+                <td align="center" bgcolor="#a89172" class="inner-td" style="border-radius:6px; font-size:16px; text-align:left; background-color:inherit;">
+                  <a href="https://booking-ui.fernandocanabarrodev.tech/rooms" style="background-color:#a89172; border:1px solid #a89172; border-color:#a89172; border-radius:0px; border-width:1px; color:#2d2109; display:inline-block; font-size:18px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 25px 12px 25px; text-align:center; text-decoration:none; border-style:solid;" target="_blank">VER QUARTOS</a>
+                </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table></td>
+        </tr>
+      </tbody>
+    </table></td>
+      </tr>
+    </tbody>
+  </table><table class="module" role="module" data-type="social" align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="aef9ad44-80e7-440c-99aa-648324dfe66a">
+    <tbody>
+      <tr>
+        <td valign="top" style="padding:40px 0px 40px 0px; font-size:6px; line-height:10px; background-color:#263b29;" align="center">
+          <table align="center" style="-webkit-margin-start:auto;-webkit-margin-end:auto;">
+            <tbody><tr align="center"><td style="padding: 0px 5px;" class="social-icon-column">
+      <a role="social-icon-link" href="https://www.facebook.com/sendgrid/" target="_blank" alt="Facebook" title="Facebook" style="display:inline-block; background-color:#544001; height:21px; width:21px;">
+        <img role="social-icon" alt="Facebook" title="Facebook" src="https://mc.sendgrid.com/assets/social/white/facebook.png" style="height:21px; width:21px;" height="21" width="21">
+      </a>
+    </td><td style="padding: 0px 5px;" class="social-icon-column">
+      <a role="social-icon-link" href="https://www.instagram.com/sendgrid/" target="_blank" alt="Instagram" title="Instagram" style="display:inline-block; background-color:#544001; height:21px; width:21px;">
+        <img role="social-icon" alt="Instagram" title="Instagram" src="https://mc.sendgrid.com/assets/social/white/instagram.png" style="height:21px; width:21px;" height="21" width="21">
+      </a>
+    </td><td style="padding: 0px 5px;" class="social-icon-column">
+      <a role="social-icon-link" href="https://www.pinterest.com/sendgrid/" target="_blank" alt="Pinterest" title="Pinterest" style="display:inline-block; background-color:#544001; height:21px; width:21px;">
+        <img role="social-icon" alt="Pinterest" title="Pinterest" src="https://mc.sendgrid.com/assets/social/white/pinterest.png" style="height:21px; width:21px;" height="21" width="21">
+      </a>
+    </td><td style="padding: 0px 5px;" class="social-icon-column">
+      <a role="social-icon-link" href="https://www.linkedin.com/company/sendgrid/" target="_blank" alt="LinkedIn" title="LinkedIn" style="display:inline-block; background-color:#544001; height:21px; width:21px;">
+        <img role="social-icon" alt="LinkedIn" title="LinkedIn" src="https://mc.sendgrid.com/assets/social/white/linkedin.png" style="height:21px; width:21px;" height="21" width="21">
+      </a>
+    </td></tr></tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table><table class="module" role="module" data-type="spacer" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="2cbeb3e8-3277-4249-b8e6-f10e34461ee4">
+    <tbody>
+      <tr>
+        <td style="padding:0px 0px 30px 0px;" role="module-content" bgcolor="">
+        </td>
+      </tr>
+    </tbody>
+  </table><table border="0" cellpadding="0" cellspacing="0" class="module" data-role="module-button" data-type="button" role="module" style="table-layout:fixed;" width="100%" data-muid="b6ab665d-a5ac-45b8-827d-ff85888d6c11">
+      <tbody>
+        <tr>
+          <td align="center" bgcolor="" class="outer-td" style="padding:0px 0px 0px 0px;">
+            <table border="0" cellpadding="0" cellspacing="0" class="wrapper-mobile" style="text-align:center;">
+              <tbody>
+                <tr>
+                <td align="center" bgcolor="#F5F8FD" class="inner-td" style="border-radius:6px; font-size:16px; text-align:center; background-color:inherit;"><a href="https://sendgrid.com/solutions/email-marketing/" style="background-color:#F5F8FD; border:1px solid #F5F8FD; border-color:#F5F8FD; border-radius:25px; border-width:1px; color:#A8B9D5; display:inline-block; font-size:10px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:5px 18px 5px 18px; text-align:center; text-decoration:none; border-style:solid; font-family:helvetica,sans-serif;" target="_blank">♥ POWERED BY TWILIO SENDGRID</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table></td>
+                                      </tr>
+                                    </table>
+                                    <!--[if mso]>
+                                  </td>
+                                </tr>
+                              </table>
+                            </center>
+                            <![endif]-->
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </center>
+    </body>
+  </html>
